@@ -1,0 +1,43 @@
+KPIs
+
+Benötigte Kennzahlen
+EPS - Earnings per share
+PER - Price earnings ratio
+PEG - Price earnings to growth ratio
+DPR - Dividen price ratio
+CFS - Cash flow per share
+PCF - Price cash flow ratio
+PBV - Price to book value
+PSR - Price sales ratio
+EQR	- Equity ratio
+DTR	- Debt ratio
+ROE	- Return on equity
+POR - Payout ratio
+GRM - Gross margin
+OPM - Operating margin
+BVS	- Book value per share
+
+Alpha 	-
+Beta 	-
+Sharpe	-
+
+Benötigte Daten:
+Täglich:
+Price
+Market capitalisation
+
+Monatlich:
+Revenue
+Operating income
+Net Income
+Dividend
+Outstanding Shares
+Operating Cashflow
+Free Cashflow
+Working Capital
+Book Value
+Equity
+Debt
+Balance Sheet Total
+EBITDA
+
