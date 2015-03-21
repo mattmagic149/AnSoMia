@@ -10,12 +10,13 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import General.*;
+import KeyPerformanceIndicators.*;
 
 
 /**
  * This Class is for Constructing the Database
  * 
- * @author Stettinger
+ * @author Senkl/Ivantsits
  *
  */
 
@@ -31,6 +32,10 @@ public class DatabaseConstruction {
 		
 		//add all classes you want to annotate
 		configuration.addAnnotatedClass(SingleCompany.class);
+		configuration.addAnnotatedClass(PriceEarningsRatio.class);
+		configuration.addAnnotatedClass(EarningsPerShare.class);
+		configuration.addAnnotatedClass(PriceEarningsToGrowthRatio.class);
+		
 		configuration.configure("hibernate.cfg.xml");
 
 		new SchemaExport(configuration).create(true, true);
@@ -38,11 +43,23 @@ public class DatabaseConstruction {
 		System.out.println("adding one SingleCompany");
 		List<Criterion>  criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.eq("isin", "DE0001218063"));
-		criterions.add(Restrictions.eq("company_name", "FINLAB AG NA O.N."));
 		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
 
 		if(company == null){
 			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.");
+			PriceEarningsRatio per = new PriceEarningsRatio(company, 333.33, new Date());
+			company.addPriceEarningsRatio(per);
+			
+			per = new PriceEarningsRatio(company, 222.22, new Date());
+			company.addPriceEarningsRatio(per);
+			
+			
+			EarningsPerShare eps = new EarningsPerShare(company, 333.33, new Date());
+			company.addEarningsPerShare(eps);
+			
+			PriceEarningsToGrowthRatio peg = new PriceEarningsToGrowthRatio(company, 333.33, new Date());
+			company.addPriceEarningsToGrowthRatio(peg);
+			
 			HibernateSupport.beginTransaction();
 			company.saveToDB();
 			HibernateSupport.commitTransaction();

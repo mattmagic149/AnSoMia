@@ -1,6 +1,7 @@
 package Support;
 
 import General.SingleCompany;
+import KeyPerformanceIndicators.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,10 +22,11 @@ import org.hibernate.service.ServiceRegistryBuilder;
 /**
  * This Class handles everything for communicating with the database
  * 
- * @author Stettinger
+ * @author Senkl/Ivantsits
  *
  */
 
+@SuppressWarnings("deprecation")
 public class HibernateSupport {
 	
 	private static SessionFactory sessionFactory;
@@ -46,7 +48,9 @@ public class HibernateSupport {
 		
 		//add all classes you want to annotate
 		configuration.addAnnotatedClass(SingleCompany.class);
-
+		configuration.addAnnotatedClass(PriceEarningsRatio.class);
+		configuration.addAnnotatedClass(EarningsPerShare.class);
+		configuration.addAnnotatedClass(PriceEarningsToGrowthRatio.class);
 		
 		configuration.configure(configFile);
 		
