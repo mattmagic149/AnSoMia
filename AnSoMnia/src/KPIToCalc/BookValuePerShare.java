@@ -18,7 +18,11 @@ public class BookValuePerShare extends KeyPerformanceIndicator  {
 	
 	public BookValuePerShare(SingleCompany company, double book_value_per_share, Date date) {
 		super(company, date);
-		this.book_value_per_share = book_value_per_share;
+		this.book_value_per_share = calculateBookValuePerShare();
+	}
+	
+	private double calculateBookValuePerShare() {
+		return 1.0;
 	}
 	
 

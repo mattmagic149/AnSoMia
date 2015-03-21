@@ -11,9 +11,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import General.*;
 import Interface.KeyPerformanceIndicator;
-import KPIToCalc.EarningsPerShare;
-import KPIToCalc.PriceEarningsRatio;
-import KPIToCalc.PriceEarningsToGrowthRatio;
+import KPIToCalc.*;
 import KPIToCrawl.*;
 
 
@@ -38,9 +36,24 @@ public class DatabaseConstruction {
 		configuration.addAnnotatedClass(SingleCompany.class);
 		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
 		
-		configuration.addAnnotatedClass(PriceEarningsRatio.class);
+		configuration.addAnnotatedClass(Alpha.class);
+		configuration.addAnnotatedClass(Beta.class);
+		configuration.addAnnotatedClass(BookValuePerShare.class);
+		configuration.addAnnotatedClass(CashflowPerShare.class);
+		configuration.addAnnotatedClass(DebtRatio.class);
+		configuration.addAnnotatedClass(DividendPriceRatio.class);
 		configuration.addAnnotatedClass(EarningsPerShare.class);
+		configuration.addAnnotatedClass(EquityRatio.class);
+		configuration.addAnnotatedClass(GrossMargin.class);
+		configuration.addAnnotatedClass(OperatingMargin.class);
+		configuration.addAnnotatedClass(PayoutRatio.class);
+		configuration.addAnnotatedClass(PriceCashflowRatio.class);
+		configuration.addAnnotatedClass(PriceEarningsRatio.class);
 		configuration.addAnnotatedClass(PriceEarningsToGrowthRatio.class);
+		configuration.addAnnotatedClass(PriceSalesRatio.class);
+		configuration.addAnnotatedClass(PriceToBookValue.class);
+		configuration.addAnnotatedClass(ReturnOnEquityRatio.class);
+		configuration.addAnnotatedClass(Sharpe.class);
 		
 		configuration.configure("hibernate.cfg.xml");
 

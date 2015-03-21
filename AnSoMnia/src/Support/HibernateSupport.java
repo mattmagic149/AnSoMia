@@ -2,9 +2,24 @@ package Support;
 
 import General.SingleCompany;
 import Interface.KeyPerformanceIndicator;
+import KPIToCalc.Alpha;
+import KPIToCalc.Beta;
+import KPIToCalc.BookValuePerShare;
+import KPIToCalc.CashflowPerShare;
+import KPIToCalc.DebtRatio;
+import KPIToCalc.DividendPriceRatio;
 import KPIToCalc.EarningsPerShare;
+import KPIToCalc.EquityRatio;
+import KPIToCalc.GrossMargin;
+import KPIToCalc.OperatingMargin;
+import KPIToCalc.PayoutRatio;
+import KPIToCalc.PriceCashflowRatio;
 import KPIToCalc.PriceEarningsRatio;
 import KPIToCalc.PriceEarningsToGrowthRatio;
+import KPIToCalc.PriceSalesRatio;
+import KPIToCalc.PriceToBookValue;
+import KPIToCalc.ReturnOnEquityRatio;
+import KPIToCalc.Sharpe;
 import KPIToCrawl.*;
 
 import java.io.File;
@@ -55,9 +70,24 @@ public class HibernateSupport {
 		configuration.addAnnotatedClass(SingleCompany.class);
 		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
 		
-		configuration.addAnnotatedClass(PriceEarningsRatio.class);
+		configuration.addAnnotatedClass(Alpha.class);
+		configuration.addAnnotatedClass(Beta.class);
+		configuration.addAnnotatedClass(BookValuePerShare.class);
+		configuration.addAnnotatedClass(CashflowPerShare.class);
+		configuration.addAnnotatedClass(DebtRatio.class);
+		configuration.addAnnotatedClass(DividendPriceRatio.class);
 		configuration.addAnnotatedClass(EarningsPerShare.class);
+		configuration.addAnnotatedClass(EquityRatio.class);
+		configuration.addAnnotatedClass(GrossMargin.class);
+		configuration.addAnnotatedClass(OperatingMargin.class);
+		configuration.addAnnotatedClass(PayoutRatio.class);
+		configuration.addAnnotatedClass(PriceCashflowRatio.class);
+		configuration.addAnnotatedClass(PriceEarningsRatio.class);
 		configuration.addAnnotatedClass(PriceEarningsToGrowthRatio.class);
+		configuration.addAnnotatedClass(PriceSalesRatio.class);
+		configuration.addAnnotatedClass(PriceToBookValue.class);
+		configuration.addAnnotatedClass(ReturnOnEquityRatio.class);
+		configuration.addAnnotatedClass(Sharpe.class);
 		
 		configuration.configure(configFile);
 		
