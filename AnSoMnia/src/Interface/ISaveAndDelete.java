@@ -1,9 +1,9 @@
-package org.ist.OAD13.General.Interface;
+package Interface;
 
 /**
  * Interface for saving Objects into the Database via Hibernate
  * 
- * @author Stettinger
+ * @author Senkl/Ivantsits
  *
  */
 
@@ -20,6 +20,9 @@ public interface ISaveAndDelete {
 	/**
 	 * Deletes the Object from the Database
 	 */
-	public void deleteFromDB();
+	public void deleteFromDB(Object obj);
+
+
+
 
 }

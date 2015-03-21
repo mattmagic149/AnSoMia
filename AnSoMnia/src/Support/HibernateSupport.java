@@ -1,18 +1,10 @@
-package org.ist.OAD13.Support;
+package Support;
+
+import General.SingleCompany;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import oadTurk.User.Admin;
-import oadTurk.User.Creator;
-import oadTurk.User.RootUser;
-import oadTurk.User.User;
-import oadTurk.Structure.*;
-import oadTurk.Exam.Exam;
-import oadTurk.Exam.Participate_Exam;
-import oadTurk.Exam.PreferedCategory;
-import oadTurk.LearningUnit.*;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -48,25 +40,12 @@ public class HibernateSupport {
 	
 	private static void init() {
 		//Change the path to your deployed config file !
-		File configFile = new File("/Users/matthiasivantsits/Documents/workspace/oadTurk/build/classes/hibernate.cfg.xml");
+		File configFile = new File("/Users/matthiasivantsits/git/AnSoMia/AnSoMia/src/hibernate.cfg.xml");
 
 		Configuration configuration = new Configuration();
 		
 		//add all classes you want to annotate
-		configuration.addAnnotatedClass(RootUser.class);
-		configuration.addAnnotatedClass(User.class);
-		configuration.addAnnotatedClass(Creator.class);
-		configuration.addAnnotatedClass(Admin.class);
-		configuration.addAnnotatedClass(LearningEnvironment.class);	
-		configuration.addAnnotatedClass(LearningApplication.class);	
-		configuration.addAnnotatedClass(Category.class);	
-		configuration.addAnnotatedClass(LearningUnit.class);	
-		configuration.addAnnotatedClass(Answer.class);	
-		configuration.addAnnotatedClass(Evaluate.class);	
-		configuration.addAnnotatedClass(Exam.class);
-		configuration.addAnnotatedClass(PreferedCategory.class);
-		configuration.addAnnotatedClass(Participate_Exam.class);
-
+		configuration.addAnnotatedClass(SingleCompany.class);
 
 		
 		configuration.configure(configFile);

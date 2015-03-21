@@ -1,6 +1,11 @@
+package General;
 import javax.persistence.*;
+import Support.*;
+import Interface.*;
 
-public class SingleCompany implements Interface.ISaveAndDelete {
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public class SingleCompany implements ISaveAndDelete {
 	
 	@Id
 	private String isin;
@@ -19,14 +24,17 @@ public class SingleCompany implements Interface.ISaveAndDelete {
 	public void setCompanyName(String company_name) {
 		this.company_name = company_name;
 	}
+	
+	
 	@Override
 	public boolean saveToDB() {
-		// TODO Auto-generated method stub
-		return false;
+		if(!HibernateSupport.commit(this))
+			return false;
+		return true;
 	}
 	@Override
-	public void deleteFromDB() {
-		// TODO Auto-generated method stub
+	public void deleteFromDB(Object obj) {
+		HibernateSupport.deleteObject(this);
 		
 	}
 
