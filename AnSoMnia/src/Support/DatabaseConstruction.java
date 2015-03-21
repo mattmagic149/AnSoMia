@@ -32,6 +32,8 @@ public class DatabaseConstruction {
 		
 		//add all classes you want to annotate
 		configuration.addAnnotatedClass(SingleCompany.class);
+		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
+		
 		configuration.addAnnotatedClass(PriceEarningsRatio.class);
 		configuration.addAnnotatedClass(EarningsPerShare.class);
 		configuration.addAnnotatedClass(PriceEarningsToGrowthRatio.class);

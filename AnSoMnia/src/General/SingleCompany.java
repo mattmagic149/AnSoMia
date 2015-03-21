@@ -31,7 +31,9 @@ public class SingleCompany implements ISaveAndDelete {
 	private List<PriceEarningsToGrowthRatio> price_earnings_to_growth_ratios;
 	
 	
-	
+	public SingleCompany() {
+		
+	}
 	
 	public SingleCompany(String isin, String company_name){
 		this.isin = isin;
