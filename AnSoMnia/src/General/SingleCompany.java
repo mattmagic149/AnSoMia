@@ -7,9 +7,7 @@ import javax.persistence.*;
 
 import Support.*;
 import Interface.*;
-import KPIToCalc.EarningsPerShare;
-import KPIToCalc.PriceEarningsRatio;
-import KPIToCalc.PriceEarningsToGrowthRatio;
+import KPIToCalc.*;
 import KPIToCrawl.*;
 
 @Entity
@@ -21,17 +19,83 @@ public class SingleCompany implements ISaveAndDelete {
 	
 	private String company_name;
 	
+	
+	
+	
+	
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<Alpha> alphas;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<Beta> betas;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<BookValuePerShare> book_values_per_share;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<CashflowPerShare> cashflows_per_share;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<DebtRatio> debt_ratios;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<DividendPriceRatio> dividend_price_ratios;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<EarningsPerShare> earnings_per_share;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<EquityRatio> equity_ratios;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<GrossMargin> gross_margins;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<OperatingMargin> operating_margins;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<PayoutRatio> payout_ratios;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<PriceCashflowRatio> price_cashflow_ratios;
+	
+	
 	@OneToMany
 	@JoinColumn(name="isin")
 	private List<PriceEarningsRatio> price_earnings_ratios;
 	
 	@OneToMany
 	@JoinColumn(name="isin")
-	private List<EarningsPerShare> earnings_per_shares;
+	private List<PriceEarningsToGrowthRatio> price_earnings_to_growth_ratios;
 	
 	@OneToMany
 	@JoinColumn(name="isin")
-	private List<PriceEarningsToGrowthRatio> price_earnings_to_growth_ratios;
+	private List<PriceSalesRatio> price_sales_ratios;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<PriceToBookValue> price_to_book_values;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<ReturnOnEquityRatio> return_on_equity_ratios;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<Sharpe> sharpes;
 	
 	
 	public SingleCompany() {
@@ -41,9 +105,24 @@ public class SingleCompany implements ISaveAndDelete {
 	public SingleCompany(String isin, String company_name){
 		this.isin = isin;
 		this.company_name = company_name;
+		this.alphas = new ArrayList<Alpha>();
+		this.betas = new ArrayList<Beta>();
+		this.book_values_per_share = new ArrayList<BookValuePerShare>();
+		this.cashflows_per_share = new ArrayList<CashflowPerShare>();
+		this.debt_ratios = new ArrayList<DebtRatio>();
+		this.dividend_price_ratios = new ArrayList<DividendPriceRatio>();
+		this.earnings_per_share = new ArrayList<EarningsPerShare>();
+		this.equity_ratios = new ArrayList<EquityRatio>();
+		this.gross_margins = new ArrayList<GrossMargin>();
+		this.operating_margins = new ArrayList<OperatingMargin>();
+		this.payout_ratios = new ArrayList<PayoutRatio>();
+		this.price_cashflow_ratios = new ArrayList<PriceCashflowRatio>();
 		this.price_earnings_ratios = new ArrayList<PriceEarningsRatio>();
-		this.earnings_per_shares = new ArrayList<EarningsPerShare>();
 		this.price_earnings_to_growth_ratios = new ArrayList<PriceEarningsToGrowthRatio>();
+		this.price_sales_ratios = new ArrayList<PriceSalesRatio>();
+		this.price_to_book_values = new ArrayList<PriceToBookValue>();
+		this.return_on_equity_ratios = new ArrayList<ReturnOnEquityRatio>();
+		this.sharpes = new ArrayList<Sharpe>();
 	}
 	
 	public String getIsin() {
