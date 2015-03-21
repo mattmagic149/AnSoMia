@@ -1,4 +1,4 @@
-package KeyPerformanceIndicators;
+package Interface;
 
 import java.util.Date;
 
@@ -12,7 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import General.SingleCompany;
-import Interface.ISaveAndDelete;
 import Support.HibernateSupport;
 
 @Entity

@@ -7,7 +7,10 @@ import javax.persistence.*;
 
 import Support.*;
 import Interface.*;
-import KeyPerformanceIndicators.*;
+import KPIToCalc.EarningsPerShare;
+import KPIToCalc.PriceEarningsRatio;
+import KPIToCalc.PriceEarningsToGrowthRatio;
+import KPIToCrawl.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
