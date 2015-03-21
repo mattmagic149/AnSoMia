@@ -13,16 +13,18 @@ public class CSVReader
   
   public void run() {
 	  
-		String csvFile = "/Users/mkyong/Downloads/GeoIPCountryWhois.csv";
+		String csv_file = "data/isin.csv";
 		BufferedReader br = null;
 		String line = "";
+		String company_name = "";
+		String company_isin = "";
 	 
 		try {
-			br = new BufferedReader(new FileReader(csvFile));
+			br = new BufferedReader(new FileReader(csv_file));
 			while ((line = br.readLine()) != null) {
-				String[] company = line.split(",");
-				String company_name = company[0];
-				String company_isin = company[1];	
+				String[] company = line.split(";");
+				company_name = company[0];
+				company_isin = company[1];	
 			}
 	 
 		} catch (FileNotFoundException e) {
@@ -39,6 +41,8 @@ public class CSVReader
 			}
 		}
 	 
+		System.out.println(company_name);
+		System.out.println(company_isin);
 		System.out.println("Done");
 	  }
   
