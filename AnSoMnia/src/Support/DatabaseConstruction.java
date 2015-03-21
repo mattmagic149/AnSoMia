@@ -37,12 +37,12 @@ public class DatabaseConstruction {
 		
 		System.out.println("adding one SingleCompany");
 		List<Criterion>  criterions = new ArrayList<Criterion>();
-		/*criterions.add(Restrictions.eq("firstname", "user"));
-		criterions.add(Restrictions.eq("surname", "user"));*/
+		criterions.add(Restrictions.eq("isin", "DE0001218063"));
+		criterions.add(Restrictions.eq("company_name", "FINLAB AG NA O.N."));
 		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
 
 		if(company == null){
-			//company = new company("user","user","user@gmail.net","0123456");
+			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.");
 			HibernateSupport.beginTransaction();
 			company.saveToDB();
 			HibernateSupport.commitTransaction();

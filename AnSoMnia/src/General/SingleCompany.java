@@ -11,6 +11,10 @@ public class SingleCompany implements ISaveAndDelete {
 	private String isin;
 	private String company_name;
 	
+	public SingleCompany(String isin, String company_name){
+		this.isin = isin;
+		this.company_name = company_name;
+	}
 	
 	public String getIsin() {
 		return isin;

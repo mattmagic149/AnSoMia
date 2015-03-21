@@ -40,7 +40,7 @@ public class HibernateSupport {
 	
 	private static void init() {
 		//Change the path to your deployed config file !
-		File configFile = new File("/Users/matthiasivantsits/git/AnSoMia/AnSoMia/src/hibernate.cfg.xml");
+		File configFile = new File("/Users/matthiasivantsits/git/AnSoMia/AnSoMnia/src/hibernate.cfg.xml");
 
 		Configuration configuration = new Configuration();
 		
