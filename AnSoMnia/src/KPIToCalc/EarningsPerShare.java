@@ -9,7 +9,6 @@ import Interface.KeyPerformanceIndicator;
 
 @Entity
 public class EarningsPerShare extends KeyPerformanceIndicator  {
-
 	private double earnings_per_share;
 		
 	public EarningsPerShare() {
@@ -20,6 +19,4 @@ public class EarningsPerShare extends KeyPerformanceIndicator  {
 		super(company, date);
 		this.earnings_per_share = earnings_per_share;
 	}
-	
-
 }

@@ -4,8 +4,8 @@ Benötigte Kennzahlen
 EPS - Earnings per share
 PER - Price earnings ratio
 PEG - Price earnings to growth ratio
-DPR - Dividen price ratio
-CFS - Cash flow per share
+DPR - Dividend price ratio
+CFS - Cashflow per share
 PCF - Price cash flow ratio
 PBV - Price to book value
 PSR - Price sales ratio
