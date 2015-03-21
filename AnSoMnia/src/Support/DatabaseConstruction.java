@@ -10,7 +10,11 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import General.*;
-import KeyPerformanceIndicators.*;
+import Interface.KeyPerformanceIndicator;
+import KPIToCalc.EarningsPerShare;
+import KPIToCalc.PriceEarningsRatio;
+import KPIToCalc.PriceEarningsToGrowthRatio;
+import KPIToCrawl.*;
 
 
 /**

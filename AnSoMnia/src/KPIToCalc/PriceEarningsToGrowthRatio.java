@@ -1,8 +1,11 @@
-package KeyPerformanceIndicators;
+package KPIToCalc;
 
 import java.util.Date;
+
 import javax.persistence.Entity;
+
 import General.*;
+import Interface.KeyPerformanceIndicator;
 
 
 @Entity

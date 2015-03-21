@@ -1,7 +1,11 @@
 package Support;
 
 import General.SingleCompany;
-import KeyPerformanceIndicators.*;
+import Interface.KeyPerformanceIndicator;
+import KPIToCalc.EarningsPerShare;
+import KPIToCalc.PriceEarningsRatio;
+import KPIToCalc.PriceEarningsToGrowthRatio;
+import KPIToCrawl.*;
 
 import java.io.File;
 import java.util.ArrayList;
