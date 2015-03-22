@@ -9,7 +9,7 @@ import javax.xml.parsers.*;
 
 import org.w3c.dom.Document;
 
-public class IndexCrawler
+public class DailyCrawler
 {
   public static void main( String[] args ) throws Exception
   {
