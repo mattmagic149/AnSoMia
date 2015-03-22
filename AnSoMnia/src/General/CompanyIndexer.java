@@ -23,10 +23,13 @@ public class CompanyIndexer
 	  
 	  CompanyIndexer obj = new CompanyIndexer();
 	  try {
+		  System.out.println("Downloading CompanyCSV now...");
 		  obj.downloadCompanyCSV();
 	  } catch (IOException e) {
 		  System.out.println(e);
 	  }
+
+	  System.out.println("Downloading CompanyCSV complete!");
 	  
 	  obj.filterAndAddToDB();
   }
@@ -38,6 +41,7 @@ public class CompanyIndexer
 	  ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 	  FileOutputStream fos = new FileOutputStream("data/companies.csv");
 	  fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+	  fos.close();
   }
   
   public void filterAndAddToDB() {
@@ -84,7 +88,6 @@ public class CompanyIndexer
 							!company_instrument_group.contains(instrument_group_filter[4]) &&
 							!company_instrument_group.contains(instrument_group_filter[5])) {
 						
-						counter++;
 						
 						List<Criterion>  criterions = new ArrayList<Criterion>();
 						criterions.add(Restrictions.eq("isin", company_isin));
@@ -95,7 +98,7 @@ public class CompanyIndexer
 							HibernateSupport.beginTransaction();
 							company_obj.saveToDB();
 							HibernateSupport.commitTransaction();
-							System.out.println("Added company nr.: " + counter);
+							System.out.println("Added company nr.: " + ++counter);
 						}
 
 					}

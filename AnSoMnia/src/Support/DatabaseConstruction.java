@@ -59,7 +59,7 @@ public class DatabaseConstruction {
 
 		new SchemaExport(configuration).create(true, true);
 		
-		System.out.println("adding one SingleCompany");
+		/*System.out.println("adding one SingleCompany");
 		List<Criterion>  criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.eq("isin", "DE0001218063"));
 		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
@@ -82,7 +82,7 @@ public class DatabaseConstruction {
 			HibernateSupport.beginTransaction();
 			company.saveToDB();
 			HibernateSupport.commitTransaction();
-		}
+		}*/
 		
 		System.out.println("Finished");
 	}
