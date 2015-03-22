@@ -65,7 +65,7 @@ public class DatabaseConstruction {
 		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
 
 		if(company == null){
-			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.");
+			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.", "ABCSD");
 			PriceEarningsRatio per = new PriceEarningsRatio(company, 333.33, new Date());
 			company.addPriceEarningsRatio(per);
 			

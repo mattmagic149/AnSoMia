@@ -19,7 +19,7 @@ public class SingleCompany implements ISaveAndDelete {
 	
 	private String company_name;
 	
-	
+	private String ticker;
 	
 	
 	
@@ -102,9 +102,11 @@ public class SingleCompany implements ISaveAndDelete {
 		
 	}
 	
-	public SingleCompany(String isin, String company_name){
+	public SingleCompany(String isin, String company_name, String ticker) {
 		this.isin = isin;
 		this.company_name = company_name;
+		this.ticker = ticker;
+		
 		this.alphas = new ArrayList<Alpha>();
 		this.betas = new ArrayList<Beta>();
 		this.book_values_per_share = new ArrayList<BookValuePerShare>();
@@ -150,7 +152,7 @@ public class SingleCompany implements ISaveAndDelete {
 	
 	public boolean addEarningsPerShare(EarningsPerShare eps) {
 		boolean success = false;
-		if (this.earnings_per_shares.add(eps)){
+		if (this.earnings_per_share.add(eps)){
 			HibernateSupport.beginTransaction();
 			success = eps.saveToDB();
 			HibernateSupport.commitTransaction();
