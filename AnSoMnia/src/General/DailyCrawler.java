@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,25 +34,43 @@ public class DailyCrawler
     Document document = builder.parse( new File("test/google.html") );
     System.out.println( document.getFirstChild().getTextContent() );*/
 	  
+
+	  
 	  DailyCrawler crawler = new DailyCrawler();
 	  
 	  List<Criterion>  criterions = new ArrayList<Criterion>();
-	  criterions.add(Restrictions.eq("isin", "AT000000STR1"));
-	  SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
+	  List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+
+	  int companies_size = companies.size();
+
+	  for(int i = 0; i < companies_size; i++) {
+		  try {
+			  crawler.crawlKPIs(companies.get(i));
+		  } catch(IOException e) {
+			  System.out.println(e);
+		  }
+	  	  System.out.println("Crawled " + (companies_size + 1) + " companies");
+		  Thread.sleep(300);
+	  }
+	  	 
+  }
+  
+  private boolean crawlKPIs(SingleCompany company) throws IOException {
+	  boolean success = false;
 	  
 	  if(company != null) {
 
-		  crawler.company_ticker = company.getTicker();
+		  this.company_ticker = company.getTicker();
 		  
-		  org.jsoup.nodes.Document doc = Jsoup.connect(crawler.url + crawler.query_page_q + crawler.company_ticker + crawler.query_result).get();
+		  org.jsoup.nodes.Document doc = Jsoup.connect(this.url + this.query_page_q + this.company_ticker + this.query_result).get();
 		  
 		  Elements buy_price_query = doc.select("#yfi_quote_summary_data");
 		  Element table = buy_price_query.get(0).child(0).child(0);
 
 		  try {
-			  crawler.crawlBuyPrice(table, company);
-			  crawler.crawlSellPrice(table, company);
-			  crawler.crawlStockPrice(doc, company);
+			  this.crawlBuyPrice(table, company);
+			  this.crawlSellPrice(table, company);
+			  this.crawlStockPrice(doc, company);
 		  } catch (NumberFormatException e) {
 			  System.out.println(e);
 		  }
@@ -62,7 +81,8 @@ public class DailyCrawler
 		  
 		  
 	  }
-	 
+	  
+	  return success;
   }
   
   private boolean crawlBuyPrice(Element table, SingleCompany company) {	  
