@@ -70,6 +70,10 @@ public class HibernateSupport {
 		configuration.addAnnotatedClass(SingleCompany.class);
 		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
 		
+		configuration.addAnnotatedClass(BuyPrice.class);
+		configuration.addAnnotatedClass(SellPrice.class);
+		configuration.addAnnotatedClass(StockPrice.class);
+		
 		configuration.addAnnotatedClass(Alpha.class);
 		configuration.addAnnotatedClass(Beta.class);
 		configuration.addAnnotatedClass(BookValuePerShare.class);

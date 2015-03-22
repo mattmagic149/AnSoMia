@@ -22,12 +22,12 @@ public class CompanyIndexer
   {
 	  
 	  CompanyIndexer obj = new CompanyIndexer();
-	  try {
+	  /*try {
 		  System.out.println("Downloading CompanyCSV now...");
 		  obj.downloadCompanyCSV();
 	  } catch (IOException e) {
 		  System.out.println(e);
-	  }
+	  }*/
 
 	  System.out.println("Downloading CompanyCSV complete!");
 	  
@@ -98,7 +98,7 @@ public class CompanyIndexer
 							HibernateSupport.beginTransaction();
 							company_obj.saveToDB();
 							HibernateSupport.commitTransaction();
-							System.out.println("Added company nr.: " + ++counter);
+							//System.out.println("Added company nr.: " + ++counter);
 						}
 
 					}
@@ -120,7 +120,7 @@ public class CompanyIndexer
 			}
 		}
 	 
-		System.out.println("counter = " + counter);
+		System.out.println("Added " + counter + " companies");
 		//System.out.println(company_isin);
 		System.out.println("Done");
 	  }

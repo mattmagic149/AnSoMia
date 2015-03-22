@@ -22,7 +22,17 @@ public class SingleCompany implements ISaveAndDelete {
 	private String ticker;
 	
 	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<BuyPrice> buy_prices;
 	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<SellPrice> sell_prices;
+	
+	@OneToMany
+	@JoinColumn(name="isin")
+	private List<StockPrice> stock_prices;
 	
 	@OneToMany
 	@JoinColumn(name="isin")
@@ -107,6 +117,10 @@ public class SingleCompany implements ISaveAndDelete {
 		this.company_name = company_name;
 		this.ticker = ticker;
 		
+		this.buy_prices = new ArrayList<BuyPrice>();
+		this.sell_prices = new ArrayList<SellPrice>();
+		this.stock_prices = new ArrayList<StockPrice>();
+		
 		this.alphas = new ArrayList<Alpha>();
 		this.betas = new ArrayList<Beta>();
 		this.book_values_per_share = new ArrayList<BookValuePerShare>();
@@ -139,6 +153,45 @@ public class SingleCompany implements ISaveAndDelete {
 	public void setCompanyName(String company_name) {
 		this.company_name = company_name;
 	}
+	public String getTicker() {
+		return ticker;
+	}
+
+	public void setTicker(String ticker) {
+		this.ticker = ticker;
+	}
+	
+	public boolean addBuyPrice(BuyPrice bp) {
+		boolean success = false;
+		if (this.buy_prices.add(bp)){
+			HibernateSupport.beginTransaction();
+			success = bp.saveToDB();
+			HibernateSupport.commitTransaction();
+		}
+		return success;
+	}
+	
+	public boolean addSellPrice(SellPrice sp) {
+		boolean success = false;
+		if (this.sell_prices.add(sp)){
+			HibernateSupport.beginTransaction();
+			success = sp.saveToDB();
+			HibernateSupport.commitTransaction();
+		}
+		return success;
+	}
+	
+	public boolean addStockPrice(StockPrice sp) {
+		boolean success = false;
+		if (this.stock_prices.add(sp)){
+			HibernateSupport.beginTransaction();
+			success = sp.saveToDB();
+			HibernateSupport.commitTransaction();
+		}
+		return success;
+	}
+	
+	
 	
 	public boolean addPriceEarningsRatio(PriceEarningsRatio per) {
 		boolean success = false;
