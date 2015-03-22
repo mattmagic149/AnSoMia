@@ -16,9 +16,14 @@ public class DebtRatio extends KeyPerformanceIndicator  {
 		super();
 	}
 	
-	public DebtRatio(SingleCompany company, float debt_ratio, Date date) {
+	public DebtRatio(SingleCompany company, float debt, int total, Date date) {
 		super(company, date);
-		this.debt_ratio = debt_ratio;
+		calculateDebtRatio(debt, total);
+	}
+		
+	private void calculateDebtRatio(float debt, int total) {
+		debt_ratio = debt / total;
+		return;
 	}
 
 	public float getDebt_ratio() {

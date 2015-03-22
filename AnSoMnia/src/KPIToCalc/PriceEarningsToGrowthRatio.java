@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import General.*;
 import Interface.KeyPerformanceIndicator;
 
-
 @Entity
 public class PriceEarningsToGrowthRatio extends KeyPerformanceIndicator {
 	

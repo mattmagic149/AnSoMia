@@ -13,16 +13,17 @@ public class BookValuePerShare extends KeyPerformanceIndicator  {
 	private float book_value_per_share;
 		
 	public BookValuePerShare() {
-		super();
+		super();		
 	}
 	
-	public BookValuePerShare(SingleCompany company, float book_value_per_share, Date date) {
+	public BookValuePerShare(SingleCompany company, float book_value, int shares, Date date) {
 		super(company, date);
-		this.book_value_per_share = calculateBookValuePerShare();
+		calculateBookValuePerShare(book_value, shares);
 	}
 	
-	private double calculateBookValuePerShare() {
-		return 1.0;
+	private void calculateBookValuePerShare(float book_value, int shares) {
+		book_value_per_share = book_value / shares;
+		return;
 	}
 
 	public float getBook_value_per_share() {

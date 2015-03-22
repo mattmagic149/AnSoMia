@@ -16,9 +16,14 @@ public class CashflowPerShare extends KeyPerformanceIndicator {
 		super();
 	}
 	
-	public CashflowPerShare(SingleCompany company, float cashflow_per_share, Date date) {
+	public CashflowPerShare(SingleCompany company, float cashflow, int shares, Date date) {
 		super(company, date);
-		this.cashflow_per_share = cashflow_per_share;
+		calculateCashflowPerShare(cashflow, shares);
+	}
+		
+	private void calculateCashflowPerShare(float cashflow, int shares) {
+		cashflow_per_share = cashflow / shares;
+		return;
 	}
 
 	public float getCashflow_per_share() {

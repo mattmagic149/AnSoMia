@@ -16,9 +16,14 @@ public class GrossMargin extends KeyPerformanceIndicator  {
 		super();
 	}
 	
-	public GrossMargin(SingleCompany company, float gross_margin, Date date) {
+	public GrossMargin(SingleCompany company, float net, float sales, Date date) {
 		super(company, date);
-		this.gross_margin = gross_margin;
+		calculateGrossMargin(equity, total);
+	}
+		
+	private void calculateEquityRatio(float equity, float total) {
+		equity_ratio = equity / total;
+		return;
 	}
 
 	public float getGross_margin() {

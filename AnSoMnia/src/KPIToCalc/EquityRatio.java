@@ -16,9 +16,14 @@ public class EquityRatio extends KeyPerformanceIndicator  {
 		super();
 	}
 	
-	public EquityRatio(SingleCompany company, float equity_ratio, Date date) {
+	public EquityRatio(SingleCompany company, float equity, float total, Date date) {
 		super(company, date);
-		this.equity_ratio = equity_ratio;
+		calculateEquityRatio(equity, total);
+	}
+		
+	private void calculateEquityRatio(float equity, float total) {
+		equity_ratio = equity / total;
+		return;
 	}
 
 	public float getEquity_ratio() {

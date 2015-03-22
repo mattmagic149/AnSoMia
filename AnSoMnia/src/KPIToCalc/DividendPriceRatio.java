@@ -16,9 +16,14 @@ public class DividendPriceRatio extends KeyPerformanceIndicator {
 		super();
 	}
 	
-	public DividendPriceRatio(SingleCompany company, float dividend_price_ratio, Date date) {
+	public DividendPriceRatio(SingleCompany company, float dividend, float price, Date date) {
 		super(company, date);
-		this.dividend_price_ratio = dividend_price_ratio;
+		calculateDividendPriceRatio(dividend, price);
+	}
+		
+	private void calculateDividendPriceRatio(float dividend, float price) {
+		dividend_price_ratio = dividend / price;
+		return;
 	}
 
 	public float getDividend_price_ratio() {

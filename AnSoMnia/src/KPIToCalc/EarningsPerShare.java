@@ -16,9 +16,14 @@ public class EarningsPerShare extends KeyPerformanceIndicator  {
 		super();
 	}
 	
-	public EarningsPerShare(SingleCompany company, float earnings_per_share, Date date) {
+	public EarningsPerShare(SingleCompany company, float earnings, int shares, Date date) {
 		super(company, date);
-		this.earnings_per_share = earnings_per_share;
+		calculateEarningsPerShare(earnings, shares);
+	}
+		
+	private void calculateEarningsPerShare(float earnings, int shares) {
+		earnings_per_share = earnings / shares;
+		return;
 	}
 
 	public float getEarnings_per_share() {
