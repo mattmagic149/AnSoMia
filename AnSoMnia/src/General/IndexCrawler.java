@@ -18,16 +18,10 @@ public class IndexCrawler
     Document document = builder.parse( new File("test/google.html") );
     System.out.println( document.getFirstChild().getTextContent() );*/
 	  
-	  String url = "http://www.deutsche-boerse-cash-market.com/dbcm-de/instrumente-statistiken/"
-	  		+ "alle-handelbaren-instrumente/handelsplaetze/1560090!search?"
-	  		+ "state=H4sIAAAAAAAAADWNwWrCQBRFf0XuehYmlhbmA1wpBAxuxMU0udHBMbHvvaEE8d-bCrM8cDjniT4YtzLd4ceckntzOxUaQkdT-"
-	  		+ "CfiqCb5ztHa-UH4E6q63tRfHzg7mIQ-fCfug9xoB17-veJUn2ucX0sritqOZpSSv0bThtKEy1Ks1m65dCn3PESjFmka09z0A_"
-	  		+ "wQktLhJ1NmeMBBqDnZMfK3yDrJMoa20RJXQTu8_gABN2E35AAAAA&sort=sTitle+asc";
+	  String url = "https://de.finance.yahoo.com/q?s=";
+	  String company_ticker = "";
 	  
-	  String hits_per_page_query_string = "&hitsPerPage=" + 50;
-	  String page_number_query_string = "&pageNum=" + 0;
-	  
-	  org.jsoup.nodes.Document doc = Jsoup.connect(url + hits_per_page_query_string + page_number_query_string).get();
+	  org.jsoup.nodes.Document doc = Jsoup.connect(url).get();
 	  Elements navigation = doc.select("#yfi_quote_summary_data tr");
 	  
 	  
