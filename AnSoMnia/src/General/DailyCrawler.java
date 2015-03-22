@@ -7,6 +7,7 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,17 +43,32 @@ public class DailyCrawler
 	  List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
 
 	  int companies_size = companies.size();
+	  int timeout_counter = 0;
+	  boolean success = true;
 
 	  for(int i = 0; i < companies_size; i++) {
 		  System.out.println("Crawling Company: " + companies.get(i).getCompanyName() + ", "
 				  + companies.get(i).getIsin() + ", " + companies.get(i).getTicker());
 		  try {
 			  crawler.crawlKPIs(companies.get(i));
+		  } catch(SocketTimeoutException e) {
+			  success = false;
+			  if(timeout_counter < 3) {
+				  i--;
+				  timeout_counter++;
+			  } else {
+				  success = true;
+			  }
 		  } catch(IOException e) {
 			  System.out.println(e);
 		  }
+		  
+		  if(success == true) {
+			  timeout_counter = 0;
+		  }
+		  success = true;
 	  	  System.out.println("Crawled " + (i + 1) + " companies");
-		  Thread.sleep(300);
+		  Thread.sleep(100);
 	  }
 	  	 
   }
@@ -61,7 +77,6 @@ public class DailyCrawler
 	  if(company != null) {
 
 		  this.company_ticker = company.getTicker();
-		  
 		  org.jsoup.nodes.Document doc = Jsoup.connect(this.url + this.query_page_q + this.company_ticker + this.query_result).get();
 		  
 		  Elements buy_price_query = doc.select("#yfi_quote_summary_data");
@@ -72,11 +87,20 @@ public class DailyCrawler
 
 		  try {
 			  this.crawlBuyPrice(table, company);
+		  } catch (NumberFormatException e) {
+			  System.out.println(e);
+		  }
+		  try {
 			  this.crawlSellPrice(table, company);
+		  } catch (NumberFormatException e) {
+			  System.out.println(e);
+		  }
+		  try {
 			  this.crawlStockPrice(doc, company);
 		  } catch (NumberFormatException e) {
 			  System.out.println(e);
 		  }
+		 
 	  
 		  HibernateSupport.beginTransaction();
 		  company.saveToDB();
@@ -94,7 +118,7 @@ public class DailyCrawler
 	  for(int i = 0; i < table_size; i++) {
 		  if(table.child(i).child(0).html().equals("Briefkurs:") && 
 				  !table.child(i).child(1).html().equals("n.v.")) {
-			  buy_price = Float.parseFloat(table.child(i).child(1).child(0).html().replace(',', '.'));
+			  buy_price = Float.parseFloat(table.child(i).child(1).child(0).html().replace(".", "").replace(',', '.'));
 		  }
 	  }
 
@@ -113,7 +137,7 @@ public class DailyCrawler
 	  for(int i = 0; i < table_size; i++) {
 		  if(table.child(i).child(0).html().equals("Geld:") && 
 				  !table.child(i).child(1).html().equals("n.v.")) {
-			  sell_price = Float.parseFloat(table.child(i).child(1).child(0).html().replace(',', '.'));
+			  sell_price = Float.parseFloat(table.child(i).child(1).child(0).html().replace(".", "").replace(',', '.'));
 		  }
 	  }
 
