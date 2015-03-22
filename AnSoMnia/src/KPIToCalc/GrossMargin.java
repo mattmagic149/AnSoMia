@@ -10,16 +10,18 @@ import Interface.KeyPerformanceIndicator;
 @Entity
 public class GrossMargin extends KeyPerformanceIndicator  {
 
-	private double gross_margin;
+	private float gross_margin;
 		
 	public GrossMargin() {
 		super();
 	}
 	
-	public GrossMargin(SingleCompany company, double gross_margin, Date date) {
+	public GrossMargin(SingleCompany company, float gross_margin, Date date) {
 		super(company, date);
 		this.gross_margin = gross_margin;
 	}
-	
 
+	public float getGross_margin() {
+		return gross_margin;
+	}
 }

@@ -10,16 +10,18 @@ import Interface.KeyPerformanceIndicator;
 @Entity
 public class Beta extends KeyPerformanceIndicator  {
 
-	private double beta;
+	private float beta;
 		
 	public Beta() {
 		super();
 	}
 	
-	public Beta(SingleCompany company, double beta, Date date) {
+	public Beta(SingleCompany company, float beta, Date date) {
 		super(company, date);
 		this.beta = beta;
 	}
-	
 
+	public float getBeta() {
+		return beta;
+	}
 }

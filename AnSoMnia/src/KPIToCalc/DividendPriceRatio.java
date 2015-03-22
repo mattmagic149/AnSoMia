@@ -10,14 +10,18 @@ import Interface.KeyPerformanceIndicator;
 @Entity
 public class DividendPriceRatio extends KeyPerformanceIndicator {
 
-	private double dividend_price_ratio;
+	private float dividend_price_ratio;
 	
 	public DividendPriceRatio() {
 		super();
 	}
 	
-	public DividendPriceRatio(SingleCompany company, double dividend_price_ratio, Date date) {
+	public DividendPriceRatio(SingleCompany company, float dividend_price_ratio, Date date) {
 		super(company, date);
 		this.dividend_price_ratio = dividend_price_ratio;
+	}
+
+	public float getDividend_price_ratio() {
+		return dividend_price_ratio;
 	}
 }

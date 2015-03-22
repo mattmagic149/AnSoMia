@@ -10,14 +10,18 @@ import Interface.KeyPerformanceIndicator;
 @Entity
 public class PayoutRatio extends KeyPerformanceIndicator {
 
-	private double payout_ratio;
+	private float payout_ratio;
 	
 	public PayoutRatio() {
 		super();
 	}
 	
-	public PayoutRatio(SingleCompany company, double payout_ratio, Date date) {
+	public PayoutRatio(SingleCompany company, float payout_ratio, Date date) {
 		super(company, date);
 		this.payout_ratio = payout_ratio;
+	}
+
+	public float getPayout_ratio() {
+		return payout_ratio;
 	}
 }

@@ -10,15 +10,18 @@ import Interface.KeyPerformanceIndicator;
 @Entity
 public class DebtRatio extends KeyPerformanceIndicator  {
 	
-	private double debt_ratio;
+	private float debt_ratio;
 
 	public DebtRatio() {
 		super();
 	}
 	
-	public DebtRatio(SingleCompany company, double debt_ratio, Date date) {
+	public DebtRatio(SingleCompany company, float debt_ratio, Date date) {
 		super(company, date);
 		this.debt_ratio = debt_ratio;
 	}
 
+	public float getDebt_ratio() {
+		return debt_ratio;
+	}
 }

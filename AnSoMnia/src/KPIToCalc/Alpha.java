@@ -9,14 +9,19 @@ import Interface.KeyPerformanceIndicator;
 
 @Entity
 public class Alpha extends KeyPerformanceIndicator {
-	private double alpha;
+	
+	private float alpha;
 	
 	public Alpha() {
 		super();
 	}
 	
-	public Alpha(SingleCompany company, double alpha, Date date) {
+	public Alpha(SingleCompany company, float alpha, Date date) {
 		super(company, date);
 		this.alpha = alpha;
+	}
+
+	public float getAlpha() {
+		return alpha;
 	}
 }

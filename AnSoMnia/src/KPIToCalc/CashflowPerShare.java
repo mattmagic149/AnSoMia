@@ -9,14 +9,19 @@ import Interface.KeyPerformanceIndicator;
 
 @Entity
 public class CashflowPerShare extends KeyPerformanceIndicator {
-	private double cashflow_per_share;
+	
+	private float cashflow_per_share;
 	
 	public CashflowPerShare() {
 		super();
 	}
 	
-	public CashflowPerShare(SingleCompany company, double cashflow_per_share, Date date) {
+	public CashflowPerShare(SingleCompany company, float cashflow_per_share, Date date) {
 		super(company, date);
 		this.cashflow_per_share = cashflow_per_share;
+	}
+
+	public float getCashflow_per_share() {
+		return cashflow_per_share;
 	}
 }

@@ -9,14 +9,18 @@ import Interface.KeyPerformanceIndicator;
 
 @Entity
 public class Sharpe extends KeyPerformanceIndicator {
-	private double alpha;
+	private float sharpe;
 	
 	public Sharpe() {
 		super();
 	}
 	
-	public Sharpe(SingleCompany company, double alpha, Date date) {
+	public Sharpe(SingleCompany company, float sharpe, Date date) {
 		super(company, date);
-		this.alpha = alpha;
+		this.sharpe = sharpe;
+	}
+
+	public float getSharpe() {
+		return sharpe;
 	}
 }
