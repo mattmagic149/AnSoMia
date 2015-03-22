@@ -10,15 +10,18 @@ import Interface.KeyPerformanceIndicator;
 @Entity
 public class ReturnOnEquityRatio extends KeyPerformanceIndicator  {
 	
-	private double sharpe;
+	private float return_on_equity;
 
 	public ReturnOnEquityRatio() {
 		super();
 	}
 	
-	public ReturnOnEquityRatio(SingleCompany company, double sharpe, Date date) {
+	public ReturnOnEquityRatio(SingleCompany company, float return_on_equity, Date date) {
 		super(company, date);
-		this.sharpe = sharpe;
+		this.return_on_equity = return_on_equity;
 	}
 
+	public float getROE() {
+		return return_on_equity;
+	}
 }
