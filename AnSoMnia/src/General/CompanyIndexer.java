@@ -73,13 +73,13 @@ public class CompanyIndexer
 				company_ticker = company[5];
 				company_instrument_group = company[8];
 
-				if(company_isin.length() != 12 || company_name == "" ||
-						company_isin == "" || company_ticker == "") {
+				if(company_isin.length() != 12 || company_name.length() < 3 ||
+						company_isin.length() < 3 || company_ticker.length() < 3 ) {
 					continue;
 				}
 				
-				if(company_isin.contains(isin_filter[0]) || company_isin.contains(isin_filter[1]) 
-														|| company_isin.contains(isin_filter[2])) {
+				if(company_isin.startsWith(isin_filter[0]) || company_isin.startsWith(isin_filter[1]) 
+														|| company_isin.startsWith(isin_filter[2])) {
 					
 					if(!company_instrument_group.contains(instrument_group_filter[0]) &&
 							!company_instrument_group.contains(instrument_group_filter[1]) &&	
@@ -98,6 +98,7 @@ public class CompanyIndexer
 							HibernateSupport.beginTransaction();
 							company_obj.saveToDB();
 							HibernateSupport.commitTransaction();
+							counter++;
 							//System.out.println("Added company nr.: " + ++counter);
 						}
 

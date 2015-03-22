@@ -44,20 +44,20 @@ public class DailyCrawler
 	  int companies_size = companies.size();
 
 	  for(int i = 0; i < companies_size; i++) {
+		  System.out.println("Crawling Company: " + companies.get(i).getCompanyName() + ", "
+				  + companies.get(i).getIsin() + ", " + companies.get(i).getTicker());
 		  try {
 			  crawler.crawlKPIs(companies.get(i));
 		  } catch(IOException e) {
 			  System.out.println(e);
 		  }
-	  	  System.out.println("Crawled " + (companies_size + 1) + " companies");
+	  	  System.out.println("Crawled " + (i + 1) + " companies");
 		  Thread.sleep(300);
 	  }
 	  	 
   }
   
-  private boolean crawlKPIs(SingleCompany company) throws IOException {
-	  boolean success = false;
-	  
+  private boolean crawlKPIs(SingleCompany company) throws IOException {	  
 	  if(company != null) {
 
 		  this.company_ticker = company.getTicker();
@@ -65,6 +65,9 @@ public class DailyCrawler
 		  org.jsoup.nodes.Document doc = Jsoup.connect(this.url + this.query_page_q + this.company_ticker + this.query_result).get();
 		  
 		  Elements buy_price_query = doc.select("#yfi_quote_summary_data");
+		  if(buy_price_query.size() <= 0) {
+			  return false;
+		  }
 		  Element table = buy_price_query.get(0).child(0).child(0);
 
 		  try {
@@ -82,14 +85,15 @@ public class DailyCrawler
 		  
 	  }
 	  
-	  return success;
+	  return true;
   }
   
   private boolean crawlBuyPrice(Element table, SingleCompany company) {	  
 	  float buy_price = -1;
 	  int table_size = table.childNodeSize();
 	  for(int i = 0; i < table_size; i++) {
-		  if(table.child(i).child(0).html().equals("Briefkurs:")) {
+		  if(table.child(i).child(0).html().equals("Briefkurs:") && 
+				  !table.child(i).child(1).html().equals("n.v.")) {
 			  buy_price = Float.parseFloat(table.child(i).child(1).child(0).html().replace(',', '.'));
 		  }
 	  }
@@ -107,7 +111,8 @@ public class DailyCrawler
 	  float sell_price = -1;
 	  int table_size = table.childNodeSize();
 	  for(int i = 0; i < table_size; i++) {
-		  if(table.child(i).child(0).html().equals("Geld:")) {
+		  if(table.child(i).child(0).html().equals("Geld:") && 
+				  !table.child(i).child(1).html().equals("n.v.")) {
 			  sell_price = Float.parseFloat(table.child(i).child(1).child(0).html().replace(',', '.'));
 		  }
 	  }
