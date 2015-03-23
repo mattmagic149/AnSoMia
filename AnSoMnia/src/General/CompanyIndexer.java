@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -56,7 +55,7 @@ public class CompanyIndexer
 		SingleCompany company_obj = new SingleCompany();
 		
 		String[] isin_filter = {"DE", "US", "AT"};
-		String[] instrument_group_filter = {"BOND", "EXCHANGE", "EB", "FOND", "EXTERNAL INSTRUMENTS", "WARRANTS"};
+		String[] instrument_group_filter = {"BOND", "EXCHANGE", "EB", "FOND", "EXTERNAL", "WARRANTS", "INSTRUMENTS"};
 	 
 		int counter = 0;
 		int row_counter = 0;
@@ -72,21 +71,24 @@ public class CompanyIndexer
 				company_isin = company[2];
 				company_ticker = company[5];
 				company_instrument_group = company[8];
+				
 
 				if(company_isin.length() != 12 || company_name.length() < 3 ||
-						company_isin.length() < 3 || company_ticker.length() < 3 ) {
+						company_isin.length() < 3 || company_ticker.length() < 3 || 
+						company_instrument_group.contains(instrument_group_filter[0]) ||
+						company_instrument_group.contains(instrument_group_filter[1]) ||	
+						company_instrument_group.contains(instrument_group_filter[2]) ||
+						company_instrument_group.contains(instrument_group_filter[3]) ||
+						company_instrument_group.contains(instrument_group_filter[4]) ||
+						company_instrument_group.contains(instrument_group_filter[5]) ||
+						company_instrument_group.contains(instrument_group_filter[6]) ||
+						company_name.contains("ETF")) {
 					continue;
 				}
 				
 				if(company_isin.startsWith(isin_filter[0]) || company_isin.startsWith(isin_filter[1]) 
 														|| company_isin.startsWith(isin_filter[2])) {
-					
-					if(!company_instrument_group.contains(instrument_group_filter[0]) &&
-							!company_instrument_group.contains(instrument_group_filter[1]) &&	
-							!company_instrument_group.contains(instrument_group_filter[2]) &&
-							!company_instrument_group.contains(instrument_group_filter[3]) &&
-							!company_instrument_group.contains(instrument_group_filter[4]) &&
-							!company_instrument_group.contains(instrument_group_filter[5])) {
+	
 						
 						
 						List<Criterion>  criterions = new ArrayList<Criterion>();
@@ -99,11 +101,11 @@ public class CompanyIndexer
 							company_obj.saveToDB();
 							HibernateSupport.commitTransaction();
 							counter++;
-							//System.out.println("Added company nr.: " + ++counter);
 						}
+						
+						//System.out.println("instrument_group = " + company_instrument_group);
 
-					}
-					//System.out.println("ISIN: " + company_isin);
+		
 				}
 			}
 	 

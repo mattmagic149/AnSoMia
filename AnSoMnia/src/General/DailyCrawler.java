@@ -27,16 +27,10 @@ public class DailyCrawler
 	private String company_ticker = "";
 	private String query_result = "&ql=1";
 	private Date date = new Date();
+	private List<SingleCompany> company_not_crawled = new ArrayList<SingleCompany>();
 	
   public static void main( String[] args ) throws Exception
   {
-    /*DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    Document document = builder.parse( new File("test/google.html") );
-    System.out.println( document.getFirstChild().getTextContent() );*/
-	  
-
-	  
 	  DailyCrawler crawler = new DailyCrawler();
 	  
 	  List<Criterion>  criterions = new ArrayList<Criterion>();
@@ -61,14 +55,23 @@ public class DailyCrawler
 			  }
 		  } catch(IOException e) {
 			  System.out.println(e);
+			  crawler.company_not_crawled.add(companies.get(i));
 		  }
 		  
 		  if(success == true) {
 			  timeout_counter = 0;
 		  }
 		  success = true;
-	  	  System.out.println("Crawled " + (i + 1) + " companies");
-		  Thread.sleep(100);
+	  	  System.out.print("Crawled ");
+	  	  System.out.printf("%.2f", ((i + 1)/(float)companies_size) * 100);
+	  	  System.out.println(" % - " + (crawler.company_not_crawled.size() + 1) + " not crawled");
+		  //Thread.sleep(100);
+	  }
+	  
+	  for(int i = 0; i < crawler.company_not_crawled.size(); i++) {
+		  System.out.println("COMPANY: " + crawler.company_not_crawled.get(i).getCompanyName() + " " + 
+				  			crawler.company_not_crawled.get(i).getIsin() + " " +
+				  			crawler.company_not_crawled.get(i).getTicker());
 	  }
 	  	 
   }
@@ -81,6 +84,7 @@ public class DailyCrawler
 		  
 		  Elements buy_price_query = doc.select("#yfi_quote_summary_data");
 		  if(buy_price_query.size() <= 0) {
+			  this.company_not_crawled.add(company);
 			  return false;
 		  }
 		  Element table = buy_price_query.get(0).child(0).child(0);
@@ -152,7 +156,7 @@ public class DailyCrawler
   
   private void crawlStockPrice(org.jsoup.nodes.Document doc, SingleCompany company) {
 	  Elements stock_price_query = doc.select(".yfi_rt_quote_summary_rt_top span");
-	  float stock_price = Float.parseFloat(stock_price_query.get(0).child(0).html().replace(',', '.'));
+	  float stock_price = Float.parseFloat(stock_price_query.get(0).child(0).html().replace(".", "").replace(',', '.'));
   	
 	  StockPrice stock_price_obj = new StockPrice(stock_price, company, this.date);
 	  company.addStockPrice(stock_price_obj);
