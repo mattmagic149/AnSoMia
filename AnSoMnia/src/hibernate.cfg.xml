@@ -28,5 +28,7 @@
     <!-- Echo all executed SQL to stdout -->
     <property name="show_sql">false</property>
     
+    <property name="hibernate.enable_lazy_load_no_trans">true</property>
+    
 </session-factory>
 </hibernate-configuration>

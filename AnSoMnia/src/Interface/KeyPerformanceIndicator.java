@@ -20,7 +20,7 @@ public abstract class KeyPerformanceIndicator implements ISaveAndDelete {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE)
-	private int id;
+	private long id;
 	
 	@ManyToOne
 	@JoinColumn(name="isin",updatable=false)
