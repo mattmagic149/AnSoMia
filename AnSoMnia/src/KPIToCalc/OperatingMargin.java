@@ -16,9 +16,14 @@ public class OperatingMargin extends KeyPerformanceIndicator  {
 		super();
 	}
 	
-	public OperatingMargin(SingleCompany company, float operating_margin, Date date) {
+	public OperatingMargin(SingleCompany company, float operating_income, float sales, Date date) {
 		super(company, date);
-		this.operating_margin = operating_margin;
+		calculateOperatingMargin(operating_income, sales);
+	}
+		
+	private void calculateOperatingMargin(float operating_income, float sales) {
+		operating_margin = operating_income / sales;
+		return;
 	}
 
 	public float getOperating_margin() {

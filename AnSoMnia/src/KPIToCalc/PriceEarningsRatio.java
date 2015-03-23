@@ -18,7 +18,12 @@ public class PriceEarningsRatio extends KeyPerformanceIndicator  {
 	
 	public PriceEarningsRatio(SingleCompany company, float price, float earnings, Date date) {
 		super(company, date);
-		this.price_earnings_ratio = price / earnings;
+		calculatePriceEarningsRatio(price, earnings);
+	}
+		
+	private void calculatePriceEarningsRatio(float price, float earnings) {
+		price_earnings_ratio = price / earnings;
+		return;
 	}
 
 	public float getPrice_earnings_ratio() {

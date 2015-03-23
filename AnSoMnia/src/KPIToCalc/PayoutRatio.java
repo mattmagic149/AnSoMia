@@ -16,9 +16,14 @@ public class PayoutRatio extends KeyPerformanceIndicator {
 		super();
 	}
 	
-	public PayoutRatio(SingleCompany company, float payout_ratio, Date date) {
+	public PayoutRatio(SingleCompany company, float dividends_per_share, float earnings_per_share , Date date) {
 		super(company, date);
-		this.payout_ratio = payout_ratio;
+		calculatePayoutRatio(dividends_per_share, earnings_per_share);
+	}
+		
+	private void calculatePayoutRatio(float dividends_per_share, float earnings_per_share) {
+		payout_ratio = dividends_per_share / earnings_per_share;
+		return;
 	}
 
 	public float getPayout_ratio() {

@@ -16,9 +16,14 @@ public class PriceCashflowRatio extends KeyPerformanceIndicator {
 		super();
 	}
 	
-	public PriceCashflowRatio(SingleCompany company, float price_cashflow_ratio, Date date) {
+	public PriceCashflowRatio(SingleCompany company, float price, float cashflow, Date date) {
 		super(company, date);
-		this.price_cashflow_ratio = price_cashflow_ratio;
+		calculatePriceCashflowRatio(price, cashflow);
+	}
+		
+	private void calculatePriceCashflowRatio(float price, float cashflow) {
+		price_cashflow_ratio = price / cashflow;
+		return;
 	}
 
 	public float getPrice_cashflow_ratio() {

@@ -16,9 +16,14 @@ public class ReturnOnEquityRatio extends KeyPerformanceIndicator  {
 		super();
 	}
 	
-	public ReturnOnEquityRatio(SingleCompany company, float return_on_equity, Date date) {
+	public ReturnOnEquityRatio(SingleCompany company, float net, float equity, Date date) {
 		super(company, date);
-		this.return_on_equity = return_on_equity;
+		calculateReturnOnEquityRatio(net, equity);
+	}
+		
+	private void calculateReturnOnEquityRatio(float net, float equity) {
+		return_on_equity = net / equity;
+		return;
 	}
 
 	public float getROE() {

@@ -16,9 +16,14 @@ public class PriceSalesRatio extends KeyPerformanceIndicator {
 		super();
 	}
 	
-	public PriceSalesRatio(SingleCompany company, float price_sales_ratio, Date date) {
+	public PriceSalesRatio(SingleCompany company, float price, float sales, int shares, Date date) {
 		super(company, date);
-		this.price_sales_ratio = price_sales_ratio;
+		calculatePriceSalesRatio(price, sales, shares);
+	}
+		
+	private void calculatePriceSalesRatio(float price, float sales, int shares) {
+		price_sales_ratio = price / (sales / shares);
+		return;
 	}
 
 	public float getPrice_sales_ratio() {
