@@ -22,7 +22,6 @@ import Support.HibernateSupport;
 public class DailyCrawler
 {
 	private String url = "https://de.finance.yahoo.com/";
-	private String query_page_ks = "ks?s=";
 	private String query_page_q = "q?s=";
 	private String company_ticker = "";
 	private String query_result = "&ql=1";
