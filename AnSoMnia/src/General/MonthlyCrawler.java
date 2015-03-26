@@ -27,6 +27,12 @@ public class MonthlyCrawler
 	private String company_ticker = "";
 	private Date date = new Date();
 	private List<SingleCompany> company_not_crawled = new ArrayList<SingleCompany>();
+	private static String[] business_year_kpis = {"Geschäftsjahresende", "Letztes Quartal"};
+	private static String[] profit_ratio_kpis = {"Gewinnspanne", "Operative Marge"};
+	private static String[] management_effectivity_kpis = {"Kapitalrentabilität", "Eigenkapitalrendite"};
+	private static String[] income_statement_kpis = {"EBITDA", "Umsatz (ttm)", "Umsatz pro Aktie (ttm)", "Jahresüberschuss"};
+	private static String[] financial_statement_kpis = {"Cash (gesamt)", "Gesamt-Cash", "Schulden (gesamt)", "Schulden/Equity"};
+	private static String[] cash_flow_kpis = {"Cash Flow aus betrieblichen Tätigkeiten", "Levered Free Cash Flow"};
 	
   public static void main( String[] args ) throws Exception
   {
@@ -39,13 +45,13 @@ public class MonthlyCrawler
 	  int timeout_counter = 0;
 	  boolean success = true;*/
 
-	  String kpi_tables_query_string = ".yfnc_datamodoutline1";
+	  String finance_highlights_query_string = ".yfnc_datamodoutline1";
 	  crawler.company_ticker = "APC";	  
 	  org.jsoup.nodes.Document doc = Jsoup.connect(crawler.url + crawler.query_page_ks + crawler.company_ticker + ".DE").get();
-	  Elements kpi_tables = doc.select(kpi_tables_query_string);
+	  Elements finance_highlights = doc.select(finance_highlights_query_string);
 	  
-	  for(int i = 0; i < kpi_tables.size(); i++) {
-		  findSubHeadlinesInTable(kpi_tables.get(i));
+	  for(int i = 0; i < finance_highlights.size(); i++) {
+		  findSubHeadlinesInTable(finance_highlights.get(i));
 	  }
 	  	  	 
   }
@@ -54,23 +60,17 @@ public class MonthlyCrawler
 	  Elements table_rows = element.select("tr tr");
 	  
 	  if(element.html().contains("Geschäftsjahr")) {
-		  String[] kpis_to_find = {"Geschäftsjahresende", "Letztes Quartal"};
-		  findKPIs(table_rows, kpis_to_find);
+		  findKPIs(table_rows, business_year_kpis);
 	  } else if(element.html().contains("Rentabilität")) {
-		  String[] kpis_to_find = {"Gewinnspanne", "Operative Marge"};
-		  findKPIs(table_rows, kpis_to_find);
+		  findKPIs(table_rows, profit_ratio_kpis);
 	  } else if(element.html().contains("Managementeffektivität")) {
-		  String[] kpis_to_find = {"Kapitalrentabilität", "Eigenkapitalrendite"};
-		  findKPIs(table_rows, kpis_to_find);
+		  findKPIs(table_rows, management_effectivity_kpis);
 	  } else if(element.html().contains("GuV")) {
-		  String[] kpis_to_find = {"EBITDA", "Umsatz (ttm)", "Umsatz pro Aktie (ttm)", "Jahresüberschuss"};
-		  findKPIs(table_rows, kpis_to_find);
+		  findKPIs(table_rows, income_statement_kpis);
 	  } else if(element.html().contains("Bilanz")) {
-		  String[] kpis_to_find = {"Cash (gesamt)", "Gesamt-Cash", "Schulden (gesamt)", "Schulden/Equity"};
-		  findKPIs(table_rows, kpis_to_find);
+		  findKPIs(table_rows, financial_statement_kpis);
 	  } else if(element.html().contains("Cash Flow")) {
-		  String[] kpis_to_find = {"Cash Flow aus betrieblichen Tätigkeiten", "Levered Free Cash Flow"};
-		  findKPIs(table_rows, kpis_to_find);
+		  findKPIs(table_rows, cash_flow_kpis);
 	  }
   }
   
