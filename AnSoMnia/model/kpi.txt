@@ -2,7 +2,7 @@ KPIs
 
 Benötigte Kennzahlen
 EPS - Earnings per share
-PER - Price earnings ratio
+PER - Price earnings ratio				
 PEG - Price earnings to growth ratio
 DPR - Dividend price ratio
 CFS - Cashflow per share
@@ -23,21 +23,21 @@ Sharpe	-
 
 Benötigte Daten:
 Täglich:
-Price
-Market capitalisation
+Price						Kurs
+Market capitalisation		Marktkap. (Intraday)
 
 Monatlich:
-Revenue
-Operating income
-Net Income
-Dividend
-Outstanding Shares
-Operating Cashflow
-Free Cashflow
-Working Capital
-Book Value
-Equity
-Debt
-Balance Sheet Total
-EBITDA
+Revenue						Umsatz (ttm)
+Operating income			GuV -> Operativer Gewinn
+Net Income					GuV -> Jahresüberschuss
+Dividend					Tatsächlicher Dividendenertrag (absolut, nicht in Prozent)
+Outstanding Shares			Auf Yahoo nicht vorhanden, kann aber über die Marktkapitalisierung und Kurs berechnet werden
+Operating Cashflow			Cash Flow aus laufender Geschäftstätigkeit
+Free Cashflow				Levered Free Cash Flow
+Working Capital				Nicht vorhanden
+Book Value					Indirekt über Equity / # Shares
+Equity						Indirekt über Schulden (gesamt) und Schulden/Equity (gesamt)
+Debt						Schulden (gesamt)
+Balance Sheet Total			Bilanz -> Anlagevermögen oder indirekt über Buchwert je Aktie
+EBITDA						EBITDA
 
