@@ -24,6 +24,8 @@ Sharpe	-
 Benötigte Daten:
 Täglich:
 Price						Kurs
+Buy Price					Briefkurs
+Sell Price					Geldkurs
 Market capitalisation		Marktkap. (Intraday)
 
 Monatlich:
