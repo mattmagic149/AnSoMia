@@ -21,23 +21,27 @@ Alpha 	-
 Beta 	-
 Sharpe	-
 
-Benötigte Daten:
+Daten:
 Täglich:
 Price						Kurs
-Market capitalisation		Marktkap. (Intraday)
+Buy Price					Briefkurs
+Sell Price					Geldkurs
 
 Monatlich:
-Revenue						Umsatz (ttm)
-Operating income			GuV -> Operativer Gewinn
-Net Income					GuV -> Jahresüberschuss
-Dividend					Tatsächlicher Dividendenertrag (absolut, nicht in Prozent)
-Outstanding Shares			Auf Yahoo nicht vorhanden, kann aber über die Marktkapitalisierung und Kurs berechnet werden
-Operating Cashflow			Cash Flow aus laufender Geschäftstätigkeit
-Free Cashflow				Levered Free Cash Flow
-Working Capital				Nicht vorhanden
-Book Value					Indirekt über Equity / # Shares
-Equity						Indirekt über Schulden (gesamt) und Schulden/Equity (gesamt)
-Debt						Schulden (gesamt)
-Balance Sheet Total			Bilanz -> Anlagevermögen oder indirekt über Buchwert je Aktie
-EBITDA						EBITDA
+Revenue						Umsatz
+Operating income			EBIT
+Net Income					Ergebnis nach Steuern
+Dividend					Dividende je Aktie
+Outstanding Shares			Aktien im Umlauf in Mio.
+Cashflow					Cash Flow
+Working Capital				Working Capital
+Book Value					Indirekt über Bilanzielles Eigenkapital / # Aktien im Umlauf (bzw. Eigenkapitalprognose)
+Equity Ratio				Eigenkapitalquote
+Equity						Bilanzielles Eigenkapital
+Debt						Summe Fremdkapital
+Balance Sheet Total			Aktiva oder Passiva
+Market capitalisation		Indirekt Kurs * # Aktien im Umlauf
+Gross Profit				Bruttoergebnis vom  Umsatz
+Liquidity					Liquidität 1./2./3. Grades
+Employee					# Mitarbeiter
 
