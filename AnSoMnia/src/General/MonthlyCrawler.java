@@ -1,12 +1,14 @@
 package General;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.javatuples.Pair;
 import org.jsoup.*;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -17,11 +19,14 @@ import javax.xml.parsers.*;
 
 import org.w3c.dom.Document;
 
+import KPIToCalc.*;
 import KPIToCrawl.*;
 import Support.HibernateSupport;
 
 public class MonthlyCrawler
 {
+	private Pair<String, ?> pair = Pair.with("", Alpha.class);
+	
 	private String url = "https://de.finance.yahoo.com/";
 	private String query_page_ks = "q/ks?s=";
 	private String company_ticker = "";
@@ -44,6 +49,17 @@ public class MonthlyCrawler
 	  int companies_size = companies.size();
 	  int timeout_counter = 0;
 	  boolean success = true;*/
+	  
+	// Load the Class. Must use fully qualified name here!
+	  Class clazz = Class.forName("KPIToCalc.Alpha");
+	  // I need an array as follows to describe the signature
+	  Class[] parameters = new Class[] {SingleCompany.class, float.class, Date.class}; //SingleCompany company, float alpha, Date date
+	  // Now I can get a reference to the right constructor
+	  Constructor constructor = clazz.getConstructor(parameters);
+	  // And I can use that Constructor to instantiate the class
+	  Object o = constructor.newInstance(new Object[] {null, (float)1.0, new Date()});
+	  // To prove it's really there...
+	  System.out.println(((Alpha)o).toString());
 
 	  String finance_highlights_query_string = ".yfnc_datamodoutline1";
 	  crawler.company_ticker = "APC";	  

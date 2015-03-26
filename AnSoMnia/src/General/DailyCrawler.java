@@ -126,7 +126,7 @@ public class DailyCrawler
 	  }
 
 	  if(buy_price > 0) {
-		  BuyPrice buy_price_obj = new BuyPrice(buy_price, company, this.date);
+		  MarketValues buy_price_obj = new MarketValues(buy_price, company, this.date);
 		  company.addBuyPrice(buy_price_obj);
 		  return true;
 	  } else {

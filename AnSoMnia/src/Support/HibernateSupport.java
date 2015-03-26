@@ -1,5 +1,7 @@
 package Support;
 
+import General.KeyPerformanceIndicators;
+import General.MarketValues;
 import General.SingleCompany;
 import Interface.KeyPerformanceIndicator;
 import KPIToCalc.Alpha;
@@ -68,30 +70,8 @@ public class HibernateSupport {
 		
 		//add all classes you want to annotate
 		configuration.addAnnotatedClass(SingleCompany.class);
-		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
-		
-		configuration.addAnnotatedClass(BuyPrice.class);
-		configuration.addAnnotatedClass(SellPrice.class);
-		configuration.addAnnotatedClass(StockPrice.class);
-		
-		configuration.addAnnotatedClass(Alpha.class);
-		configuration.addAnnotatedClass(Beta.class);
-		configuration.addAnnotatedClass(BookValuePerShare.class);
-		configuration.addAnnotatedClass(CashflowPerShare.class);
-		configuration.addAnnotatedClass(DebtRatio.class);
-		configuration.addAnnotatedClass(DividendPriceRatio.class);
-		configuration.addAnnotatedClass(EarningsPerShare.class);
-		configuration.addAnnotatedClass(EquityRatio.class);
-		configuration.addAnnotatedClass(GrossMargin.class);
-		configuration.addAnnotatedClass(OperatingMargin.class);
-		configuration.addAnnotatedClass(PayoutRatio.class);
-		configuration.addAnnotatedClass(PriceCashflowRatio.class);
-		configuration.addAnnotatedClass(PriceEarningsRatio.class);
-		configuration.addAnnotatedClass(PriceEarningsToGrowthRatio.class);
-		configuration.addAnnotatedClass(PriceSalesRatio.class);
-		configuration.addAnnotatedClass(PriceToBookValue.class);
-		configuration.addAnnotatedClass(ReturnOnEquityRatio.class);
-		configuration.addAnnotatedClass(Sharpe.class);
+		configuration.addAnnotatedClass(MarketValues.class);
+		configuration.addAnnotatedClass(KeyPerformanceIndicators.class);
 		
 		configuration.configure(configFile);
 		
