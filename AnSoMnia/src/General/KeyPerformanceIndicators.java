@@ -21,9 +21,43 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	private long id;
 	
 	private Date date;
-	private float stock_price;
-	private float bid_price;
-	private float ask_price;
+	private long earnings_per_share;
+	private long earnings_ratio;
+	private long earnings_to_growth_ratio;
+	private long price_ratio;
+	private long cashflow_per_share;
+	private long price_cash_flow_ratio;
+	private long price_to_book_value;
+	private long price_sales_ratio;
+	//private long equity_ratio;
+	private long debt_ratio;
+	private long return_on_equity;
+	private long payout_ratio;
+	private long gross_margin;
+	private long operating_margin;
+	private long book_value_per_share;
+	
+	private long alpha;
+	private long beta;
+	private long sharpe;
+	
+	private long revenue;
+	private long operating_income;
+	private long net_income;
+	private long dividend;
+	private long outstanding_shares;
+	private long cashflow;
+	private long working_capital;
+	private long book_value;
+	private long equity_ratio;
+	private long equity;
+	private long debt;
+	private long balance_sheet_total;
+	private long market_capitalisation;
+	private long gross_profit;
+	private long liquidity;
+	private long number_of_employees;
+	
 	
 	@ManyToOne
 	@JoinColumn(name="isin",updatable=false)
@@ -32,13 +66,7 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	public KeyPerformanceIndicators() {
 		this.date = new Date();
 	}
-	
-	public KeyPerformanceIndicators(float stock_price, float bid_price, float ask_price) {
-		this.date = new Date();
-		this.stock_price = stock_price;
-		this.bid_price = bid_price;
-		this.ask_price = ask_price;
-	}
+
 	
 	@Override
 	public boolean saveToDB() {
