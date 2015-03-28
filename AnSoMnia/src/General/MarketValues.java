@@ -21,6 +21,7 @@ public class MarketValues implements ISaveAndDelete {
 	private long id;
 	
 	private Date date;
+	private String market_place;
 	private float stock_price;
 	private float bid_price;
 	private float ask_price;
@@ -33,9 +34,10 @@ public class MarketValues implements ISaveAndDelete {
 		this.date = new Date();
 	}
 	
-	public MarketValues(SingleCompany company, float stock_price, float bid_price, float ask_price) {
+	public MarketValues(SingleCompany company, String market_place, float stock_price, float bid_price, float ask_price) {
 		this.date = new Date();
 		this.company = company;
+		this.market_place = market_place;
 		this.stock_price = stock_price;
 		this.bid_price = bid_price;
 		this.ask_price = ask_price;

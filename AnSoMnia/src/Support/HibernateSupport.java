@@ -3,26 +3,7 @@ package Support;
 import General.KeyPerformanceIndicators;
 import General.MarketValues;
 import General.SingleCompany;
-import Interface.KeyPerformanceIndicator;
-import KPIToCalc.Alpha;
-import KPIToCalc.Beta;
-import KPIToCalc.BookValuePerShare;
-import KPIToCalc.CashflowPerShare;
-import KPIToCalc.DebtRatio;
-import KPIToCalc.DividendPriceRatio;
-import KPIToCalc.EarningsPerShare;
-import KPIToCalc.EquityRatio;
-import KPIToCalc.GrossMargin;
-import KPIToCalc.OperatingMargin;
-import KPIToCalc.PayoutRatio;
-import KPIToCalc.PriceCashflowRatio;
-import KPIToCalc.PriceEarningsRatio;
-import KPIToCalc.PriceEarningsToGrowthRatio;
-import KPIToCalc.PriceSalesRatio;
-import KPIToCalc.PriceToBookValue;
-import KPIToCalc.ReturnOnEquityRatio;
-import KPIToCalc.Sharpe;
-import KPIToCrawl.*;
+
 
 import java.io.File;
 import java.util.ArrayList;

@@ -7,8 +7,6 @@ import javax.persistence.*;
 
 import Support.*;
 import Interface.*;
-import KPIToCalc.*;
-import KPIToCrawl.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -20,6 +18,8 @@ public class SingleCompany implements ISaveAndDelete {
 	private String company_name;
 	
 	private String ticker;
+	
+	private String wallstreet_query_string;
 	
 	
 	@OneToMany
@@ -66,6 +66,22 @@ public class SingleCompany implements ISaveAndDelete {
 		this.ticker = ticker;
 	}
 	
+	public String getWallstreetQueryString() {
+		return wallstreet_query_string;
+	}
+
+	public void setWallstreetQueryString(String wallstreet_query_string) {
+		this.wallstreet_query_string = wallstreet_query_string;
+	}
+	
+	public List<MarketValues> getMarketValuesList() {
+		return market_values_list;
+	}
+
+	public List<KeyPerformanceIndicators> getKpisList() {
+		return kpis_list;
+	}
+
 	public boolean addMarketValues(MarketValues values) {
 		boolean success = false;
 		if (this.market_values_list.add(values)){

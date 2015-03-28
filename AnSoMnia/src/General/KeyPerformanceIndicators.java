@@ -12,7 +12,6 @@ import javax.persistence.ManyToOne;
 
 import General.SingleCompany;
 import Interface.ISaveAndDelete;
-import KPIToCalc.Sharpe;
 import Support.HibernateSupport;
 
 @Entity
