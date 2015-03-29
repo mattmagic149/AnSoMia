@@ -21,14 +21,14 @@ public class CompanyIndexer
   {
 	  
 	  CompanyIndexer obj = new CompanyIndexer();
-	  try {
+	  /*try {
 		  System.out.println("Downloading CompanyCSV now...");
 		  obj.downloadCompanyCSV();
 	  } catch (IOException e) {
 		  System.out.println(e);
 	  }
 
-	  System.out.println("Downloading CompanyCSV complete!");
+	  System.out.println("Downloading CompanyCSV complete!");*/
 	  
 	  obj.filterAndAddToDB();
   }
@@ -56,6 +56,7 @@ public class CompanyIndexer
 		
 		String[] isin_filter = {"DE", "US", "AT"};
 		String[] instrument_group_filter = {"BOND", "EXCHANGE", "EB", "FOND", "EXTERNAL", "WARRANTS", "INSTRUMENTS"};
+		String[] company_name_filter = {"ETF", " ETN"," ETP"};
 	 
 		int counter = 0;
 		int row_counter = 0;
@@ -82,7 +83,9 @@ public class CompanyIndexer
 						company_instrument_group.contains(instrument_group_filter[4]) ||
 						company_instrument_group.contains(instrument_group_filter[5]) ||
 						company_instrument_group.contains(instrument_group_filter[6]) ||
-						company_name.contains("ETF")) {
+						company_name.contains(company_name_filter[0]) ||
+						company_name.contains(company_name_filter[1]) ||
+						company_name.contains(company_name_filter[2])) {
 					continue;
 				}
 				
