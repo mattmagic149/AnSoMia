@@ -57,9 +57,17 @@ public class CompanyIndexer
 		String[] isin_filter = {"DE", "US", "AT"};
 		String[] instrument_group_filter = {"BOND", "EXCHANGE", "EB", "FOND", "EXTERNAL", "WARRANTS", "INSTRUMENTS"};
 		String[] company_name_filter = {"ETF", " ETN"," ETP"};
+		String[] unwanted_companies_by_isin = {"DE0006867617", "DE0006867633", "DE0006949555", "DE000A0DQSE2",
+				"DE000A11QCU2", "DE000A12UMG0", "DE000A133ZW0", "DE000A13SVS8", "DE000A14KNC4", "DE000A1E89W7",
+				"DE000A1E8HF6", "DE000A1EK0H1", "DE000A1EK3B8", "DE000A1J7N89", "DE000A1PHDA3", "DE000A1TNEE3",
+				"DE000A1VFZ36", "DE000A1VFZ44", "DE000A1VFZ51", "DE000A1VFZ69", "DE000A1X3H41", "DE000A1X3N35",
+				"DE000A1YC4S6", "DE000A1YCMH2", "DE000A1YCN14", "DE000A1YDDX6", "DE000A1YDDY4", "DE000A1ZK3V1",
+				"DE000A1ZK3W9", "DE000A1ZLCP4", "DE000A1ZLCQ2", "DE000A1ZLZB5", "DE000A1ZLZC3", "DE000BC1C7J1",
+				"DE000BC1C7Q6", "DE000BC1C7R4", "DE000BC1DBG1", "DE000BC2KTT9", "DE000TUAG158", "US7476191041"};
 	 
 		int counter = 0;
 		int row_counter = 0;
+		boolean unwanted = false;
 		
 		try {
 			br = new BufferedReader(new FileReader(csv_file));
@@ -72,6 +80,17 @@ public class CompanyIndexer
 				company_isin = company[2];
 				company_ticker = company[5];
 				company_instrument_group = company[8];
+				
+				for(int i = 0; i < unwanted_companies_by_isin.length; i++) {
+					if(company_isin.contains(unwanted_companies_by_isin[i])) {
+						unwanted = true;
+						break;
+					}
+				}
+				if(unwanted) {
+					unwanted = false;
+					continue;
+				}
 				
 
 				if(company_isin.length() != 12 || company_name.length() < 3 ||
