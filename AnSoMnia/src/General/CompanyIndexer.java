@@ -21,14 +21,14 @@ public class CompanyIndexer
   {
 	  
 	  CompanyIndexer obj = new CompanyIndexer();
-	  /*try {
+	  try {
 		  System.out.println("Downloading CompanyCSV now...");
 		  obj.downloadCompanyCSV();
 	  } catch (IOException e) {
 		  System.out.println(e);
 	  }
 
-	  System.out.println("Downloading CompanyCSV complete!");*/
+	  System.out.println("Downloading CompanyCSV complete!");
 	  
 	  obj.filterAndAddToDB();
   }
@@ -56,7 +56,7 @@ public class CompanyIndexer
 		
 		String[] isin_filter = {"DE", "US", "AT"};
 		String[] instrument_group_filter = {"BOND", "EXCHANGE", "EB", "FOND", "EXTERNAL", "WARRANTS", "INSTRUMENTS"};
-		String[] company_name_filter = {"ETF", " ETN"," ETP"};
+		String[] company_name_filter = {"ETF", " ETN"," ETP", "ETC", "EXCH."};
 		String[] unwanted_companies_by_isin = {"DE0006867617", "DE0006867633", "DE0006949555", "DE000A0DQSE2",
 				"DE000A11QCU2", "DE000A12UMG0", "DE000A133ZW0", "DE000A13SVS8", "DE000A14KNC4", "DE000A1E89W7",
 				"DE000A1E8HF6", "DE000A1EK0H1", "DE000A1EK3B8", "DE000A1J7N89", "DE000A1PHDA3", "DE000A1TNEE3",
@@ -104,7 +104,9 @@ public class CompanyIndexer
 						company_instrument_group.contains(instrument_group_filter[6]) ||
 						company_name.contains(company_name_filter[0]) ||
 						company_name.contains(company_name_filter[1]) ||
-						company_name.contains(company_name_filter[2])) {
+						company_name.contains(company_name_filter[2]) ||
+						company_name.contains(company_name_filter[3]) ||
+						company_name.contains(company_name_filter[4])) {
 					continue;
 				}
 				

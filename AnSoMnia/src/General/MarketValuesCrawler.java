@@ -27,16 +27,18 @@ public class MarketValuesCrawler
 	private static String share_string = "/aktien/";
 	private static String market_value_string = "/kurse";
 	private static List<SingleCompany> company_not_crawled = new ArrayList<SingleCompany>();
+	private static String[] column_values = {"Handelsplatz", "Kurs", "Währung", "Bid", "Ask"};
+	private static String[] market_place_strings = {"Xetra", "Tradegate", "Frankfurt", "Berlin"};
 
 	
 	public static void main( String[] args ) throws Exception
 	{
-	 
 		
-
 		List<Criterion>  criterions = new ArrayList<Criterion>();
 		List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+		//SingleCompany cmp = HibernateSupport.readOneObjectByStringId(SingleCompany.class, "AT000000STR1");
 
+	
 		int companies_size = companies.size();
 		int timeout_counter = 0;
 		boolean success = true;
@@ -84,6 +86,7 @@ public class MarketValuesCrawler
 	
 	private static void crawlSingleCompany(SingleCompany company) throws IOException {
 		if(company == null) {
+			System.out.println("Company is NULL...");
 			return;
 		} else if(company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			String isin = company.getIsin();
@@ -103,102 +106,74 @@ public class MarketValuesCrawler
 	  
 		//System.out.println(response.select(".module").size());
 		
-		Elements modules = response.select(".module");
-		int length = modules.size();
+		Elements market_places = response.select("#main_content .container");
 		
-		for(int i = 0; i < length; i++) {
-			if(modules.get(i).html().contains("Deutsche Handelsplätze")) {
-				ArrayList<Integer> column_indexes = getColumnIndexes(modules.get(i).select("tr th"));
-				int row_index = getRowIndex(modules.get(i).select("tbody tr"));
-				float stock_price = -1;
-				float bid_price = -1;
-				float ask_price = -1;
-				String market_place = modules.get(i).select("tbody tr").get(row_index).child(0).child(0).child(0).child(0).child(0).html();
-								
-				if(!modules.get(i).select("tbody tr").get(row_index).child(column_indexes.get(0)).html().contains("-")) {
-					stock_price = Float.parseFloat(modules.get(i).select("tbody tr").get(row_index).child(column_indexes.get(0)).child(0).child(0).html().replace(".", "").replace(",", "."));
-				}
-				if(!modules.get(i).select("tbody tr").get(row_index).child(column_indexes.get(1)).html().contains("-")) {
-					bid_price = Float.parseFloat(modules.get(i).select("tbody tr").get(row_index).child(column_indexes.get(1)).child(0).child(0).html().replace(".", "").replace(",", "."));
-				}
-				if(!modules.get(i).select("tbody tr").get(row_index).child(column_indexes.get(2)).html().contains("-")) {
-					ask_price = Float.parseFloat(modules.get(i).select("tbody tr").get(row_index).child(column_indexes.get(2)).child(0).child(0).html().replace(".", "").replace(",", "."));
-				}
+		if(market_places.size() < 1) {
+			throw new IOException("no #main_content .container available...");
+		}
+		
+		
+		Element market_place = market_places.get(1);
+		int[] table_column_indecis = getTableColumnIndecis(market_place);
+		Element market_place_row = getMarketPlaceColumn(market_place);
+		if(market_place_row == null) {
+			throw new IOException("no #main_content .container available...");
+		}
+		
+		String market_place_string = market_place_row.child(table_column_indecis[0]).child(0).child(0).child(0).child(0).html();
+		String currency = market_place_row.child(table_column_indecis[2]).child(0).html();
+		float stock_price = -1;
+		float bid_price = -1;
+		float ask_price = -1;
 				
-				//System.out.println("StockPrice = " + stock_price + " BidPrice = " + bid_price + " AskPrice = " + ask_price);
-				//System.out.println(market_place);
-				MarketValues market_values = new MarketValues(company, market_place, stock_price, bid_price, ask_price);
-				company.addMarketValues(market_values);
-				
-				HibernateSupport.beginTransaction();
-				company.saveToDB();
-				HibernateSupport.commitTransaction();
-
+		if(!market_place_row.child(table_column_indecis[1]).child(0).html().contains("-")) {
+			stock_price = Float.parseFloat(market_place_row.child(table_column_indecis[1]).child(0).child(0).html().replace(".", "").replace(",", "."));
+		}
+		
+		if(!market_place_row.child(table_column_indecis[3]).child(0).html().contains("-")) {
+			bid_price = Float.parseFloat(market_place_row.child(table_column_indecis[3]).child(0).child(0).html().replace(".", "").replace(",", "."));
+		}
+		
+		if(!market_place_row.child(table_column_indecis[4]).child(0).html().contains("-")) {
+			ask_price = Float.parseFloat(market_place_row.child(table_column_indecis[4]).child(0).child(0).html().replace(".", "").replace(",", "."));
+		}
+		
+		MarketValues market_values = new MarketValues(company, market_place_string, stock_price, bid_price, ask_price, currency);
+		company.addMarketValues(market_values);
+		
+		HibernateSupport.beginTransaction();
+		company.saveToDB();
+		HibernateSupport.commitTransaction();
+		
+	}
+	
+	private static int[] getTableColumnIndecis(Element market_place) {
+		int[] ret = {-1,-1,-1,-1,-1};
+		
+		Elements table_header_columns = market_place.select(".module table").get(0).select("thead tr th");
+		
+		for(int i = 0; i < column_values.length; i++) {
+			for(int j = 0; j < table_header_columns.size(); j++) {
+				if(table_header_columns.get(j).html().equals(column_values[i])) {
+					ret[i] = j;
+				}
 			}
+		}
+		
+		return ret;
+	}
+	
+	private static Element getMarketPlaceColumn(Element market_place) {
+		
+		Elements tables = market_place.select("table");
+		for(int i = 0; i < market_place_strings.length; i++) {
 			
-		}
-	}
-	
-	private static int getRowIndex(Elements elements) {
-		int result = -1;
-		//System.out.println(elements.size());
-		
-		int length = elements.size();
-		for(int i = 0; i < length; i++) {
-			if(elements.get(i).html().contains("Xetra")) {
-				result = i;
+			if(tables.select("div:contains(" + market_place_strings[i] + ")").size() != 0) {
+				return tables.select("div:contains(" + market_place_strings[i] + ")").first().parent().parent();
 			}
 		}
 		
-		if(result == -1) {
-			for(int i = 0; i < length; i++) {
-				if(elements.get(i).html().contains("Frankfurt")) {
-					result = i;
-				}
-			}
-		}
-		
-		if(result == -1) {
-			for(int i = 0; i < length; i++) {
-				if(elements.get(i).html().contains("Berlin")) {
-					result = i;
-				}
-			}
-		}
-		
-		if(result == -1) {
-			///TODO throw exception
-		}
-		
-		return result;
-	}
-	
-	private static ArrayList<Integer> getColumnIndexes(Elements elements) {
-		ArrayList<Integer> result = new ArrayList<Integer>();
-		int length = elements.size();
-		for(int i = 0; i < length; i++) {
-			if(elements.get(i).html().contains("Kurs") && !elements.get(i).html().contains("Kurs Stück")) {
-				result.add(i);
-			}
-		}
-		
-		for(int i = 0; i < length; i++) {
-			if(elements.get(i).html().contains("Bid")) {
-				result.add(i);
-			}
-		}
-		
-		for(int i = 0; i < length; i++) {
-			if(elements.get(i).html().contains("Ask")) {
-				result.add(i);
-			}
-		}
-		
-		if(result.size() != 3) {
-			///TODO throw exception
-		}
-		
-		return result;
+		return null;
 	}
   
   

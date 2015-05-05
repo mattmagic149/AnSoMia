@@ -107,6 +107,13 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	public static <T> T readOneObjectByStringId(Class<?> classToRetrieve, String id) {
+		List<Criterion> criterions = new ArrayList<Criterion>();
+		criterions.add(Restrictions.idEq(id));
+		T result = readOneObject(classToRetrieve, criterions);
+		return result;
+	}
+	
 	public static <T> void deleteObject(T objectToDelete) {
 		getCurrentSession().delete(objectToDelete);
 	}

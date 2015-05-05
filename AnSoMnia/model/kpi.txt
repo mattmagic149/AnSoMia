@@ -30,18 +30,20 @@ Sell Price					Geldkurs
 
 Monatlich:
 Revenue						Umsatz
-Operating income			EBIT
+Operating income				EBIT
 Net Income					Ergebnis nach Steuern
-Dividend					Dividende je Aktie
-Outstanding Shares			Aktien im Umlauf in Mio.
 Cashflow					Cash Flow
-Working Capital				Working Capital
-Book Value Per Share		Indirekt über Bilanzielles Eigenkapital / # Aktien im Umlauf (bzw. Eigenkapitalprognose)
-Equity Ratio				Eigenkapitalquote
 Equity						Bilanzielles Eigenkapital
 Debt						Summe Fremdkapital
-Balance Sheet Total			Aktiva oder Passiva
-Market capitalisation		Indirekt Kurs * # Aktien im Umlauf
-Gross Profit				Bruttoergebnis vom  Umsatz
-Liquidity					Liquidität 1./2./3. Grades
+Balance Sheet Total				Aktiva oder Passiva
+Dividend					Dividende je Aktie
+Working Capital					Working Capital
+Equity Ratio					Eigenkapitalquote
 Employee					# Mitarbeiter
+Liquidity					Liquidität 1./2./3. Grades
+Gross Profit					Bruttoergebnis vom  Umsatz
+Outstanding Shares				Aktien im Umlauf in Mio.
+
+
+Book Value Per Share				Indirekt über Bilanzielles Eigenkapital / # Aktien im Umlauf (bzw. Eigenkapitalprognose)
+Market capitalisation				Indirekt Kurs * # Aktien im Umlauf

@@ -1,9 +1,13 @@
 package General;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.*;
+
+import org.javatuples.Pair;
+import org.jsoup.select.Elements;
 
 import Support.*;
 import Interface.*;
@@ -102,7 +106,21 @@ public class SingleCompany implements ISaveAndDelete {
 		return success;
 	}
 	
-	
+	public KeyPerformanceIndicators getKpisCorrespondingToYear(int year) {
+		Calendar new_year = Calendar.getInstance();
+		Calendar existing_year = Calendar.getInstance();
+		new_year.set(year, 1, 1);
+		
+		for(int i = 0; i < this.kpis_list.size(); i++) {
+			existing_year.setTime(this.kpis_list.get(i).getDate());
+
+			if(new_year.get(Calendar.YEAR) == existing_year.get(Calendar.YEAR)) {
+				return this.kpis_list.get(i);
+			}
+		}
+		
+		return null;
+	}
 	
 	
 	@Override

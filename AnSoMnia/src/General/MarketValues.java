@@ -25,6 +25,7 @@ public class MarketValues implements ISaveAndDelete {
 	private float stock_price;
 	private float bid_price;
 	private float ask_price;
+	private String currency;
 	
 	@ManyToOne
 	@JoinColumn(name="isin",updatable=false)
@@ -34,13 +35,14 @@ public class MarketValues implements ISaveAndDelete {
 		this.date = new Date();
 	}
 	
-	public MarketValues(SingleCompany company, String market_place, float stock_price, float bid_price, float ask_price) {
+	public MarketValues(SingleCompany company, String market_place, float stock_price, float bid_price, float ask_price, String currency) {
 		this.date = new Date();
 		this.company = company;
 		this.market_place = market_place;
 		this.stock_price = stock_price;
 		this.bid_price = bid_price;
 		this.ask_price = ask_price;
+		this.currency = currency;
 	}
 	
 	@Override

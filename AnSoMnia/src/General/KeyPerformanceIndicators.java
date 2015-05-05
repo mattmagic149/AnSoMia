@@ -1,6 +1,7 @@
 package General;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -20,59 +21,106 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE)
 	private long id;
+
 	private Date date;
 	
 	// KPIs to crawl
-	private float balance_sheet_total;
-	private float cashflow;
-	private float debt;
+	private long balance_sheet_total;
+	private long cashflow;
+	private long debt;
 	private float dividend;
-	private float equity;
-	private float gross_profit;
-	private float liquidity;
-	private float net_income;
-	private long number_of_employees;
-	private float operating_income;
+	private long equity;
+	private long gross_profit;
+	private float liquidity_1;
+	private float liquidity_2;
+	private float liquidity_3;
+	private long net_income;
+	private int number_of_employees;
+	private long operating_income;
 	private long outstanding_shares;
-	private float revenue;
-	private float working_capital;
+	private long revenue;
+	private long working_capital;
 	
 	// KPIs to calculate
-	//private float alpha;
-	//private float beta;
 	private float book_value_per_share;
 	private float cashflow_per_share;
 	private float debt_ratio;
-	private float dividend_price_ratio; ///TODO: class DividendPriceRatio existed, but it was not included in the kpi.txt file???
+	private float dividend_price_ratio;
 	private float earnings_per_share;
-	private float earnings_per_share_growth; // Is NOW included in kpi.txt (at the top, with all the other KPIs to calculate)
+	private float earnings_per_share_growth;
 	private float equity_ratio;
 	private float gross_margin;
 	private float market_capitalisation;
 	private float operating_margin;
 	private float payout_ratio;
 	private float price_cash_flow_ratio;
-	private float price_earnings_ratio; // Already is included in kpi.txt (at the top, with all the other KPIs to calculate)
-	private float price_earnings_to_growth_ratio; // Already is included in kpi.txt (at the top, with all the other KPIs to calculate)
+	private float price_earnings_ratio;
+	private float price_earnings_to_growth_ratio;
 	private float price_sales_ratio;
 	private float price_to_book_value;
 	private float return_on_equity;
 	//private float sharpe;
-	
-	// TODO: categorize or delete
-	private long earnings_ratio; // what da fuck is dat?
-	private long earnings_to_growth_ratio; // what da fuck is dat?
-	private long price_ratio; // what da fuck is dat?
+	//private float alpha;
+	//private float beta;
+
 
 	@ManyToOne
 	@JoinColumn(name="isin",updatable=false)
 	protected SingleCompany company;
 	
 	public KeyPerformanceIndicators() {
-		this.date = new Date();
+		//this.date = new Date();
+	}
+
+	public KeyPerformanceIndicators(int year, SingleCompany company) {
+		Calendar c = Calendar.getInstance();
+		c.set(year, 1, 1);
+		this.date = c.getTime();
+		this.company = company;
+		
+		this.balance_sheet_total = -1;
+		this.cashflow = -1;
+		this.debt = -1;
+		this.dividend = -1;
+		this.equity = -1;
+		this.gross_profit = -1;
+		this.liquidity_1 = -1;
+		this.liquidity_2 = -1;
+		this.liquidity_3 = -1;
+		this.net_income = -1;
+		this.number_of_employees = -1;	
+		this.operating_income = -1;
+		this.outstanding_shares = -1;
+		this.revenue = -1;
+		this.working_capital = -1;
+		
+		this.book_value_per_share = -1;
+		this.cashflow_per_share = -1;
+		this.debt_ratio = -1;
+		this.dividend_price_ratio = -1;
+		this.earnings_per_share = -1;
+		this.earnings_per_share_growth = -1;
+		this.equity_ratio = -1;
+		this.gross_margin = -1;
+		this.market_capitalisation = -1;
+		this.operating_margin = -1;
+		this.price_cash_flow_ratio = -1;
+		this.price_earnings_ratio = -1;
+		this.price_sales_ratio = -1;
+		this.price_to_book_value = -1;
+		this.return_on_equity = -1;
+		
+		// initialize derivative KPIs
+		this.payout_ratio = this.calculatePayoutRatio(dividend, earnings_per_share);
+		this.price_earnings_to_growth_ratio = this.calculatePriceEarningsToGrowthRatio(price_earnings_ratio, earnings_per_share_growth);
+		
+		//this.alpha = this.calculateAlpha(); 
+		//this.beta = this.calculateBeta(); 
+		//this.sharpe = this.calculateSharpe();
+		
 	}
 	
-	public KeyPerformanceIndicators(long total, long equity, long cashflow, long debt, long dividend, long gross_profit,long liquidity,
+	/*public KeyPerformanceIndicators(long total, long equity, long cashflow, long debt, long dividend, long gross_profit,long liquidity,
 			long net_income, int number_of_employees, long operating_income, int shares, long revenue, long working_capital, long price, long past_net_income) {
 		
 		// initialize date
@@ -113,27 +161,86 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		// initialize derivative KPIs
 		this.payout_ratio = this.calculatePayoutRatio(dividend, earnings_per_share);
 		this.price_earnings_to_growth_ratio = this.calculatePriceEarningsToGrowthRatio(price_earnings_ratio, earnings_per_share_growth);
-		/*
-		 * this.alpha = this.calculateAlpha(); 
-		 * this.beta = this.calculateBeta(); 
-		 * this.sharpe = this.calculateSharpe();
-		 */
+		
+		//this.alpha = this.calculateAlpha(); 
+		//this.beta = this.calculateBeta(); 
+		//this.sharpe = this.calculateSharpe();
+		 
+		
+	}*/
+	
+	public void setProfileValues(float dividend, float equity_ratio, 
+			float liquidity_1, float liquidity_2, float liquidity_3, int number_of_employees, 
+			long outstanding_shares, long working_capital) {
+		
+		if(dividend != -1)
+			this.dividend = dividend;
+		
+		if(equity_ratio != -1)
+			this.equity_ratio = equity_ratio;
+		
+		if(liquidity_1 != -1)
+			this.liquidity_1 = liquidity_1;
+		
+		if(liquidity_2 != -1)
+			this.liquidity_2 = liquidity_2;
+		
+		if(liquidity_3 != -1)
+			this.liquidity_3 = liquidity_3;
+		
+		if(number_of_employees != -1)
+			this.number_of_employees = number_of_employees;
+		
+		if(outstanding_shares != -1)
+			this.outstanding_shares = outstanding_shares;
+		
+		if(working_capital != -1)
+			this.working_capital = working_capital;
 		
 	}
 	
-	/*
+	public void setBalanceSheetValues(long revenue, long operating_income, long net_income,
+			long cashflow, long equity, long debt, long balance_sheet_total, long gross_profit) {
+		
+		if(revenue != -1)
+			this.revenue = revenue;
+		
+		if(operating_income != -1)
+			this.operating_income = operating_income;
+		
+		if(net_income != -1)
+			this.net_income = net_income;
+		
+		if(cashflow != -1)
+			this.cashflow = cashflow;
+
+		if(equity != -1)
+			this.equity = equity;
+		
+		if(debt != -1)
+			this.debt = debt;
+		
+		if(balance_sheet_total != -1)
+			this.balance_sheet_total = balance_sheet_total;
+		
+		if(gross_profit != -1)
+			this.gross_profit = gross_profit;
+		
+	}
+	
+	public void setAllValuesIfNotSet() {
+		
+	}
+	
 	// TODO: Implement Alpha
 	private float calculateAlpha() {
 		return -1.0f;
 	}
-	*/
 	
-	/*
 	// TODO: Implement Beta
 	private float calculateBeta() {
 		return -1.0f;
 	}
-	*/
 	
 	private float calculateBookValuePerShare(float book_value, int shares) {
 		return (book_value / shares);
@@ -250,6 +357,10 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		System.out.println(test.sharpe);
 	}
 	*/
+	
+	public Date getDate() {
+		return date;
+	}
 	
 	@Override
 	public boolean saveToDB() {
