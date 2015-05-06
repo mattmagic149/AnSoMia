@@ -122,6 +122,15 @@ public class SingleCompany implements ISaveAndDelete {
 		return null;
 	}
 	
+	public void updateKpisToCalculate() {
+		for(int i = 0; i < this.kpis_list.size(); i++) {
+			kpis_list.get(i).updateKpisToCalculate();
+			HibernateSupport.beginTransaction();
+			kpis_list.get(i).saveToDB();
+			HibernateSupport.commitTransaction();
+		}
+	}
+	
 	
 	@Override
 	public boolean saveToDB() {

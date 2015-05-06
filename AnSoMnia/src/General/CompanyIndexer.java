@@ -21,14 +21,14 @@ public class CompanyIndexer
   {
 	  
 	  CompanyIndexer obj = new CompanyIndexer();
-	  try {
+	  /*try {
 		  System.out.println("Downloading CompanyCSV now...");
 		  obj.downloadCompanyCSV();
 	  } catch (IOException e) {
 		  System.out.println(e);
 	  }
 
-	  System.out.println("Downloading CompanyCSV complete!");
+	  System.out.println("Downloading CompanyCSV complete!");*/
 	  
 	  obj.filterAndAddToDB();
   }

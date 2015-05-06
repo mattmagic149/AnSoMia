@@ -99,6 +99,8 @@ public class KPICrawler
 
 		}
 		
+		company.updateKpisToCalculate();
+		
 		
 	}
 	

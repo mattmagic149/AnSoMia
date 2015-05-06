@@ -59,9 +59,9 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	private float price_sales_ratio;
 	private float price_to_book_value;
 	private float return_on_equity;
-	//private float sharpe;
-	//private float alpha;
-	//private float beta;
+	private float sharpe;
+	private float alpha;
+	private float beta;
 
 
 	@ManyToOne
@@ -111,63 +111,41 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		this.return_on_equity = -1;
 		
 		// initialize derivative KPIs
-		this.payout_ratio = this.calculatePayoutRatio(dividend, earnings_per_share);
-		this.price_earnings_to_growth_ratio = this.calculatePriceEarningsToGrowthRatio(price_earnings_ratio, earnings_per_share_growth);
+		this.payout_ratio = -1;
+		this.price_earnings_to_growth_ratio = -1;
 		
-		//this.alpha = this.calculateAlpha(); 
-		//this.beta = this.calculateBeta(); 
-		//this.sharpe = this.calculateSharpe();
+		this.alpha = -1; 
+		this.beta = -1; 
+		this.sharpe = -1;
 		
 	}
 	
-	/*public KeyPerformanceIndicators(long total, long equity, long cashflow, long debt, long dividend, long gross_profit,long liquidity,
-			long net_income, int number_of_employees, long operating_income, int shares, long revenue, long working_capital, long price, long past_net_income) {
-		
-		// initialize date
-		this.date = new Date();
-		
-		// initialize crawled KPIs
-		this.balance_sheet_total = total;
-		this.cashflow = cashflow;
-		this.debt = debt;
-		this.dividend = dividend;
-		this.equity = equity;
-		this.gross_profit = gross_profit;
-		this.liquidity = liquidity;
-		this.net_income = net_income;
-		this.number_of_employees = number_of_employees;	
-		this.operating_income = operating_income;
-		this.outstanding_shares = shares;
-		this.revenue = revenue;
-		this.working_capital = working_capital;
-		
+	
+	public void updateKpisToCalculate() {
 		// initialize directly calculated KPIs
-		this.book_value_per_share = this.calculateBookValuePerShare(equity, shares);
-		this.cashflow_per_share = this.calculateCashflowPerShare(cashflow, shares);
-		this.debt_ratio = this.calculateDebtRatio(debt, total);
-		this.dividend_price_ratio = this.calculateDividendPriceRatio(dividend, price);
-		this.earnings_per_share = this.calculateEarningsPerShare(net_income, shares);
-		this.earnings_per_share_growth = this.calculateEarningsPerShareGrowth(net_income, past_net_income);
-		this.equity_ratio = this.calculateEquityRatio(equity, total);
-		this.gross_margin = this.calculateGrossMargin(gross_profit, revenue);
-		this.market_capitalisation = this.calculateMarketCapitalization(price, shares); 
-		this.operating_margin = this.calculateOperatingMargin(operating_income, revenue);
-		this.price_cash_flow_ratio = this.calculatePriceCashflowRatio(price, cashflow);
-		this.price_earnings_ratio = this.calculatePriceEarningsRatio(price, net_income);
-		this.price_sales_ratio = this.calculatePriceSalesRatio(price, revenue, shares);
-		this.price_to_book_value = this.calculatePriceToBookValue(price, equity, shares);
-		this.return_on_equity = this.calculateReturnOnEquityRatio(net_income, equity);
-		
-		// initialize derivative KPIs
-		this.payout_ratio = this.calculatePayoutRatio(dividend, earnings_per_share);
-		this.price_earnings_to_growth_ratio = this.calculatePriceEarningsToGrowthRatio(price_earnings_ratio, earnings_per_share_growth);
-		
+		this.book_value_per_share = this.calculateBookValuePerShare(this.equity, this.outstanding_shares);
+		this.cashflow_per_share = this.calculateCashflowPerShare(this.cashflow, this.outstanding_shares);
+		this.debt_ratio = this.calculateDebtRatio(this.debt, this.working_capital);
+		//this.dividend_price_ratio = this.calculateDividendPriceRatio(this.dividend, price);
+		this.earnings_per_share = this.calculateEarningsPerShare(this.net_income, this.outstanding_shares);
+		//this.earnings_per_share_growth = this.calculateEarningsPerShareGrowth(this.net_income, past_net_income);
+		this.equity_ratio = this.calculateEquityRatio(this.equity, this.working_capital);
+		this.gross_margin = this.calculateGrossMargin(this.gross_profit, revenue);
+		//this.market_capitalisation = this.calculateMarketCapitalization(price, this.outstanding_shares); 
+		this.operating_margin = this.calculateOperatingMargin(this.operating_income, this.revenue);
+		//this.price_cash_flow_ratio = this.calculatePriceCashflowRatio(price, this.cashflow);
+		//this.price_earnings_ratio = this.calculatePriceEarningsRatio(price, this.net_income);
+		//this.price_sales_ratio = this.calculatePriceSalesRatio(price, this.revenue, this.outstanding_shares);
+		//this.price_to_book_value = this.calculatePriceToBookValue(price, this.equity, this.outstanding_shares);
+		this.return_on_equity = this.calculateReturnOnEquityRatio(this.net_income, this.equity);
+				
+		this.payout_ratio = this.calculatePayoutRatio(this.dividend, this.earnings_per_share);
+		this.price_earnings_to_growth_ratio = this.calculatePriceEarningsToGrowthRatio(this.price_earnings_ratio, this.earnings_per_share_growth);
+				
 		//this.alpha = this.calculateAlpha(); 
 		//this.beta = this.calculateBeta(); 
 		//this.sharpe = this.calculateSharpe();
-		 
-		
-	}*/
+	}
 	
 	public void setProfileValues(float dividend, float equity_ratio, 
 			float liquidity_1, float liquidity_2, float liquidity_3, int number_of_employees, 
@@ -242,48 +220,48 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		return -1.0f;
 	}
 	
-	private float calculateBookValuePerShare(float book_value, int shares) {
-		return (book_value / shares);
+	private float calculateBookValuePerShare(long book_value, long shares) {
+		return ((float)book_value / shares);
 	}
 
-	private float calculateCashflowPerShare(float cashflow, int shares) {
-		return (cashflow / shares);
+	private float calculateCashflowPerShare(long cashflow, long shares) {
+		return ((float)cashflow / shares);
 	}
 	
-	private float calculateDebtRatio(float debt, float total) {
-		return (debt / total);
+	private float calculateDebtRatio(long debt, long total) {
+		return ((float)debt / total);
 	}
 	
 	private float calculateDividendPriceRatio(float dividend, float price) {
-		return (dividend / price);
+		return ((float)dividend / price);
 	}
 	
-	private float calculateEarningsPerShare(float earnings, int shares) {
-		return (earnings / shares);
+	private float calculateEarningsPerShare(long earnings, long shares) {
+		return ((float)earnings / shares);
 	}
 	
 	private float calculateEarningsPerShareGrowth(float current_earnings, float past_earnings) {
-		return (current_earnings / past_earnings);
+		return ((float)current_earnings / past_earnings);
 	}
 	
-	private float calculateEquityRatio(float equity, float total) {
-		return (equity / total);
+	private float calculateEquityRatio(long equity, long total) {
+		return ((float)equity / total);
 	}
 	
-	private float calculateGrossMargin(float gross, float sales) {
-		return (gross / sales);
+	private float calculateGrossMargin(long gross, long sales) {
+		return ((float)gross / sales);
 	}
 	
 	private float calculateMarketCapitalization(float price, int shares) {
 		return (price * shares);
 	}
 	
-	private float calculateOperatingMargin(float operating_income, float sales) {
-		return (operating_income / sales);
+	private float calculateOperatingMargin(long operating_income, long sales) {
+		return ((float)operating_income / sales);
 	}
 	
 	private float calculatePayoutRatio(float dividends_per_share, float earnings_per_share) {
-		return (dividends_per_share / earnings_per_share);
+		return ((float)dividends_per_share / earnings_per_share);
 	}
 	
 	private float calculatePriceCashflowRatio(float price, float cashflow) {
@@ -306,8 +284,9 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		return (price / (book_value / shares));
 	}
 	
-	private float calculateReturnOnEquityRatio(float net, float equity) {
-		return (net / equity);
+	private float calculateReturnOnEquityRatio(long net, long equity) {
+		System.out.println("return_on_equity = " + ((float)net / equity));
+		return ((float)net / equity);
 	}
 	
 	/*
