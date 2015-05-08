@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,7 +36,7 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	private float liquidity_2;
 	private float liquidity_3;
 	private long net_income;
-	private int number_of_employees;
+	private long number_of_employees;
 	private long operating_income;
 	private long outstanding_shares;
 	private long revenue;
@@ -57,7 +58,9 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	private float price_earnings_ratio;
 	private float price_earnings_to_growth_ratio;
 	private float price_sales_ratio;
+	
 	private float price_to_book_value;
+	
 	private float return_on_equity;
 	private float sharpe;
 	private float alpha;
@@ -78,45 +81,45 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		this.date = c.getTime();
 		this.company = company;
 		
-		this.balance_sheet_total = -1;
-		this.cashflow = -1;
-		this.debt = -1;
-		this.dividend = -1;
-		this.equity = -1;
-		this.gross_profit = -1;
-		this.liquidity_1 = -1;
-		this.liquidity_2 = -1;
-		this.liquidity_3 = -1;
-		this.net_income = -1;
-		this.number_of_employees = -1;	
-		this.operating_income = -1;
-		this.outstanding_shares = -1;
-		this.revenue = -1;
-		this.working_capital = -1;
+		this.balance_sheet_total = Long.MIN_VALUE;
+		this.cashflow = Long.MIN_VALUE;
+		this.debt = Long.MIN_VALUE;
+		this.dividend = Float.MIN_VALUE;
+		this.equity = Long.MIN_VALUE;
+		this.gross_profit = Long.MIN_VALUE;
+		this.liquidity_1 = Float.MIN_VALUE;
+		this.liquidity_2 = Float.MIN_VALUE;
+		this.liquidity_3 = Float.MIN_VALUE;
+		this.net_income = Long.MIN_VALUE;
+		this.number_of_employees = Long.MIN_VALUE;	
+		this.operating_income = Long.MIN_VALUE;
+		this.outstanding_shares = Long.MIN_VALUE;
+		this.revenue = Long.MIN_VALUE;
+		this.working_capital = Long.MIN_VALUE;
 		
-		this.book_value_per_share = -1;
-		this.cashflow_per_share = -1;
-		this.debt_ratio = -1;
-		this.dividend_price_ratio = -1;
-		this.earnings_per_share = -1;
-		this.earnings_per_share_growth = -1;
-		this.equity_ratio = -1;
-		this.gross_margin = -1;
-		this.market_capitalisation = -1;
-		this.operating_margin = -1;
-		this.price_cash_flow_ratio = -1;
-		this.price_earnings_ratio = -1;
-		this.price_sales_ratio = -1;
-		this.price_to_book_value = -1;
-		this.return_on_equity = -1;
+		this.book_value_per_share = Float.MIN_VALUE;
+		this.cashflow_per_share = Float.MIN_VALUE;
+		this.debt_ratio = Float.MIN_VALUE;
+		this.dividend_price_ratio = Float.MIN_VALUE;
+		this.earnings_per_share = Float.MIN_VALUE;
+		this.earnings_per_share_growth = Float.MIN_VALUE;
+		this.equity_ratio = Float.MIN_VALUE;
+		this.gross_margin = Float.MIN_VALUE;
+		this.market_capitalisation = Float.MIN_VALUE;
+		this.operating_margin = Float.MIN_VALUE;
+		this.price_cash_flow_ratio = Float.MIN_VALUE;
+		this.price_earnings_ratio = Float.MIN_VALUE;
+		this.price_sales_ratio = Float.MIN_VALUE;
+		this.price_to_book_value = Float.MIN_VALUE;
+		this.return_on_equity = Long.MIN_VALUE;
 		
 		// initialize derivative KPIs
-		this.payout_ratio = -1;
-		this.price_earnings_to_growth_ratio = -1;
+		this.payout_ratio = Float.MIN_VALUE;
+		this.price_earnings_to_growth_ratio = Float.MIN_VALUE;
 		
-		this.alpha = -1; 
-		this.beta = -1; 
-		this.sharpe = -1;
+		this.alpha = Float.MIN_VALUE;
+		this.beta = Float.MIN_VALUE;
+		this.sharpe = Float.MIN_VALUE;
 		
 	}
 	
@@ -148,22 +151,22 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	}
 	
 	public void setProfileValues(float dividend, float equity_ratio, 
-			float liquidity_1, float liquidity_2, float liquidity_3, int number_of_employees, 
+			float liquidity_1, float liquidity_2, float liquidity_3, long number_of_employees, 
 			long outstanding_shares, long working_capital) {
 		
-		if(dividend != -1)
+		if(dividend != Float.MIN_VALUE)
 			this.dividend = dividend;
 		
-		if(equity_ratio != -1)
+		if(equity_ratio != Float.MIN_VALUE)
 			this.equity_ratio = equity_ratio;
 		
-		if(liquidity_1 != -1)
+		if(liquidity_1 != Float.MIN_VALUE)
 			this.liquidity_1 = liquidity_1;
 		
-		if(liquidity_2 != -1)
+		if(liquidity_2 != Float.MIN_VALUE)
 			this.liquidity_2 = liquidity_2;
 		
-		if(liquidity_3 != -1)
+		if(liquidity_3 != Float.MIN_VALUE)
 			this.liquidity_3 = liquidity_3;
 		
 		if(number_of_employees != -1)
@@ -180,28 +183,28 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	public void setBalanceSheetValues(long revenue, long operating_income, long net_income,
 			long cashflow, long equity, long debt, long balance_sheet_total, long gross_profit) {
 		
-		if(revenue != -1)
+		if(revenue != Long.MIN_VALUE)
 			this.revenue = revenue;
 		
-		if(operating_income != -1)
+		if(operating_income != Long.MIN_VALUE)
 			this.operating_income = operating_income;
 		
-		if(net_income != -1)
+		if(net_income != Long.MIN_VALUE)
 			this.net_income = net_income;
 		
-		if(cashflow != -1)
+		if(cashflow != Long.MIN_VALUE)
 			this.cashflow = cashflow;
 
-		if(equity != -1)
+		if(equity != Long.MIN_VALUE)
 			this.equity = equity;
 		
-		if(debt != -1)
+		if(debt != Long.MIN_VALUE)
 			this.debt = debt;
 		
-		if(balance_sheet_total != -1)
+		if(balance_sheet_total != Long.MIN_VALUE)
 			this.balance_sheet_total = balance_sheet_total;
 		
-		if(gross_profit != -1)
+		if(gross_profit != Long.MIN_VALUE)
 			this.gross_profit = gross_profit;
 		
 	}
@@ -212,23 +215,32 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	
 	// TODO: Implement Alpha
 	private float calculateAlpha() {
-		return -1.0f;
+		return Float.MIN_VALUE;
 	}
 	
 	// TODO: Implement Beta
 	private float calculateBeta() {
-		return -1.0f;
+		return Float.MIN_VALUE;
 	}
 	
 	private float calculateBookValuePerShare(long book_value, long shares) {
+		if(book_value == Long.MIN_VALUE || shares == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)book_value / shares);
 	}
 
 	private float calculateCashflowPerShare(long cashflow, long shares) {
+		if(cashflow == Long.MIN_VALUE || shares == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)cashflow / shares);
 	}
 	
 	private float calculateDebtRatio(long debt, long total) {
+		if(debt == Long.MIN_VALUE || total == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)debt / total);
 	}
 	
@@ -237,6 +249,9 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	}
 	
 	private float calculateEarningsPerShare(long earnings, long shares) {
+		if(earnings == Long.MIN_VALUE || shares == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)earnings / shares);
 	}
 	
@@ -245,22 +260,34 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	}
 	
 	private float calculateEquityRatio(long equity, long total) {
+		if(equity == Long.MIN_VALUE || total == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)equity / total);
 	}
 	
 	private float calculateGrossMargin(long gross, long sales) {
+		if(gross == Long.MIN_VALUE || sales == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)gross / sales);
 	}
 	
-	private float calculateMarketCapitalization(float price, int shares) {
+	private float calculateMarketCapitalization(float price, long shares) {
 		return (price * shares);
 	}
 	
 	private float calculateOperatingMargin(long operating_income, long sales) {
+		if(operating_income == Long.MIN_VALUE || sales == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)operating_income / sales);
 	}
 	
 	private float calculatePayoutRatio(float dividends_per_share, float earnings_per_share) {
+		if(dividends_per_share == Float.MIN_VALUE || earnings_per_share == Float.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)dividends_per_share / earnings_per_share);
 	}
 	
@@ -273,19 +300,24 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	}
 	
 	private float calculatePriceEarningsToGrowthRatio(float price_earnings_ratio, float eps_growth) {
+		if(price_earnings_ratio == Float.MIN_VALUE || eps_growth == Float.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return (price_earnings_ratio / eps_growth);
 	}
 	
-	private float calculatePriceSalesRatio(float price, float sales, int shares) {
+	private float calculatePriceSalesRatio(float price, float sales, long shares) {
 		return (price / (sales / shares));
 	}
 	
-	private float calculatePriceToBookValue(float price, float book_value, int shares) {
+	private float calculatePriceToBookValue(float price, float book_value, long shares) {
 		return (price / (book_value / shares));
 	}
 	
 	private float calculateReturnOnEquityRatio(long net, long equity) {
-		System.out.println("return_on_equity = " + ((float)net / equity));
+		if(net == Long.MIN_VALUE || equity == Long.MIN_VALUE)
+			return Float.MIN_VALUE;
+		
 		return ((float)net / equity);
 	}
 	
