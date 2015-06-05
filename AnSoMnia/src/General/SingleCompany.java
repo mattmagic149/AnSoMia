@@ -25,6 +25,12 @@ public class SingleCompany implements ISaveAndDelete {
 	
 	private String wallstreet_query_string;
 	
+	private String wkn;
+		
+	private String valor;
+	
+	private String finance_query_string;
+	
 	
 	@OneToMany
 	@JoinColumn(name="isin")
@@ -78,6 +84,14 @@ public class SingleCompany implements ISaveAndDelete {
 		this.wallstreet_query_string = wallstreet_query_string;
 	}
 	
+	public String getFinanceQueryString() {
+		return finance_query_string;
+	}
+
+	public void setFinanceQueryString(String finance_query_string) {
+		this.finance_query_string = finance_query_string;
+	}
+	
 	public List<MarketValues> getMarketValuesList() {
 		return market_values_list;
 	}
@@ -86,6 +100,22 @@ public class SingleCompany implements ISaveAndDelete {
 		return kpis_list;
 	}
 
+	public String getWkn() {
+		return wkn;
+	}
+
+	public void setWkn(String wkn) {
+		this.wkn = wkn;
+	}
+
+	public String getValor() {
+		return valor;
+	}
+
+	public void setValor(String valor) {
+		this.valor = valor;
+	}
+	
 	public boolean addMarketValues(MarketValues values) {
 		boolean success = false;
 		if (this.market_values_list.add(values)){
