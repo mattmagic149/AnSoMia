@@ -273,11 +273,11 @@ public class CompanyIndexer
 static public boolean crawlCompanyFinanceInformation(SingleCompany company) throws IOException {
   		  		
   		String isin = company.getIsin();
-		Document response = Jsoup.connect("http://www.finanzen.net/ajax/SearchController_Suggest?max_results=1&Keywords=" + isin).data("query", "Java")
-				  .userAgent("Mozilla")
+		Document response = Jsoup.connect("http://www.finanzen.net/ajax/SearchController_Suggest?max_results=1&Keywords=" + isin)//.data("query", "Java")
+				  //.userAgent("Mozilla")
 				  .timeout(3000)
 				  .get();
-
+		
 		String tmp = response.select("body").first().toString().replace("\n", "");
 		tmp = tmp.replaceAll(".*new Array[(](.+?)[)][)].*", "$1");
 		String tmp_array[] = tmp.split(", ");
@@ -285,7 +285,6 @@ static public boolean crawlCompanyFinanceInformation(SingleCompany company) thro
 		tmp_array = tmp.split("\\|");
 		company.setFinanceQueryString(tmp_array[0]);
 		
-  		
   		return true;
   	}
   
