@@ -5,38 +5,55 @@ import org.jsoup.*;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.Job;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import General.KeyPerformanceIndicators;
 import General.SingleCompany;
 import Support.HibernateSupport;
 
-public class WallStreetOnlineCrawler extends KPICrawler
+public class WallStreetOnlineCrawler extends Crawler implements Job
 {
 	private static String wall_street_url = "http://www.wallstreet-online.de";
 	private static String share_string = "/aktien/";
 	private static String balance_sheet_string = "/bilanz";
 	private static String company_profile = "/unternehmensprofil";
 	
-	public static void main( String[] args ) throws Exception
-	{
-		WallStreetOnlineCrawler fc = new WallStreetOnlineCrawler();
-		fc.execute();
+	public WallStreetOnlineCrawler() {
+		this.name = "wallstreet_crawler";
+		System.out.println("WallStreetOnlineCrawler ctor called");
 	}
 	
-	public boolean crawlKpis(SingleCompany company) throws IOException {
-		System.out.println("WallStreetOnlineCrawler");
-
+	@Override	
+	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		WallStreetOnlineCrawler wsc = new WallStreetOnlineCrawler();
+		try {
+			wsc.startCrawling();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected boolean crawlKpis(SingleCompany company) {
 		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;
 		}
 		
-		Response response_abs = Jsoup.connect(wall_street_url + share_string + 
-				company.getWallstreetQueryString() + balance_sheet_string).execute();
-		
-		
+		Response response_abs;
+		try {
+			response_abs = Jsoup.connect(wall_street_url + share_string + 
+					company.getWallstreetQueryString() + balance_sheet_string).execute();
+		} catch(SocketTimeoutException e) {
+			return false;
+		} catch(IOException e) {
+			return false;
+		}
+			
 		Element response;
 		Elements data_tables;
 		Elements table_header;
@@ -47,7 +64,11 @@ public class WallStreetOnlineCrawler extends KPICrawler
 				company.getWallstreetQueryString() + balance_sheet_string)) {
 			
 
-			response = response_abs.parse();
+			try {
+				response = response_abs.parse();
+			} catch (IOException e) {
+				return false;
+			}
 			data_tables = response.select("#main_content .t-data");
 			if(data_tables.size() >= 1) {
 				
@@ -75,15 +96,25 @@ public class WallStreetOnlineCrawler extends KPICrawler
 
 		
 		
+		try {
+			response_abs = Jsoup.connect(wall_street_url + share_string + 
+					company.getWallstreetQueryString() + company_profile).execute();
+		} catch(SocketTimeoutException e) {
+			return false;
+		} catch(IOException e) {
+			return false;
+		}
 		
-		response_abs = Jsoup.connect(wall_street_url + share_string + 
-				company.getWallstreetQueryString() + company_profile).execute();
 		
 		if(response_abs.url().toString().equals(wall_street_url + share_string + 
 				company.getWallstreetQueryString() + company_profile)) {
 			
 
-			response = response_abs.parse();
+			try {
+				response = response_abs.parse();
+			} catch (IOException e) {
+				return false;
+			}
 			
 			data_tables = response.select("#main_content .t-data");
 			if(data_tables.size() >= 1) {
@@ -115,7 +146,7 @@ public class WallStreetOnlineCrawler extends KPICrawler
 		
 	}
 	
-	public boolean updateProfileKpis(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
+	private boolean updateProfileKpis(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
 		KeyPerformanceIndicators indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
@@ -184,7 +215,7 @@ public class WallStreetOnlineCrawler extends KPICrawler
 		return true;
 	}
 	
-	public boolean updateBalanceSheetValues(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
+	private boolean updateBalanceSheetValues(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
 		KeyPerformanceIndicators indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());

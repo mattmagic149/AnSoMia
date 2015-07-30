@@ -7,32 +7,53 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 import General.KeyPerformanceIndicators;
 import General.SingleCompany;
 import Support.HibernateSupport;
 
-public class FinanzenCrawler extends KPICrawler
+public class FinanzenCrawler extends Crawler implements Job
 {
 	private static String finance_url = "http://www.finanzen.at";
 	private static String profit_and_loss_string = "/bilanz_guv/";
 	
-	public static void main( String[] args ) throws Exception
-	{
-		FinanzenCrawler fc = new FinanzenCrawler();
-		fc.execute();
+	public FinanzenCrawler() {
+		this.name = "finance_crawler";
+		System.out.println("FinanzenCrawler ctor called");
 	}
 	
-	public boolean crawlKpis(SingleCompany company) throws IOException {
-		System.out.println("FinanzenCrawler");
-
+	@Override	
+	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		FinanzenCrawler fc = new FinanzenCrawler();
+		try {
+			fc.startCrawling();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected boolean crawlKpis(SingleCompany company) {
 		if(company == null || company.getFinanceQueryString() == null || company.getFinanceQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;
 		}
 
-		Response response_abs = Jsoup.connect(finance_url + profit_and_loss_string + 
-				company.getFinanceQueryString()).execute();
+		
+		Response response_abs;
+		try {
+			response_abs = Jsoup.connect(finance_url + profit_and_loss_string + 
+					company.getFinanceQueryString()).execute();
+		} catch(SocketTimeoutException e) {
+			return false;
+		} catch(IOException e) {
+			return false;
+		}
+		
 		
 		
 		Element response;
@@ -45,7 +66,11 @@ public class FinanzenCrawler extends KPICrawler
 				company.getFinanceQueryString())) {
 			
 
-			response = response_abs.parse();
+			try {
+				response = response_abs.parse();
+			} catch (IOException e) {
+				return false;
+			}
 			data_tables = response.select("#site .main .content_box").not(".depot_add").not(".state_info")
 					.not(".state_success").not(".state_error").not(".infobox");
 			if(data_tables.size() >= 1) {
@@ -53,14 +78,10 @@ public class FinanzenCrawler extends KPICrawler
 				table_header = data_tables.last().select("table tr").select("th");
 				year = 0;
 				for(int i = 0; i < table_header.size(); i++) {
-					year = KPICrawler.extractYearFromString(table_header.get(i).html());
+					year = this.extractYearFromString(table_header.get(i).html());
 					if(year != -1) {
-						//calendar.set(year, 0, 0);
-						System.out.println("year == " + year);
 						Pair<Integer, Integer> year_pair = new Pair<Integer,Integer>(i, year);
-						
 						updateBalanceSheetValues(company, data_tables, year_pair);
-
 					}
 
 				}
@@ -77,7 +98,7 @@ public class FinanzenCrawler extends KPICrawler
 		
 	}
 	
-	static public boolean updateBalanceSheetValues(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
+	private boolean updateBalanceSheetValues(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
 		KeyPerformanceIndicators indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
@@ -102,35 +123,35 @@ public class FinanzenCrawler extends KPICrawler
 				row_description = tmp.get(j).child(0).html();
 
 				if(row_description.contains("Umsatzerlöse")) {
-					revenue = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					revenue = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("revenue " + year_pair.getValue1() + " = " + revenue);
 				} else if(row_description.contains("Anzahl Mitarbeiter") && !row_description.contains("Veränderung Anzahl Mitarbeiter")) {
-					number_of_employees = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.NONE);
+					number_of_employees = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.NONE);
 					//System.out.println("number_of_employees " + year_pair.getValue1() + " = " + number_of_employees);
 				} else if(row_description.contains("Operatives Ergebnis") && !row_description.contains("Veränderung Operatives Ergebnis")) {
-					operating_income = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					operating_income = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("operating_income " + year_pair.getValue1() + " = " + operating_income);
 				} else if(row_description.contains("Ergebnis vor Steuern") && !row_description.contains("Veränderung Ergebnis vor Steuern")) {
-					earnings_before_taxes = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					earnings_before_taxes = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("earnings_before_taxes " + year_pair.getValue1() + " = " + earnings_before_taxes);
 				} else if(row_description.contains("Ergebnis nach Steuer") && !row_description.contains("Veränderung Ergebnis nach Steuer")) {
-					earnings_after_taxes = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					earnings_after_taxes = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("earnings_after_taxes " + year_pair.getValue1() + " = " + earnings_after_taxes);
 				} else if(row_description.contains("Bilanzsumme") && !row_description.contains("Veränderung Bilanzsumme")) {
-					balance_sheet_total = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					balance_sheet_total = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("balance_sheet_total " + year_pair.getValue1() + " = " + balance_sheet_total);
 				} else if(row_description.contains("Eigenkapital") && !row_description.contains("Veränderung Eigenkapital")
 						&& !row_description.contains("Eigenkapitalquote")) {
-					equity = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					equity = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("equity " + year_pair.getValue1() + " = " + equity);
 				} else if(row_description.contains("Dividende pro Aktie")) {
-					dividend = KPICrawler.parseFloat(tmp.get(j).child(year_pair.getValue0()).html());
+					dividend = this.parseFloat(tmp.get(j).child(year_pair.getValue0()).html());
 					//System.out.println("dividend " + year_pair.getValue1() + " = " + dividend);
 				} else if(row_description.contains("Gewinn je Aktie (unverwässert)")) {
-					earnings_per_share = KPICrawler.parseFloat(tmp.get(j).child(year_pair.getValue0()).html());
+					earnings_per_share = this.parseFloat(tmp.get(j).child(year_pair.getValue0()).html());
 					//System.out.println("earnings_per_share " + year_pair.getValue1() + " = " + earnings_per_share);
 				} else if(row_description.contains("Bruttoergebnis vom Umsatz")) {
-					gross_profit = KPICrawler.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
+					gross_profit = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("gross_profit " + year_pair.getValue1() + " = " + gross_profit);
 				}
 
@@ -154,8 +175,6 @@ public class FinanzenCrawler extends KPICrawler
 		HibernateSupport.commitTransaction();
 		
 		return true;
-	}
-	
-	
+	}	
 	
 }
