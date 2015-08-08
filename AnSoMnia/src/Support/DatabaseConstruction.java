@@ -41,7 +41,7 @@ public class DatabaseConstruction {
 		System.out.println("adding one SingleCompany");
 		List<Criterion>  criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.eq("isin", "DE0001218063"));
-		SingleCompany company = null;//HibernateSupport.readOneObject(SingleCompany.class, criterions);
+		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
 
 		if(company == null){
 			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.", "ABCSD");
@@ -58,13 +58,26 @@ public class DatabaseConstruction {
 			//PriceEarningsToGrowthRatio peg = new PriceEarningsToGrowthRatio(company, 333.33, new Date());
 			//company.addPriceEarningsToGrowthRatio(peg);
 			
-			//CompanyNews news = new CompanyNews("url", "author", new Date(), "content");
-			//company.addNews(news);
-			
 			HibernateSupport.beginTransaction();
 			company.saveToDB();
 			HibernateSupport.commitTransaction();
+			
+			
+			
+			/*HibernateSupport.beginTransaction();
+			company.saveToDB();
+			HibernateSupport.commitTransaction();*/
 		}
+		CompanyNews news = new CompanyNews("url", "author", new Date(), "content");
+		company.addNews(news);
+		company.addNews(news);
+		
+		if(company.checkUrlsAlreadyAdded("url")) {
+			System.out.println("url already added.");
+		} else {
+			System.out.println("url NOT added.");
+		}
+
 		
 		System.out.println("Finished");
 	}

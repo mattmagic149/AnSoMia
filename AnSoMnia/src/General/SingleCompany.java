@@ -39,11 +39,11 @@ public class SingleCompany implements ISaveAndDelete {
 	@JoinColumn(name="isin")
 	private List<KeyPerformanceIndicators> kpis_list;
 	
-	/*@ManyToMany
-	@JoinTable(name="company_news_join",
-				joinColumns={@JoinColumn(name="company_isin")}, 
+	@ManyToMany
+	@JoinTable(name="CompanyToNews",
+				joinColumns={@JoinColumn(name="isin")}, 
 				inverseJoinColumns={@JoinColumn(name="url")})
-	private List<CompanyNews> company_news_list;*/
+	private List<CompanyNews> company_news;
 
 	
 	public SingleCompany() {
@@ -57,7 +57,8 @@ public class SingleCompany implements ISaveAndDelete {
 		
 		this.market_values_list = new ArrayList<MarketValues>();
 		this.kpis_list = new ArrayList<KeyPerformanceIndicators>();
-		
+		this.company_news = new ArrayList<CompanyNews>();
+
 	}
 	
 	public String getIsin() {
@@ -165,12 +166,12 @@ public class SingleCompany implements ISaveAndDelete {
 		}
 	}
 	
-	/*public List<CompanyNews> getCompanyNews() {
+	public List<CompanyNews> getCompanyNews() {
 		HibernateSupport.beginTransaction();
 		// refresh DB-Image
 		try{
 			HibernateSupport.getCurrentSession().refresh(this);
-			Hibernate.initialize(this.company_news_list);
+			Hibernate.initialize(this.company_news);
 		} catch(HibernateException e){
 			System.out.println("Error: Instance of "+ this.getClass().getName() + " not merged to DB");
 			return null;
@@ -178,44 +179,31 @@ public class SingleCompany implements ISaveAndDelete {
 		finally{
 			HibernateSupport.commitTransaction();
 		}
-		return this.company_news_list;
-	}*/
+		return this.company_news;
+	}
 	
 	//*************************************************************************************************
 	// addNews:
 	// adds news to the news_list.
-	/*public boolean addNews(CompanyNews new_news) {
+	public boolean addNews(CompanyNews new_news) {
 		boolean success = false;
 		
 		if(new_news != null){	
 			
 			HibernateSupport.beginTransaction();
+			new_news.saveToDB();
 			// refresh DB-Image
 			try{
 				HibernateSupport.getCurrentSession().refresh(this);
-				Hibernate.initialize(this.company_news_list);
+				Hibernate.initialize(this.company_news);
 			} catch(HibernateException e){
 				System.out.println("Error: Instance of "+ this.getClass().getName() + " not merged to DB");
 				HibernateSupport.commitTransaction();
 				return false;
 			}
 			
-			// check, if object is already added 
-			try{
-				HibernateSupport.getCurrentSession().refresh(new_news);
-				if(this.company_news_list.contains(new_news)){
-					System.out.println("Error: Object already added");
-					HibernateSupport.commitTransaction();
-					return false;
-				}			
-			} catch(HibernateException e){
-				// drops here in usual program flow.
-				// in this special case:
-				// no need to handle this exception
-			}
-			
 			// add object to list and save to DB
-			if (this.company_news_list.add(new_news))
+			if (this.company_news.add(new_news))
 				success = this.saveToDB();
 			HibernateSupport.commitTransaction();			
 		}
@@ -225,7 +213,17 @@ public class SingleCompany implements ISaveAndDelete {
 		}
 		else
 			return false;
-	}*/
+	}
+	
+	public boolean checkUrlsAlreadyAdded(String url) {
+		for(int i = 0; i < this.company_news.size(); i++) {
+			if(this.company_news.get(i).getUrl().equals(url)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	
 	
 	@Override
