@@ -16,6 +16,9 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.jsoup.Connection;
@@ -27,7 +30,7 @@ import org.jsoup.select.Elements;
 import General.SingleCompany;
 import Support.HibernateSupport;
 
-public class CompanyIndexer
+public class CompanyIndexer implements Job
 {
 	private static String wall_street_url = "http://www.wallstreet-online.de";	
 	private static String[] isin_filter = {"DE", "US", "AT"};
@@ -37,8 +40,9 @@ public class CompanyIndexer
 	public static Logger logger; 
 	public static FileHandler fh; 
 	
-  public static void main( String[] args ) throws Exception
-  {
+
+	@Override
+	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 	  logger = Logger.getLogger("MyLogger");
 	  logger.setUseParentHandlers(false);
 	  
@@ -192,7 +196,6 @@ public class CompanyIndexer
 					return false;
 				}
 			} catch (IOException | InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
@@ -226,7 +229,6 @@ public class CompanyIndexer
 				}
 				
 			} catch (InterruptedException | IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				return false;
 			}

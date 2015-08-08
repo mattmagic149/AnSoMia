@@ -1,9 +1,6 @@
 package Support;
 
-import General.KeyPerformanceIndicators;
-import General.MarketValues;
-import General.SingleCompany;
-
+import General.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,7 +50,8 @@ public class HibernateSupport {
 		configuration.addAnnotatedClass(SingleCompany.class);
 		configuration.addAnnotatedClass(MarketValues.class);
 		configuration.addAnnotatedClass(KeyPerformanceIndicators.class);
-		
+		configuration.addAnnotatedClass(CompanyNews.class);
+
 		configuration.configure(configFile);
 		
 		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();

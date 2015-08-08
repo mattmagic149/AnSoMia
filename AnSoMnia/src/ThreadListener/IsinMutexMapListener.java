@@ -1,9 +1,11 @@
-package General;
+package ThreadListener;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
 import org.quartz.SchedulerException;
+
+import General.MainApplication;
 
 public class IsinMutexMapListener implements JobListener {
 
@@ -37,10 +39,9 @@ public class IsinMutexMapListener implements JobListener {
 		System.out.println("this job has been executed!!!!");
 		
 		try {
-			MainApplication.scheduler.triggerJob(MainApplication.wallstreet_crawler_job.getKey());
-			MainApplication.scheduler.triggerJob(MainApplication.finance_crawler_job.getKey());
+			MainApplication.app.getScheduler().triggerJob(MainApplication.app.getWallstreetCrawlerJob().getKey());
+			MainApplication.app.getScheduler().triggerJob(MainApplication.app.getFinanceCrawlerJob().getKey());
 		} catch (SchedulerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

@@ -17,13 +17,13 @@ import Support.HibernateSupport;
 
 public abstract class Crawler {
 
-	protected static List<SingleCompany> company_not_crawled = new ArrayList<SingleCompany>();
+	protected static List<SingleCompany> companies_not_crawled = new ArrayList<SingleCompany>();
 	protected enum DECIMALS {
 	    NONE, THOUSAND, MILLION, BILLION 
 	}
 	protected String name;
-	private Logger logger; 
-	private FileHandler fh; 
+	protected Logger logger; 
+	protected FileHandler fh; 
 	
 	public void setName(String name) {
 		this.name = name;
@@ -75,27 +75,27 @@ public abstract class Crawler {
 	    			if(this.crawlKpis(company)) {
 	    				break;
 	    			} else if(i == 2) {
-						company_not_crawled.add(company);
+						companies_not_crawled.add(company);
 						this.logger.info("Company " + company.getIsin() + " not crawled from wallstreet-online.de");
 	    			}
 	    		}
 	    		
 			  	System.out.print("Crawled ");
 			  	System.out.printf("%.2f", ((companies_size - isin_list.size())/(float)companies_size) * 100);
-			  	System.out.println(" % - " + (company_not_crawled.size()) + " not crawled");
+			  	System.out.println(" % - " + (companies_not_crawled.size()) + " not crawled");
 				Thread.sleep(250);
 	    	
 	    	mutex.unlock();
 	    	
 	    }
 		
-		for(int i = 0; i < company_not_crawled.size(); i++) {
-			System.out.println("COMPANY: " + company_not_crawled.get(i).getCompanyName() + " " + 
-					  			company_not_crawled.get(i).getIsin() + " " +
-					  			company_not_crawled.get(i).getTicker());
+		for(int i = 0; i < companies_not_crawled.size(); i++) {
+			System.out.println("COMPANY: " + companies_not_crawled.get(i).getCompanyName() + " " + 
+					  			companies_not_crawled.get(i).getIsin() + " " +
+					  			companies_not_crawled.get(i).getTicker());
 		}
 		
-		System.out.println((company_not_crawled.size()) + " not crawled");
+		System.out.println((companies_not_crawled.size()) + " not crawled");
 		
 	  	  	 
 	}

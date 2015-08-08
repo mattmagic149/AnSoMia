@@ -1,4 +1,5 @@
 package Mining;
+import org.hibernate.criterion.Criterion;
 import org.jsoup.*;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Element;
@@ -9,7 +10,11 @@ import org.quartz.JobExecutionException;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
+import General.MainApplication;
 import General.MarketValues;
 import General.SingleCompany;
 import Support.HibernateSupport;
@@ -26,6 +31,17 @@ public class MarketValuesCrawler extends Crawler implements Job
 	
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		System.out.println(MainApplication.isin_mutex_map.size());
+		MainApplication.isin_mutex_map.clear();
+		List<Criterion>  criterions = new ArrayList<Criterion>();
+		List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+		
+		for(int i = 0; i < companies.size(); i++) {
+			MainApplication.isin_mutex_map.put(companies.get(i).getIsin(), new ReentrantLock(true));
+		}
+		
+		System.out.println(MainApplication.isin_mutex_map.size());
+		
 		MarketValuesCrawler mvc = new MarketValuesCrawler();
 		try {
 			mvc.startCrawling();
@@ -40,6 +56,7 @@ public class MarketValuesCrawler extends Crawler implements Job
 			return false;
 		}
 		
+		System.out.println("crawlKpis marketvalues");
 		
 		Response response_abs;
 		Element response;

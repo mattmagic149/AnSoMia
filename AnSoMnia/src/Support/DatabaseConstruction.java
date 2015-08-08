@@ -32,35 +32,39 @@ public class DatabaseConstruction {
 		configuration.addAnnotatedClass(SingleCompany.class);
 		configuration.addAnnotatedClass(MarketValues.class);
 		configuration.addAnnotatedClass(KeyPerformanceIndicators.class);
+		configuration.addAnnotatedClass(CompanyNews.class);
 		
 		configuration.configure("hibernate.cfg.xml");
 
 		new SchemaExport(configuration).create(true, true);
 		
-		/*System.out.println("adding one SingleCompany");
+		System.out.println("adding one SingleCompany");
 		List<Criterion>  criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.eq("isin", "DE0001218063"));
-		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
+		SingleCompany company = null;//HibernateSupport.readOneObject(SingleCompany.class, criterions);
 
 		if(company == null){
 			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.", "ABCSD");
-			PriceEarningsRatio per = new PriceEarningsRatio(company, 333.33, new Date());
-			company.addPriceEarningsRatio(per);
+			//PriceEarningsRatio per = new PriceEarningsRatio(company, 333.33, new Date());
+			//company.addPriceEarningsRatio(per);
 			
-			per = new PriceEarningsRatio(company, 222.22, new Date());
-			company.addPriceEarningsRatio(per);
+			//per = new PriceEarningsRatio(company, 222.22, new Date());
+			//company.addPriceEarningsRatio(per);
 			
 			
-			EarningsPerShare eps = new EarningsPerShare(company, 333.33, new Date());
-			company.addEarningsPerShare(eps);
+			//EarningsPerShare eps = new EarningsPerShare(company, 333.33, new Date());
+			//company.addEarningsPerShare(eps);
 			
-			PriceEarningsToGrowthRatio peg = new PriceEarningsToGrowthRatio(company, 333.33, new Date());
-			company.addPriceEarningsToGrowthRatio(peg);
+			//PriceEarningsToGrowthRatio peg = new PriceEarningsToGrowthRatio(company, 333.33, new Date());
+			//company.addPriceEarningsToGrowthRatio(peg);
+			
+			//CompanyNews news = new CompanyNews("url", "author", new Date(), "content");
+			//company.addNews(news);
 			
 			HibernateSupport.beginTransaction();
 			company.saveToDB();
 			HibernateSupport.commitTransaction();
-		}*/
+		}
 		
 		System.out.println("Finished");
 	}

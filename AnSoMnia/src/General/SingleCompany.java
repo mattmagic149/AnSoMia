@@ -6,14 +6,13 @@ import java.util.List;
 
 import javax.persistence.*;
 
-import org.javatuples.Pair;
-import org.jsoup.select.Elements;
+import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
 
 import Support.*;
 import Interface.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class SingleCompany implements ISaveAndDelete {
 	
 	@Id
@@ -40,7 +39,12 @@ public class SingleCompany implements ISaveAndDelete {
 	@JoinColumn(name="isin")
 	private List<KeyPerformanceIndicators> kpis_list;
 	
-	
+	/*@ManyToMany
+	@JoinTable(name="company_news_join",
+				joinColumns={@JoinColumn(name="company_isin")}, 
+				inverseJoinColumns={@JoinColumn(name="url")})
+	private List<CompanyNews> company_news_list;*/
+
 	
 	public SingleCompany() {
 		
@@ -160,6 +164,68 @@ public class SingleCompany implements ISaveAndDelete {
 			HibernateSupport.commitTransaction();
 		}
 	}
+	
+	/*public List<CompanyNews> getCompanyNews() {
+		HibernateSupport.beginTransaction();
+		// refresh DB-Image
+		try{
+			HibernateSupport.getCurrentSession().refresh(this);
+			Hibernate.initialize(this.company_news_list);
+		} catch(HibernateException e){
+			System.out.println("Error: Instance of "+ this.getClass().getName() + " not merged to DB");
+			return null;
+		}
+		finally{
+			HibernateSupport.commitTransaction();
+		}
+		return this.company_news_list;
+	}*/
+	
+	//*************************************************************************************************
+	// addNews:
+	// adds news to the news_list.
+	/*public boolean addNews(CompanyNews new_news) {
+		boolean success = false;
+		
+		if(new_news != null){	
+			
+			HibernateSupport.beginTransaction();
+			// refresh DB-Image
+			try{
+				HibernateSupport.getCurrentSession().refresh(this);
+				Hibernate.initialize(this.company_news_list);
+			} catch(HibernateException e){
+				System.out.println("Error: Instance of "+ this.getClass().getName() + " not merged to DB");
+				HibernateSupport.commitTransaction();
+				return false;
+			}
+			
+			// check, if object is already added 
+			try{
+				HibernateSupport.getCurrentSession().refresh(new_news);
+				if(this.company_news_list.contains(new_news)){
+					System.out.println("Error: Object already added");
+					HibernateSupport.commitTransaction();
+					return false;
+				}			
+			} catch(HibernateException e){
+				// drops here in usual program flow.
+				// in this special case:
+				// no need to handle this exception
+			}
+			
+			// add object to list and save to DB
+			if (this.company_news_list.add(new_news))
+				success = this.saveToDB();
+			HibernateSupport.commitTransaction();			
+		}
+		
+		if (success){
+			return true;
+		}
+		else
+			return false;
+	}*/
 	
 	
 	@Override

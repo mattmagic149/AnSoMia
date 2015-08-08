@@ -22,7 +22,4 @@ public interface ISaveAndDelete {
 	 */
 	public void deleteFromDB(Object obj);
 
-
-
-
 }
