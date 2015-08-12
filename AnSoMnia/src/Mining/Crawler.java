@@ -23,10 +23,12 @@ public abstract class Crawler {
 	}
 	protected String name;
 	protected Logger logger; 
-	protected FileHandler fh; 
+	protected FileHandler fh;
+	protected int reconnection_attempts;
 	
 	public void setName(String name) {
 		this.name = name;
+		this.reconnection_attempts = 1;
 	}
 	
 	protected void startCrawling() throws Exception
@@ -72,9 +74,9 @@ public abstract class Crawler {
 						  + company.getIsin() + ", " + company.getTicker());
 	    		
 	    		for(int i = 0; i < 3; i++) {
-	    			if(this.crawlKpis(company)) {
+	    			if(this.crawlInfos(company)) {
 	    				break;
-	    			} else if(i == 2) {
+	    			} else if(i == (2)) {
 						companies_not_crawled.add(company);
 						this.logger.info("Company " + company.getIsin() + " not crawled from wallstreet-online.de");
 	    			}
@@ -100,7 +102,7 @@ public abstract class Crawler {
 	  	  	 
 	}
 	
-	protected boolean crawlKpis(SingleCompany company) {return false;}
+	protected boolean crawlInfos(SingleCompany company) {return false;}
 	
 	protected float parseFloat(String s) {
 		float ret = Float.MIN_VALUE;

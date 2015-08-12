@@ -45,6 +45,38 @@ public class MarketValues implements ISaveAndDelete {
 		this.currency = currency;
 	}
 	
+	public long getId() {
+		return id;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public String getMarketPlace() {
+		return market_place;
+	}
+
+	public float getStock_price() {
+		return stock_price;
+	}
+
+	public float getBidPrice() {
+		return bid_price;
+	}
+
+	public float getAskPrice() {
+		return ask_price;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public SingleCompany getCompany() {
+		return company;
+	}
+	
 	@Override
 	public boolean saveToDB() {
 		if(!HibernateSupport.commit(this))

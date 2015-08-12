@@ -215,7 +215,17 @@ public class SingleCompany implements ISaveAndDelete {
 			return false;
 	}
 	
-	public boolean checkUrlsAlreadyAdded(String url) {
+	public boolean checkNewsAlreadyAdded(long hash) {
+		for(int i = 0; i < this.company_news.size(); i++) {
+			if(this.company_news.get(i).getHash() == hash) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean checkUrlAlreadyAdded(String url) {
 		for(int i = 0; i < this.company_news.size(); i++) {
 			if(this.company_news.get(i).getUrl().equals(url)) {
 				return true;

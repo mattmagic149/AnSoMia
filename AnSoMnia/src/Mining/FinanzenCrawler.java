@@ -37,7 +37,7 @@ public class FinanzenCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlKpis(SingleCompany company) {
+	protected boolean crawlInfos(SingleCompany company) {
 		if(company == null || company.getFinanceQueryString() == null || company.getFinanceQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;

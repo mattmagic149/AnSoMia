@@ -33,6 +33,8 @@ public class MainApplication {
 	private JobDetail finance_crawler_job;
 	private JobDetail wallstreet_crawler_job;
 	private JobDetail market_values_crawler_job;
+	private JobDetail finance_news_crawler_job;
+	private JobDetail yahoo_news_crawler_job;
 
 	public static void main(String[] args) throws SchedulerException {
 		System.out.println("Starting MainApplication...");
@@ -65,16 +67,19 @@ public class MainApplication {
 
 		Trigger daily_trigger = newTrigger()
 			    .withIdentity("Daily Trigger", "Crawler Triggers")
-			    .withSchedule(cronSchedule("0 52 12 ? * MON-FRI"))
+			    .withSchedule(cronSchedule("0 14 15 ? * MON-FRI"))
 			    .build();
 		
 		Trigger weekly_trigger = newTrigger()
 				.withIdentity("Weekly Trigger", "Crawler Triggers")
-				.withSchedule(cronSchedule("0 07 16 ? * MON-FRI"))
+				.withSchedule(cronSchedule("0 07 16 ? * SAT-SUN"))
 				.build();
 		
 		app.scheduler.scheduleJob(app.market_values_crawler_job, daily_trigger);
 		app.scheduler.scheduleJob(app.company_indexer_job, weekly_trigger);
+		
+		//app.getScheduler().triggerJob(MainApplication.app.getFinanceNewsCrawlerJob().getKey());
+
 
 	}
 	
@@ -84,6 +89,8 @@ public class MainApplication {
 			app.scheduler.addJob(app.isin_mutex_map_creation_job, false);
 			app.scheduler.addJob(app.wallstreet_crawler_job, false);
 			app.scheduler.addJob(app.finance_crawler_job, false);
+			app.scheduler.addJob(app.finance_news_crawler_job, false);
+			app.scheduler.addJob(app.yahoo_news_crawler_job, false);		
 			//app.scheduler.addJob(app.market_values_crawler_job, false);
 
 		} catch (SchedulerException e) {
@@ -119,6 +126,16 @@ public class MainApplication {
 				.withIdentity("MarketValuesCrawler", "DailyCrawlers")
 				.storeDurably()
 				.build();
+		
+		app.finance_news_crawler_job = newJob(FinanzenNewsCrawler.class)
+				.withIdentity("finanzen.net NewsCrawler", "DailyCrawlers")
+				.storeDurably()
+				.build();
+		
+		app.yahoo_news_crawler_job = newJob(YahooNewsCrawler.class)
+				.withIdentity("finance.yahoo.com NewsCrawler", "DailyCrawlers")
+				.storeDurably()
+				.build();
 	}
 
 	public Scheduler getScheduler() {
@@ -143,6 +160,14 @@ public class MainApplication {
 	
 	public JobDetail getMarketValuesCrawlerJob() {
 		return market_values_crawler_job;
+	}
+	
+	public JobDetail getFinanceNewsCrawlerJob() {
+		return finance_news_crawler_job;
+	}
+	
+	public JobDetail getYahooNewsCrawlerJob() {
+		return yahoo_news_crawler_job;
 	}
 
 }

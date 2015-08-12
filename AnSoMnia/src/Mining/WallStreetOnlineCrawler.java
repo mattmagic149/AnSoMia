@@ -38,7 +38,7 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlKpis(SingleCompany company) {
+	protected boolean crawlInfos(SingleCompany company) {
 		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;

@@ -1,12 +1,6 @@
 package Support;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.hibernate.cfg.Configuration;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import General.*;
@@ -39,7 +33,7 @@ public class DatabaseConstruction {
 		new SchemaExport(configuration).create(true, true);
 		
 		System.out.println("adding one SingleCompany");
-		List<Criterion>  criterions = new ArrayList<Criterion>();
+		/*List<Criterion>  criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.eq("isin", "DE0001218063"));
 		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
 
@@ -63,10 +57,6 @@ public class DatabaseConstruction {
 			HibernateSupport.commitTransaction();
 			
 			
-			
-			/*HibernateSupport.beginTransaction();
-			company.saveToDB();
-			HibernateSupport.commitTransaction();*/
 		}
 		CompanyNews news = new CompanyNews("url", "author", new Date(), "content");
 		company.addNews(news);
@@ -76,7 +66,7 @@ public class DatabaseConstruction {
 			System.out.println("url already added.");
 		} else {
 			System.out.println("url NOT added.");
-		}
+		}*/
 
 		
 		System.out.println("Finished");

@@ -227,6 +227,83 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		
 	}
 	
+	public long getId() {
+		return id;
+	}
+
+	public long getRevenue() {
+		return revenue;
+	}
+
+	public long getNumberOfEmployees() {
+		return number_of_employees;
+	}
+
+	public long getNumberOfShares() {
+		return number_of_shares;
+	}
+
+	public long getOperatingIncome() {
+		return operating_income;
+	}
+
+	public long getEarningsBeforeTaxes() {
+		return earnings_before_taxes;
+	}
+
+	public long getEarningsAfterTaxes() {
+		return earnings_after_taxes;
+	}
+
+	public long getBalanceSheetTotal() {
+		return balance_sheet_total;
+	}
+
+	public long getDebt() {
+		return debt;
+	}
+
+	public long getEquity() {
+		return equity;
+	}
+
+	public float getDividend() {
+		return dividend;
+	}
+
+	public float getEarningsPerShare() {
+		return earnings_per_share;
+	}
+
+	public long getCashflow() {
+		return cashflow;
+	}
+
+	public long getGrossProfit() {
+		return gross_profit;
+	}
+
+	public long getWorkingCapital() {
+		return working_capital;
+	}
+
+	public float getLiquidity1() {
+		return liquidity_1;
+	}
+
+	public float getLiquidity2() {
+		return liquidity_2;
+	}
+
+	public float getLiquidity3() {
+		return liquidity_3;
+	}
+
+	public SingleCompany getCompany() {
+		return company;
+	}
+
+	
 	/*
 	// TODO: Implement Alpha
 	private float calculateAlpha() {
