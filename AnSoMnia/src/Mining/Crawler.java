@@ -11,13 +11,13 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import DatabaseClasses.Company;
 import General.MainApplication;
-import General.SingleCompany;
 import Support.HibernateSupport;
 
 public abstract class Crawler {
 
-	protected static List<SingleCompany> companies_not_crawled = new ArrayList<SingleCompany>();
+	protected static List<Company> companies_not_crawled = new ArrayList<Company>();
 	protected enum DECIMALS {
 	    NONE, THOUSAND, MILLION, BILLION 
 	}
@@ -59,7 +59,7 @@ public abstract class Crawler {
 	    Collections.shuffle(isin_list);
 	    String isin;
 		Lock mutex;
-		SingleCompany company;
+		Company company;
 		int companies_size = isin_list.size();
 		
 	    while(isin_list.size() > 0) {
@@ -69,8 +69,8 @@ public abstract class Crawler {
 	    	mutex = MainApplication.isin_mutex_map.get(isin);
 	    	mutex.lock();
 	    	
-	    		company = HibernateSupport.readOneObjectByStringId(SingleCompany.class, isin);
-	    		System.out.println("Crawling Company: " + company.getCompanyName() + ", "
+	    		company = HibernateSupport.readOneObjectByStringId(Company.class, isin);
+	    		System.out.println("Crawling Company: " + company.getName() + ", "
 						  + company.getIsin() + ", " + company.getTicker());
 	    		
 	    		for(int i = 0; i < 3; i++) {
@@ -92,7 +92,7 @@ public abstract class Crawler {
 	    }
 		
 		for(int i = 0; i < companies_not_crawled.size(); i++) {
-			System.out.println("COMPANY: " + companies_not_crawled.get(i).getCompanyName() + " " + 
+			System.out.println("COMPANY: " + companies_not_crawled.get(i).getName() + " " + 
 					  			companies_not_crawled.get(i).getIsin() + " " +
 					  			companies_not_crawled.get(i).getTicker());
 		}
@@ -102,10 +102,10 @@ public abstract class Crawler {
 	  	  	 
 	}
 	
-	protected boolean crawlInfos(SingleCompany company) {return false;}
+	protected boolean crawlInfos(Company company) {return false;}
 	
-	protected float parseFloat(String s) {
-		float ret = Float.MIN_VALUE;
+	protected float parseFloat(String s, float return_on_error) {
+		float ret = return_on_error;
 		String tmp = s.split(" ")[0];
 		tmp = tmp.replace(".", "");
 		tmp = tmp.replace(",", ".");
@@ -113,9 +113,9 @@ public abstract class Crawler {
 		try { 
 			ret = Float.parseFloat(tmp); 
 		} catch(NumberFormatException e) { 
-			return Float.MIN_VALUE;
+			return return_on_error;
 		} catch(NullPointerException e) {
-			return Float.MIN_VALUE;
+			return return_on_error;
 		}
 	
 		return ret;

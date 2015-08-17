@@ -3,6 +3,12 @@ package Support;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
+import DatabaseClasses.Company;
+import DatabaseClasses.CompanyNews;
+import DatabaseClasses.Index;
+import DatabaseClasses.IndustrySector;
+import DatabaseClasses.KeyPerformanceIndicator;
+import DatabaseClasses.MarketValue;
 import General.*;
 
 /**
@@ -23,51 +29,19 @@ public class DatabaseConstruction {
 		Configuration configuration = new Configuration();
 		
 		//add all classes you want to annotate
-		configuration.addAnnotatedClass(SingleCompany.class);
-		configuration.addAnnotatedClass(MarketValues.class);
-		configuration.addAnnotatedClass(KeyPerformanceIndicators.class);
+		configuration.addAnnotatedClass(Index.class);
+		configuration.addAnnotatedClass(Company.class);
+		configuration.addAnnotatedClass(MarketValue.class);
+		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
 		configuration.addAnnotatedClass(CompanyNews.class);
+		configuration.addAnnotatedClass(IndustrySector.class);
 		
 		configuration.configure("hibernate.cfg.xml");
 
 		new SchemaExport(configuration).create(true, true);
 		
-		System.out.println("adding one SingleCompany");
-		/*List<Criterion>  criterions = new ArrayList<Criterion>();
-		criterions.add(Restrictions.eq("isin", "DE0001218063"));
-		SingleCompany company = HibernateSupport.readOneObject(SingleCompany.class, criterions);
-
-		if(company == null){
-			company = new SingleCompany("DE0001218063","FINLAB AG NA O.N.", "ABCSD");
-			//PriceEarningsRatio per = new PriceEarningsRatio(company, 333.33, new Date());
-			//company.addPriceEarningsRatio(per);
-			
-			//per = new PriceEarningsRatio(company, 222.22, new Date());
-			//company.addPriceEarningsRatio(per);
-			
-			
-			//EarningsPerShare eps = new EarningsPerShare(company, 333.33, new Date());
-			//company.addEarningsPerShare(eps);
-			
-			//PriceEarningsToGrowthRatio peg = new PriceEarningsToGrowthRatio(company, 333.33, new Date());
-			//company.addPriceEarningsToGrowthRatio(peg);
-			
-			HibernateSupport.beginTransaction();
-			company.saveToDB();
-			HibernateSupport.commitTransaction();
-			
-			
-		}
-		CompanyNews news = new CompanyNews("url", "author", new Date(), "content");
-		company.addNews(news);
-		company.addNews(news);
-		
-		if(company.checkUrlsAlreadyAdded("url")) {
-			System.out.println("url already added.");
-		} else {
-			System.out.println("url NOT added.");
-		}*/
-
+		SaveLoadDatabase sldb = new SaveLoadDatabase();
+		sldb.loadDataBase();
 		
 		System.out.println("Finished");
 	}

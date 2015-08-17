@@ -1,5 +1,7 @@
-package General;
+package DatabaseClasses;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -10,12 +12,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import General.SingleCompany;
+import DatabaseClasses.Company;
 import Interface.ISaveAndDelete;
 import Support.HibernateSupport;
 
 @Entity
-public class KeyPerformanceIndicators implements ISaveAndDelete {
+public class KeyPerformanceIndicator implements ISaveAndDelete {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE)
@@ -70,13 +72,13 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 
 	@ManyToOne
 	@JoinColumn(name="isin",updatable=false)
-	protected SingleCompany company;
+	protected Company company;
 	
-	public KeyPerformanceIndicators() {
+	public KeyPerformanceIndicator() {
 		//this.date = new Date();
 	}
 
-	public KeyPerformanceIndicators(int year, SingleCompany company) {
+	public KeyPerformanceIndicator(int year, Company company) {
 		Calendar c = Calendar.getInstance();
 		c.set(year, 1, 1);
 		this.date = c.getTime();
@@ -99,6 +101,45 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		this.working_capital = Long.MIN_VALUE;
 		
 		
+	}
+	
+	public KeyPerformanceIndicator(String[] serialized_kpi, Company company) {
+		
+		this.company = company;
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			this.date = formatter.parse(serialized_kpi[1]);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			assert(false);
+		}
+		
+		this.revenue = Long.parseLong(serialized_kpi[2]);
+		this.number_of_employees = Long.parseLong(serialized_kpi[3]);
+		this.number_of_shares = Long.parseLong(serialized_kpi[4]);
+		this.operating_income = Long.parseLong(serialized_kpi[5]);
+		this.earnings_before_taxes = Long.parseLong(serialized_kpi[6]);
+		this.earnings_after_taxes = Long.parseLong(serialized_kpi[7]);
+		this.balance_sheet_total = Long.parseLong(serialized_kpi[8]);
+		this.debt = Long.parseLong(serialized_kpi[9]);
+		this.equity = Long.parseLong(serialized_kpi[10]);
+		this.dividend = Float.parseFloat(serialized_kpi[11]);
+		this.earnings_per_share = Float.parseFloat(serialized_kpi[12]);
+		this.cashflow = Long.parseLong(serialized_kpi[13]);
+		this.gross_profit = Long.parseLong(serialized_kpi[14]);
+		this.working_capital = Long.parseLong(serialized_kpi[15]);
+		this.liquidity_1 = Float.parseFloat(serialized_kpi[16]);
+		this.liquidity_2 = Float.parseFloat(serialized_kpi[17]);
+		this.liquidity_3 = Float.parseFloat(serialized_kpi[18]);
+		
+		/*return this.company.getIsin() + "\t" + this.date + "\t" + this.revenue + "\t" + 
+				this.number_of_employees + "\t" + this.number_of_shares + "\t" + 
+				this.operating_income + "\t" + this.earnings_before_taxes + "\t" + 
+				this.earnings_after_taxes + "\t" + this.balance_sheet_total + "\t" +
+				this.debt + "\t" + this.equity + "\t" + this.dividend + "\t" + 
+				this.earnings_per_share + "\t" + this.cashflow + "\t" + this.gross_profit + "\t" + 
+				this.working_capital + "\t" + this.liquidity_1 + "\t" + this.liquidity_2 + "\t" + 
+				this.liquidity_3;*/
 	}
 	
 	
@@ -299,7 +340,7 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 		return liquidity_3;
 	}
 
-	public SingleCompany getCompany() {
+	public Company getCompany() {
 		return company;
 	}
 
@@ -463,6 +504,18 @@ public class KeyPerformanceIndicators implements ISaveAndDelete {
 	
 	public Date getDate() {
 		return date;
+	}
+	
+	public String serializeKPI() {
+		
+		return this.company.getIsin() + "\t" + this.date + "\t" + this.revenue + "\t" + 
+				this.number_of_employees + "\t" + this.number_of_shares + "\t" + 
+				this.operating_income + "\t" + this.earnings_before_taxes + "\t" + 
+				this.earnings_after_taxes + "\t" + this.balance_sheet_total + "\t" +
+				this.debt + "\t" + this.equity + "\t" + this.dividend + "\t" + 
+				this.earnings_per_share + "\t" + this.cashflow + "\t" + this.gross_profit + "\t" + 
+				this.working_capital + "\t" + this.liquidity_1 + "\t" + this.liquidity_2 + "\t" + 
+				this.liquidity_3;
 	}
 	
 	@Override

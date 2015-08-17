@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.hibernate.criterion.Criterion;
 
+import DatabaseClasses.Company;
 import Support.HibernateSupport;
 
 import org.quartz.Job;
@@ -19,7 +20,7 @@ public class IsinMutexMapCreator implements Job {
 		System.out.println(MainApplication.isin_mutex_map.size());
 		MainApplication.isin_mutex_map.clear();
 		List<Criterion>  criterions = new ArrayList<Criterion>();
-		List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, criterions);
 		
 		for(int i = 0; i < companies.size(); i++) {
 			MainApplication.isin_mutex_map.put(companies.get(i).getIsin(), new ReentrantLock(true));

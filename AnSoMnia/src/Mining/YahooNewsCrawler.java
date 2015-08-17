@@ -25,6 +25,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import DatabaseClasses.Company;
 import General.*;
 import Support.HibernateSupport;
 
@@ -47,7 +48,7 @@ public class YahooNewsCrawler extends Crawler implements Job
 		System.out.println(MainApplication.isin_mutex_map.size());
 		MainApplication.isin_mutex_map.clear();
 		List<Criterion>  criterions = new ArrayList<Criterion>();
-		List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, criterions);
 		
 		for(int i = 0; i < companies.size(); i++) {
 			MainApplication.isin_mutex_map.put(companies.get(i).getIsin(), new ReentrantLock(true));
@@ -63,7 +64,7 @@ public class YahooNewsCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlInfos(SingleCompany company) {
+	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getTicker() == null || company.getTicker() == "") {
 			System.out.println("Company is NULL...");
 			return false;

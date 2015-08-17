@@ -11,12 +11,13 @@ import org.quartz.JobExecutionException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import DatabaseClasses.Company;
+import DatabaseClasses.MarketValue;
 import General.MainApplication;
-import General.MarketValues;
-import General.SingleCompany;
 import Support.HibernateSupport;
 
 public class MarketValuesCrawler extends Crawler implements Job
@@ -26,7 +27,7 @@ public class MarketValuesCrawler extends Crawler implements Job
 	private static String market_value_string = "/kurse";
 	private static String[] column_values = {"Handelsplatz", "Kurs", "Währung", "Bid", "Ask"};
 	private static String[] market_place_strings = {"Xetra", "Tradegate", "Frankfurt", "Berlin"};
-	
+	private Date date;
 
 	
 	@Override	
@@ -34,11 +35,22 @@ public class MarketValuesCrawler extends Crawler implements Job
 		System.out.println(MainApplication.isin_mutex_map.size());
 		MainApplication.isin_mutex_map.clear();
 		List<Criterion>  criterions = new ArrayList<Criterion>();
-		List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, criterions);
 		
 		for(int i = 0; i < companies.size(); i++) {
 			MainApplication.isin_mutex_map.put(companies.get(i).getIsin(), new ReentrantLock(true));
 		}
+		
+		
+		/*String inputStr = "13-08-2015";
+		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+		try {
+			date = dateFormat.parse(inputStr);
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}*/
+		date = new Date();
 		
 		System.out.println(MainApplication.isin_mutex_map.size());
 		
@@ -50,7 +62,7 @@ public class MarketValuesCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlInfos(SingleCompany company) {
+	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;
@@ -117,10 +129,10 @@ public class MarketValuesCrawler extends Crawler implements Job
 				System.out.println("ask_price = " + ask_price);
 			}
 			
-			MarketValues market_values = new MarketValues(company, market_place_string, stock_price, bid_price, ask_price, currency);
-			company.addMarketValues(market_values);
+			MarketValue market_values = new MarketValue(company, market_place_string, stock_price, bid_price, ask_price, currency, date);
 			
 			HibernateSupport.beginTransaction();
+			company.addMarketValue(market_values);		
 			company.saveToDB();
 			HibernateSupport.commitTransaction();
 		}

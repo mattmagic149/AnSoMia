@@ -12,8 +12,8 @@ import org.quartz.Job;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
-import General.KeyPerformanceIndicators;
-import General.SingleCompany;
+import DatabaseClasses.Company;
+import DatabaseClasses.KeyPerformanceIndicator;
 import Support.HibernateSupport;
 
 public class WallStreetOnlineCrawler extends Crawler implements Job
@@ -38,7 +38,7 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlInfos(SingleCompany company) {
+	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;
@@ -146,13 +146,13 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		
 	}
 	
-	private boolean updateProfileKpis(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
+	private boolean updateProfileKpis(Company company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
-		KeyPerformanceIndicators indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
+		KeyPerformanceIndicator indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
 		
 		if(indicators == null){
-			indicators = new KeyPerformanceIndicators(year_pair.getValue1(), company);
+			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company);
 			existing_indicators = false;
 		}
 		
@@ -170,26 +170,26 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 				row_description = tmp.get(j).child(0).html();
 
 				if(row_description.contains("Umsatz je Aktie")) {
-					dividend = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html());
+					dividend = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html(), Float.MIN_VALUE);
 					//System.out.println("dividend " + year_pair.getValue1() + " = " + dividend);
 				} else if(row_description.contains("Working Capital") && !row_description.contains("Partners")) {
 					///TODO: what if it is NOT in Mio?!?!?!
 					working_capital = parseStringToLong(tmp.get(j).child(year_pair.getValue0()).child(0).html(), DECIMALS.MILLION);
 					//System.out.println("working_capital " + year_pair.getValue1() + " = " + working_capital);
 				} else if(row_description.contains("Eigenkapitalquote")) {
-					equity_ratio = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html());
+					equity_ratio = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html(), Float.MIN_VALUE);
 					//System.out.println("equity_ratio " + year_pair.getValue1() + " = " + equity_ratio);
 				} else if(row_description.contains("Anzahl Mitarbeiter") && tmp.get(j).children().size() > year_pair.getValue0()) {
-					number_employee = (long)parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html());
+					number_employee = (long)parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html(), Float.MIN_VALUE);
 					//System.out.println("number_employee " + year_pair.getValue1() + " = " + number_employee);
 				} else if(row_description.contains("‎Liquidität 1. Grades")) {
-					liquidity_1 = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html());
+					liquidity_1 = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html(), Float.MIN_VALUE);
 					//System.out.println("liquidity_1 " + year_pair.getValue1() + " = " + liquidity_1);
 				} else if(row_description.contains("‎Liquidität 2. Grades")) {
-					liquidity_2 = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html());
+					liquidity_2 = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html(), Float.MIN_VALUE);
 					//System.out.println("liquidity_2 " + year_pair.getValue1() + " = " + liquidity_2);
 				} else if(row_description.contains("‎Liquidität 3. Grades")) {
-					liquidity_3 = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html());
+					liquidity_3 = parseFloat(tmp.get(j).child(year_pair.getValue0()).child(0).html(), Float.MIN_VALUE);
 					//System.out.println("liquidity_3 " + year_pair.getValue1() + " = " + liquidity_3);
 				} else if(row_description.contains("‎Aktien im Umlauf in Mio.")) {
 					///TODO: what if it is not in Mio?!?!?!
@@ -205,7 +205,9 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 				
 		
 		if(!existing_indicators) {
+			HibernateSupport.beginTransaction();
 			company.addKPIs(indicators);
+			HibernateSupport.commitTransaction();
 		}
 		
 		HibernateSupport.beginTransaction();
@@ -215,13 +217,13 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		return true;
 	}
 	
-	private boolean updateBalanceSheetValues(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
+	private boolean updateBalanceSheetValues(Company company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
-		KeyPerformanceIndicators indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
+		KeyPerformanceIndicator indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
 		
 		if(indicators == null){
-			indicators = new KeyPerformanceIndicators(year_pair.getValue1(), company);
+			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company);
 			existing_indicators = false;
 		}
 		
@@ -273,7 +275,9 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 				
 		
 		if(!existing_indicators) {
+			HibernateSupport.beginTransaction();
 			company.addKPIs(indicators);
+			HibernateSupport.commitTransaction();
 		}
 		
 		HibernateSupport.beginTransaction();

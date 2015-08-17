@@ -1,5 +1,7 @@
-package General;
+package DatabaseClasses;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class CompanyNews implements ISaveAndDelete {
 	private List<Integer> sentence_ratings;*/
 	
 	@ManyToMany(mappedBy="company_news")
-	private List<SingleCompany> companies;
+	private List<Company> companies;
 	
 	public CompanyNews() {}
 	
@@ -56,6 +58,27 @@ public class CompanyNews implements ISaveAndDelete {
 		this.translated_content = translated_content;
 		this.language = language;
 		this.total_rating = Float.MIN_VALUE;
+	}
+	
+	public CompanyNews(String serialized_news) {
+		String[] tmp = serialized_news.split("\t");
+		
+		this.md5_hash = Long.parseLong(tmp[0]);
+		this.news_url = tmp[1];
+		this.author = tmp[2];
+		
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			this.date = formatter.parse(tmp[3]);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			assert(false);
+		}
+		
+		this.original_content = tmp[4];
+		this.translated_content = tmp[5];
+		this.language = tmp[6];
+		this.total_rating = Float.parseFloat(tmp[7]);
 	}
 	
 	public String getTranslatedContent() {
@@ -90,7 +113,7 @@ public class CompanyNews implements ISaveAndDelete {
 		return this.md5_hash;
 	}
 	
-	public List<SingleCompany> getCompanies() {
+	public List<Company> getCompanies() {
 		return companies;
 	}
 
@@ -107,6 +130,13 @@ public class CompanyNews implements ISaveAndDelete {
 	public List<Integer> getSentenceRatings() {
 		return this.sentence_ratings;
 	}*/
+	
+	public String serializeCompanyNews() {
+		
+		return this.md5_hash + "\t" + this.news_url + "\t" + this.author + "\t" + 
+				this.date + "\t" + this.original_content + "\t" +  this.translated_content + "\t" + 
+				this.language + "\t" + this.total_rating;
+	}
 
 	@Override
 	public boolean saveToDB() {

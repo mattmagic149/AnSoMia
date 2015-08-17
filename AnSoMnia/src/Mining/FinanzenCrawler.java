@@ -13,8 +13,8 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import General.KeyPerformanceIndicators;
-import General.SingleCompany;
+import DatabaseClasses.Company;
+import DatabaseClasses.KeyPerformanceIndicator;
 import Support.HibernateSupport;
 
 public class FinanzenCrawler extends Crawler implements Job
@@ -37,7 +37,7 @@ public class FinanzenCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlInfos(SingleCompany company) {
+	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getFinanceQueryString() == null || company.getFinanceQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;
@@ -98,13 +98,13 @@ public class FinanzenCrawler extends Crawler implements Job
 		
 	}
 	
-	private boolean updateBalanceSheetValues(SingleCompany company, Elements tables, Pair<Integer, Integer> year_pair) {
+	private boolean updateBalanceSheetValues(Company company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
-		KeyPerformanceIndicators indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
+		KeyPerformanceIndicator indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
 		
 		if(indicators == null){
-			indicators = new KeyPerformanceIndicators(year_pair.getValue1(), company);
+			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company);
 			existing_indicators = false;
 		}
 		
@@ -145,10 +145,10 @@ public class FinanzenCrawler extends Crawler implements Job
 					equity = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
 					//System.out.println("equity " + year_pair.getValue1() + " = " + equity);
 				} else if(row_description.contains("Dividende pro Aktie")) {
-					dividend = this.parseFloat(tmp.get(j).child(year_pair.getValue0()).html());
+					dividend = this.parseFloat(tmp.get(j).child(year_pair.getValue0()).html(), Float.MIN_VALUE);
 					//System.out.println("dividend " + year_pair.getValue1() + " = " + dividend);
 				} else if(row_description.contains("Gewinn je Aktie (unverwässert)")) {
-					earnings_per_share = this.parseFloat(tmp.get(j).child(year_pair.getValue0()).html());
+					earnings_per_share = this.parseFloat(tmp.get(j).child(year_pair.getValue0()).html(), Float.MIN_VALUE);
 					//System.out.println("earnings_per_share " + year_pair.getValue1() + " = " + earnings_per_share);
 				} else if(row_description.contains("Bruttoergebnis vom Umsatz")) {
 					gross_profit = this.parseStringToLong(tmp.get(j).child(year_pair.getValue0()).html(), DECIMALS.MILLION);
@@ -167,7 +167,9 @@ public class FinanzenCrawler extends Crawler implements Job
 		debt, balance_sheet_total, gross_profit, number_of_employees, dividend, earnings_per_share);
 		
 		if(!existing_indicators) {
+			HibernateSupport.beginTransaction();
 			company.addKPIs(indicators);
+			HibernateSupport.commitTransaction();
 		}
 		
 		HibernateSupport.beginTransaction();

@@ -1,5 +1,11 @@
 package Support;
 
+import DatabaseClasses.Company;
+import DatabaseClasses.CompanyNews;
+import DatabaseClasses.Index;
+import DatabaseClasses.IndustrySector;
+import DatabaseClasses.KeyPerformanceIndicator;
+import DatabaseClasses.MarketValue;
 import General.*;
 
 import java.io.File;
@@ -47,10 +53,13 @@ public class HibernateSupport {
 		Configuration configuration = new Configuration();
 		
 		//add all classes you want to annotate
-		configuration.addAnnotatedClass(SingleCompany.class);
-		configuration.addAnnotatedClass(MarketValues.class);
-		configuration.addAnnotatedClass(KeyPerformanceIndicators.class);
+		configuration.addAnnotatedClass(Index.class);
+
+		configuration.addAnnotatedClass(Company.class);
+		configuration.addAnnotatedClass(MarketValue.class);
+		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
 		configuration.addAnnotatedClass(CompanyNews.class);
+		configuration.addAnnotatedClass(IndustrySector.class);
 
 		configuration.configure(configFile);
 		

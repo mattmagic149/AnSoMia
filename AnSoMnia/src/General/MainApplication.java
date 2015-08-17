@@ -11,11 +11,7 @@ import org.quartz.impl.matchers.KeyMatcher;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.quartz.JobBuilder.*; 
-import static org.quartz.TriggerBuilder.*;
-import static org.quartz.CronScheduleBuilder.*;
-
-import org.quartz.*;
+import static org.quartz.JobBuilder.*;
 
 import Mining.*;
 import ThreadListener.*;
@@ -35,6 +31,7 @@ public class MainApplication {
 	private JobDetail market_values_crawler_job;
 	private JobDetail finance_news_crawler_job;
 	private JobDetail yahoo_news_crawler_job;
+	private JobDetail history_market_values_crawler_job;
 
 	public static void main(String[] args) throws SchedulerException {
 		System.out.println("Starting MainApplication...");
@@ -65,20 +62,22 @@ public class MainApplication {
 
 		System.out.println("Creating Triggers...");
 
-		Trigger daily_trigger = newTrigger()
+		/*Trigger daily_trigger = newTrigger()
 			    .withIdentity("Daily Trigger", "Crawler Triggers")
-			    .withSchedule(cronSchedule("0 14 15 ? * MON-FRI"))
+			    .withSchedule(cronSchedule("0 25 17 ? * MON-FRI"))
 			    .build();
 		
 		Trigger weekly_trigger = newTrigger()
 				.withIdentity("Weekly Trigger", "Crawler Triggers")
-				.withSchedule(cronSchedule("0 07 16 ? * SAT-SUN"))
+				.withSchedule(cronSchedule("0 00 15 ? * SAT-SUN"))
 				.build();
 		
 		app.scheduler.scheduleJob(app.market_values_crawler_job, daily_trigger);
-		app.scheduler.scheduleJob(app.company_indexer_job, weekly_trigger);
+		app.scheduler.scheduleJob(app.company_indexer_job, weekly_trigger);*/
 		
 		//app.getScheduler().triggerJob(MainApplication.app.getFinanceNewsCrawlerJob().getKey());
+		app.getScheduler().triggerJob(MainApplication.app.history_market_values_crawler_job.getKey());
+		//app.getScheduler().triggerJob(MainApplication.app.market_values_crawler_job.getKey());
 
 
 	}
@@ -91,6 +90,7 @@ public class MainApplication {
 			app.scheduler.addJob(app.finance_crawler_job, false);
 			app.scheduler.addJob(app.finance_news_crawler_job, false);
 			app.scheduler.addJob(app.yahoo_news_crawler_job, false);		
+			app.scheduler.addJob(app.history_market_values_crawler_job, false);		
 			//app.scheduler.addJob(app.market_values_crawler_job, false);
 
 		} catch (SchedulerException e) {
@@ -102,7 +102,7 @@ public class MainApplication {
 	}
 	
 	private void createJobs() {
-		app.company_indexer_job = newJob(CompanyIndexer.class) 
+		app.company_indexer_job = newJob(CompanyIndexIndustryCrawler.class) 
 				.withIdentity("CompanyIndexer", "Indexer")
 				.storeDurably()
 				.build();
@@ -134,6 +134,11 @@ public class MainApplication {
 		
 		app.yahoo_news_crawler_job = newJob(YahooNewsCrawler.class)
 				.withIdentity("finance.yahoo.com NewsCrawler", "DailyCrawlers")
+				.storeDurably()
+				.build();
+		
+		app.history_market_values_crawler_job = newJob(HistoryMarketValuesCrawler.class)
+				.withIdentity("wallstreet-online.de history market values crawler", "Indexer")
 				.storeDurably()
 				.build();
 	}
@@ -168,6 +173,10 @@ public class MainApplication {
 	
 	public JobDetail getYahooNewsCrawlerJob() {
 		return yahoo_news_crawler_job;
+	}
+
+	public JobDetail getHistoryMarketValuesCrawlerJob() {
+		return history_market_values_crawler_job;
 	}
 
 }

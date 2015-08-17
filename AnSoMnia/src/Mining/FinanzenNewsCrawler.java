@@ -28,6 +28,8 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import DatabaseClasses.Company;
+import DatabaseClasses.CompanyNews;
 import General.*;
 import Support.HibernateSupport;
 
@@ -50,7 +52,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 		System.out.println(MainApplication.isin_mutex_map.size());
 		MainApplication.isin_mutex_map.clear();
 		List<Criterion>  criterions = new ArrayList<Criterion>();
-		List<SingleCompany> companies = HibernateSupport.readMoreObjects(SingleCompany.class, criterions);
+		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, criterions);
 		
 		for(int i = 0; i < companies.size(); i++) {
 			MainApplication.isin_mutex_map.put(companies.get(i).getIsin(), new ReentrantLock(true));
@@ -75,7 +77,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 		}
 	}
 	
-	protected boolean crawlInfos(SingleCompany company) {
+	protected boolean crawlInfos(Company company) {
 		System.out.println("FinanzenNewsCrawler crawlInfos");
 
 		if(company == null || company.getFinanceQueryString() == null || company.getFinanceQueryString() == "") {
@@ -130,7 +132,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 		
 	}
 	
-	private void crawlSingleNews(SingleCompany company, ArrayList<String> links, ArrayList<String> dates) {
+	private void crawlSingleNews(Company company, ArrayList<String> links, ArrayList<String> dates) {
 		Date date = new Date();
 		DateFormat format = new SimpleDateFormat("d.M.y");
 		CompanyNews news;
@@ -243,10 +245,14 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 				}
 				
 				news = new CompanyNews(hash, link, "finanzen.net", date, content, "translated_content", language);
+				HibernateSupport.beginTransaction();
 				company.addNews(news);
 				System.out.println("news don't exist.");
+				HibernateSupport.commitTransaction();
 			} else if(news != null && !company.checkNewsAlreadyAdded(hash)) {
+				HibernateSupport.beginTransaction();
 				company.addNews(news);
+				HibernateSupport.commitTransaction();
 				System.out.println("news exist, but NOT within this company.");
 			} else {
 				System.out.println(hash);
