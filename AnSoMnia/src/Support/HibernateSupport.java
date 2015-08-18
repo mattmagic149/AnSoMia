@@ -1,12 +1,6 @@
 package Support;
 
-import DatabaseClasses.Company;
-import DatabaseClasses.CompanyNews;
-import DatabaseClasses.Index;
-import DatabaseClasses.IndustrySector;
-import DatabaseClasses.KeyPerformanceIndicator;
-import DatabaseClasses.MarketValue;
-import General.*;
+import DatabaseClasses.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -97,6 +91,20 @@ public class HibernateSupport {
 		for(Criterion criterion: criterions) {
 			criteria.add(criterion);
 		}
+		List<T> result = criteria.list();
+		commitTransaction();
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> List <T> readMoreObjects(Class<?> classToRetrieve, List<Criterion> criterions, int offset) {
+		beginTransaction();
+		Criteria criteria = getCurrentSession().createCriteria(classToRetrieve);
+		for(Criterion criterion: criterions) {
+			criteria.add(criterion);
+		}
+		criteria.setFirstResult(offset);
+		criteria.setMaxResults(30000);
 		List<T> result = criteria.list();
 		commitTransaction();
 		return result;

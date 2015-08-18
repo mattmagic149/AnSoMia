@@ -13,13 +13,7 @@ import java.util.Map;
 
 import org.hibernate.criterion.Criterion;
 
-import DatabaseClasses.Company;
-import DatabaseClasses.CompanyNews;
-import DatabaseClasses.Index;
-import DatabaseClasses.IndustrySector;
-import DatabaseClasses.KeyPerformanceIndicator;
-import DatabaseClasses.MarketValue;
-import General.*;
+import DatabaseClasses.*;
 
 public class SaveLoadDatabase {
 
@@ -231,11 +225,20 @@ public class SaveLoadDatabase {
 			return false;
 		}
 		
-		List<MarketValue> market_values = HibernateSupport.readMoreObjects(MarketValue.class, new ArrayList<Criterion>());
+		HibernateSupport.beginTransaction();
+		int market_values_size = ((Long)HibernateSupport.getCurrentSession()
+									.createQuery("select count(*) from MarketValue")
+									.uniqueResult()).intValue();
+		HibernateSupport.commitTransaction();
+		System.out.println(market_values_size);
 
-		for(int i = 0; i < market_values.size(); i++) {
-			//System.out.println((i + 1) + " market values stored to file.");
-			writer.println(market_values.get(i).serializeMarketValue());
+		for(int offset = 0; offset < market_values_size; offset += 30000) {
+			List<MarketValue> market_values = HibernateSupport.readMoreObjects(MarketValue.class, new ArrayList<Criterion>(), offset);
+			System.out.println(offset + " market values, of " + market_values_size + " stored to file.");
+
+			for(int i = 0; i < market_values.size(); i++) {
+				writer.println(market_values.get(i).serializeMarketValue());
+			}
 		}
 		writer.close();
 		System.out.println("Finished storing market values!");

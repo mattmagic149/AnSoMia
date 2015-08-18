@@ -3,13 +3,7 @@ package Support;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
-import DatabaseClasses.Company;
-import DatabaseClasses.CompanyNews;
-import DatabaseClasses.Index;
-import DatabaseClasses.IndustrySector;
-import DatabaseClasses.KeyPerformanceIndicator;
-import DatabaseClasses.MarketValue;
-import General.*;
+import DatabaseClasses.*;
 
 /**
  * This Class is for Constructing the Database

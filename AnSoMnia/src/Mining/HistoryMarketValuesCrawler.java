@@ -121,8 +121,24 @@ public class HistoryMarketValuesCrawler extends Crawler implements Job
 				//tries to connect 3 times in a row, if it fails, it returns
 				if(++connection_attempts == 3) {
 					System.out.println("returning after 3 connection attempt.");
+					
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException ex) {
+						// TODO Auto-generated catch block
+						ex.printStackTrace();
+					}
+					
 					return false;
 				} else {
+					
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException ex) {
+						// TODO Auto-generated catch block
+						ex.printStackTrace();
+					}
+					
 					continue;
 				}
 			}
@@ -130,7 +146,7 @@ public class HistoryMarketValuesCrawler extends Crawler implements Job
 			connection_attempts = 0;
 						
 			try {
-				Thread.sleep(100);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
