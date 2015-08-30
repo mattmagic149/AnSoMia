@@ -87,16 +87,16 @@ public class IsinMutexMapListener implements JobListener {
 		System.out.println("this job has been executed!!!!");
 		
 		try {
-			MainApplication.getInstance()
+			/*MainApplication.getInstance()
 						   .getScheduler()
 						   .triggerJob(MainApplication.getInstance()
 								   					  .getFinanceNewsCrawlerJob()
-								   					  .getKey());
+								   					  .getKey());*/
 			
 			MainApplication.getInstance()
 						   .getScheduler()
 						   .triggerJob(MainApplication.getInstance()
-								   					  .getMarketValuesCrawlerJob()
+								   					  .getWallstreetNewsCrawlerJob()
 								   					  .getKey());
 			
 		} catch (SchedulerException e) {

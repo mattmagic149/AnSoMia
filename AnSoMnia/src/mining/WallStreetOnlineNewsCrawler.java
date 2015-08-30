@@ -19,6 +19,7 @@
  */
 package mining;
 
+import org.javatuples.Pair;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -30,10 +31,10 @@ import io.sensium.SensiumException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.quartz.Job;
@@ -48,11 +49,11 @@ import database.*;
 /**
  * The Class FinanzenNewsCrawler.
  */
-public class FinanzenNewsCrawler extends Crawler implements Job
+public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 {
 	
 	/** The finance_url. */
-	private String finance_url = "http://www.finanzen.at";
+	private String wall_street_url = "http://www.wallstreet-online.de";
 	
 	/** The sensium. */
 	private Sensium sensium;
@@ -69,7 +70,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 	/**
 	 * Instantiates a new finanzen news crawler.
 	 */
-	public FinanzenNewsCrawler() {
+	public WallStreetOnlineNewsCrawler() {
 		this.name = "finance_news_crawler";
 		this.http_req_manager = HttpRequestManager.getInstance();
 		this.sensium = new Sensium("e16c27a8-e309-47aa-838d-cc2e6ffc5007");
@@ -91,35 +92,25 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 	protected boolean crawlInfos(Company company) {
 		System.out.println("FinanzenNewsCrawler crawlInfos");
 
-		if(company == null || company.getFinanceQueryString() == null || company.getFinanceQueryString() == "") {
+		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
 			return false;
 		}
 		
-		HttpRequester http_req = this.http_req_manager.getCorrespondingHttpRequester(finance_url);
-		Element response = http_req.getHtmlContent("/aktien/" + company.getFinanceQueryString() + "-Aktie");
+		ArrayList<Pair<String, Date>> links_plus_dates = new ArrayList<Pair<String, Date>>();
+		ArrayList<Pair<String, Date>> tmp = new ArrayList<Pair<String, Date>>();
 
-		if(response == null) {
-			return false;
-		}
 		
-		Elements news_tables_entries;
-		Elements link_elements;
-		ArrayList<String> links = new ArrayList<String>();
-		ArrayList<String> dates = new ArrayList<String>();
-		
-		news_tables_entries = response.select("#detail-news-table tbody tr");
-		link_elements = news_tables_entries.select("a");
-
-		for(int i = 0; i < link_elements.size(); i++) {
-			if(link_elements.get(i).attr("abs:href").contains(finance_url + "/nachrichten")) {
-				//System.out.println(link_elements.get(i).attr("abs:href"));
-				links.add(link_elements.get(i).attr("abs:href"));
-				dates.add((link_elements.get(i).parent().siblingElements().first().html()));
+		for(int i = 1; i <= 5; i++) {
+			tmp = getLinksFromOnePage(company, i);
+			if(tmp != null) {
+				links_plus_dates.addAll(tmp);
 			}
 		}
+
+		System.out.println(links_plus_dates.size());
 		
-		crawlSingleNews(company, links, dates);
+		crawlSingleNews(company, links_plus_dates);
 
 		return true;
 		
@@ -129,24 +120,22 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 	 * Crawl single news.
 	 *
 	 * @param company the company
-	 * @param links the links
-	 * @param dates the dates
+	 * @param links_plus_dates the links_plus_dates
 	 */
-	private void crawlSingleNews(Company company, ArrayList<String> links, ArrayList<String> dates) {
+	private void crawlSingleNews(Company company, ArrayList<Pair<String, Date>> links_plus_dates) {
 		Date date = new Date();
-		DateFormat format = new SimpleDateFormat("d.M.y");
 		News news;
-		Element response;
-		Elements main_content;
 		String content;
 		String link;
 		String language;
 		long hash = 0;
-		HttpRequester http_req;
+		HttpRequester hr;
+		Element response;
 
-		for(int i = 0; i < links.size(); i++) {
+		for(int i = 0; i < links_plus_dates.size(); i++) {
 			System.out.println("Next news...");
-			link = links.get(i);
+			link = links_plus_dates.get(i).getValue0();
+			date = links_plus_dates.get(i).getValue1();
 			//System.out.println("link = " + link);
 			
 			if(company.checkUrlAlreadyAddedToNews(link)) {
@@ -155,60 +144,34 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 				continue;
 			}
 			
-			
-			System.out.println("First request...");
-			http_req = this.http_req_manager.getCorrespondingHttpRequester(link);
-			response = http_req.getHtmlContentWithCompleteUrl(link);
+			hr = this.http_req_manager.getCorrespondingHttpRequester(link);
+			response = hr.getHtmlContentWithCompleteUrl(link);
 			if(response == null) {
-				continue;
+				System.out.println("response == null.");
+				return;
 			}
 			
-			main_content = response.select(".news_text");
-			if(main_content.toString().isEmpty()) {
-				System.out.println("main_content is NULL");
-				///TODO: log
-				continue;
-			}
-			
-			content = main_content.text();
-			if(content.contains("Weiter zum vollständigen Artikel bei")) {
-				link = main_content.select("a").last().attr("abs:href");
+			try {
 				
-				if(company.checkUrlAlreadyAddedToNews(link)) {
-					///TODO: log
-					System.out.println("skipped these news, because url is already added.");
-					continue;
+				if(response.select(".postingText").size() == 1) {
+					System.out.println("using text from response.");
+					this.req.text = response.select(".postingText").text();
+					this.req.url = "";
 				} else {
-					//System.out.println("link = " + link);
+					System.out.println("using text from sensium.");
+					this.req.text = "";
+					this.req.url = link;
 				}
 				
-				System.out.println("Second request...");
+				resp = sensium.extract(req);
+				content = resp.text;
+				language = resp.language;
 
-				try {
-					this.req.url = link;
-					resp = sensium.extract(req);
-					content = resp.text;
-					language = resp.language;
-				} catch (SensiumException e) {
-					//e.printStackTrace();
-					///TODO: log
-					System.out.println("sensium.extract(req) threw an exception!!!");
-					System.out.println("url: " + link);
-					continue;
-				}
-			} else {
-				try {
-					this.req.url = link;
-					resp = sensium.extract(req);
-					content = resp.text;
-					language = resp.language;
-
-				} catch (SensiumException e) {
-					//e.printStackTrace();
-					///TODO: log
-					System.out.println("sensium.extract(req) threw an exception!!!");
-					continue;
-				}
+			} catch (SensiumException e) {
+				//e.printStackTrace();
+				///TODO: log
+				System.out.println("sensium.extract(req) threw an exception!!!");
+				continue;
 			}
 			
 			if(content.length() < 100) {
@@ -232,16 +195,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 			news = HibernateSupport.readOneObjectByID(News.class, hash);
 			
 			if(news == null && !company.checkNewsAlreadyAdded(hash)) {
-				
-				try {
-					date = format.parse(dates.get(i));
-				} catch (ParseException e) {
-					//e.printStackTrace();
-					///TODO: log
-					continue;
-				}
-				
-				news = new News(hash, link, "finanzen.net", date, content, "translated_content", language);
+				news = new News(hash, link, "wallstreet-online.de", date, content, "translated_content", language);
 				HibernateSupport.beginTransaction();
 				news.saveToDB();
 				company.addNews(news);
@@ -258,6 +212,85 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 			}
 			
 		}
+	}
+	
+	/**
+	 * Gets the links from one page.
+	 *
+	 * @param company the company
+	 * @param page_number the page_number
+	 * @return the links from one page
+	 */
+	private ArrayList<Pair<String, Date>> getLinksFromOnePage(Company company, int page_number) {
+		ArrayList<Pair<String, Date>> result = new ArrayList<Pair<String, Date>>();
+		
+		
+		HttpRequester hr = http_req_manager.getCorrespondingHttpRequester(wall_street_url);
+		
+		Element response = hr.getHtmlContent("/aktien/" + 
+												company.getWallstreetQueryString() + 
+												"/nachrichten?page=" + 
+												page_number);
+		
+		if(response == null) {
+			System.out.println("NULL!!!!!");
+			return null;
+		}
+				
+		Elements t_datas = response.select(".module .t-data");
+		if(t_datas.size() == 0) {
+			return null;
+		}
+		int max = 0;
+		int index = 0;
+		Elements ankers;
+		for(int i = 0; i < t_datas.size(); i++) {
+			ankers = t_datas.get(i).select("a");
+			if(ankers.size() > max) {
+				max = ankers.size();
+				index = i;
+			}
+		}
+		
+		SimpleDateFormat formater = new SimpleDateFormat("dd.MM.");
+		
+		Date reference_date = new Date();
+		Calendar reference_calendar = Calendar.getInstance();
+		reference_calendar.setTime(reference_date);
+		
+		reference_calendar.set(Calendar.HOUR, 0);
+		reference_calendar.set(Calendar.MINUTE, 0);
+		reference_calendar.set(Calendar.SECOND, 0);
+		
+		Calendar current_calendar = Calendar.getInstance();
+
+		Elements rows = t_datas.get(index).select("tbody tr");
+		if(rows.size() == 0) {
+			return null;
+		}
+		String url;
+		String date_string;
+		
+		for(int i = 0; i < rows.size(); i++) {
+			url = rows.get(i).select("a").first().attr("abs:href");
+			date_string = rows.get(i).select("span").html();
+			try {
+				current_calendar.setTime(formater.parse(date_string));
+				current_calendar.set(Calendar.YEAR, reference_calendar.get(Calendar.YEAR));
+				
+				while(current_calendar.after(reference_calendar)) {
+					current_calendar.set(Calendar.YEAR, current_calendar.get(Calendar.YEAR) - 1);
+				}
+				
+				result.add(new Pair<String, Date>(url, current_calendar.getTime()));
+
+			} catch (ParseException e) {
+				continue;
+			}
+		}
+		
+		
+		return result;
 	}
 	
 }

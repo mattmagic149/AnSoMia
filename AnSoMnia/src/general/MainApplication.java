@@ -66,6 +66,9 @@ public class MainApplication {
 	/** The finance_news_crawler_job. */
 	private JobDetail finance_news_crawler_job;
 	
+	/** The wallstreet_news_crawler_job. */
+	private JobDetail wallstreet_news_crawler_job;
+	
 	/** The yahoo_news_crawler_job. */
 	private JobDetail yahoo_news_crawler_job;
 	
@@ -142,6 +145,7 @@ public class MainApplication {
 			app.scheduler.addJob(app.wallstreet_crawler_job, false);
 			app.scheduler.addJob(app.finance_crawler_job, false);
 			app.scheduler.addJob(app.finance_news_crawler_job, false);
+			app.scheduler.addJob(app.wallstreet_news_crawler_job, false);
 			app.scheduler.addJob(app.yahoo_news_crawler_job, false);		
 			app.scheduler.addJob(app.market_values_crawler_job, false);		
 			//app.scheduler.addJob(app.market_values_crawler_job, false);
@@ -180,6 +184,11 @@ public class MainApplication {
 		
 		app.finance_news_crawler_job = newJob(FinanzenNewsCrawler.class)
 				.withIdentity("finanzen.net NewsCrawler", "DailyCrawlers")
+				.storeDurably()
+				.build();
+		
+		app.wallstreet_news_crawler_job = newJob(WallStreetOnlineNewsCrawler.class)
+				.withIdentity("wallstreet-online.de NewsCrawler", "DailyCrawlers")
 				.storeDurably()
 				.build();
 		
@@ -246,6 +255,15 @@ public class MainApplication {
 	 */
 	public JobDetail getFinanceNewsCrawlerJob() {
 		return finance_news_crawler_job;
+	}
+	
+	/**
+	 * Gets the wallstreet news crawler job.
+	 *
+	 * @return the wallstreet news crawler job
+	 */
+	public JobDetail getWallstreetNewsCrawlerJob() {
+		return wallstreet_news_crawler_job;
 	}
 	
 	/**
