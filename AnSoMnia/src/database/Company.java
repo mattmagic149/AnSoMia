@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package database;
 
 import interfaces.*;
@@ -16,40 +35,61 @@ import org.hibernate.HibernateException;
 
 import utils.*;
 
+/**
+ * The Class Company.
+ */
 @Entity
 public class Company extends ShareInfo implements ISaveAndDelete {
 	
+	/** The website of the company. */
 	private String web_site;
 	
+	/** The origin of the company. */
 	private String origin;
 	
+	/** The wallstreetid. */
 	private int wallstreet_id;
 		
+	/** List of all market values. */
 	@OneToMany
 	@JoinColumn(name="isin")
 	private List<MarketValue> market_values_list;
 	
+	/** List of all KeyPerformanceIndicators. */
 	@OneToMany
 	@JoinColumn(name="isin")
 	private List<KeyPerformanceIndicator> kpis_list;
 	
+	/** List of all news. */
 	@ManyToMany
 	@JoinTable(name="CompanyToNews",
 				joinColumns={@JoinColumn(name="isin")}, 
 				inverseJoinColumns={@JoinColumn(name="md5_hash")})
-	private List<CompanyNews> company_news;
+	private List<News> company_news;
 	
+	/** List of all indexes. */
 	@ManyToMany(mappedBy="companies")
 	private List<Index> indexes;
 	
+	/** List of all industry sectors. */
 	@ManyToMany(mappedBy="companies")
 	private List<Index> industry_sectors;
 
 	
+	/**
+	 * Instantiates a new company.
+	 */
 	public Company() {
 		
 	}
 	
+	/**
+	 * Instantiates a new company.
+	 *
+	 * @param isin the isin
+	 * @param company_name the company_name
+	 * @param ticker the ticker
+	 */
 	public Company(String isin, String company_name, String ticker) {
 		this.isin = isin;
 		this.name = company_name;
@@ -57,10 +97,15 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		
 		this.market_values_list = new ArrayList<MarketValue>();
 		this.kpis_list = new ArrayList<KeyPerformanceIndicator>();
-		this.company_news = new ArrayList<CompanyNews>();
+		this.company_news = new ArrayList<News>();
 
 	}
 	
+	/**
+	 * Instantiates a new company.
+	 *
+	 * @param serialized_company the serialized_company
+	 */
 	public Company(String serialized_company) {
 		String[] tmp = serialized_company.split("\t");
 		this.isin = tmp[0];
@@ -76,42 +121,88 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		
 		this.market_values_list = new ArrayList<MarketValue>();
 		this.kpis_list = new ArrayList<KeyPerformanceIndicator>();
-		this.company_news = new ArrayList<CompanyNews>();
+		this.company_news = new ArrayList<News>();
 		
 	}
 	
+	/**
+	 * Gets the wallstreet id.
+	 *
+	 * @return the wallstreet id
+	 */
 	public int getWallstreetId() {
 		return wallstreet_id;
 	}
 
+	/**
+	 * Sets the wallstreet id.
+	 *
+	 * @param wallstreet_id the new wallstreet id
+	 */
 	public void setWallstreetId(int wallstreet_id) {
 		this.wallstreet_id = wallstreet_id;
 	}
 	
+	/**
+	 * Gets the market values list.
+	 *
+	 * @return the market values list
+	 */
 	public List<MarketValue> getMarketValuesList() {
 		return market_values_list;
 	}
 
+	/**
+	 * Gets the kpis list.
+	 *
+	 * @return the kpis list
+	 */
 	public List<KeyPerformanceIndicator> getKpisList() {
 		return kpis_list;
 	}
 	
+	/**
+	 * Gets the origin.
+	 *
+	 * @return the origin
+	 */
 	public String getOrigin() {
 		return origin;
 	}
 
+	/**
+	 * Sets the origin.
+	 *
+	 * @param origin the new origin
+	 */
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
 	
+	/**
+	 * Gets the web site.
+	 *
+	 * @return the web site
+	 */
 	public String getWebSite() {
 		return web_site;
 	}
 
+	/**
+	 * Sets the web site.
+	 *
+	 * @param web_site the new web site
+	 */
 	public void setWebSite(String web_site) {
 		this.web_site = web_site;
 	}
 	
+	/**
+	 * Checks if the market value is already added.
+	 *
+	 * @param date the date
+	 * @return true, if is market value already added
+	 */
 	public boolean isMarketValueAlreadyAdded(Date date) {
 		for(int i = 0; i < market_values_list.size(); i++) {
 			if(DateUtils.isSameDay(date, market_values_list.get(i).getDate())) {
@@ -121,6 +212,12 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return false;
 	}
 	
+	/**
+	 * Gets the number of added dates of particular month and year.
+	 *
+	 * @param date the year and month to check
+	 * @return the number of added dates of particular month and year
+	 */
 	public int getNumberOfAddedDatesOfParticularMonthAndYear(Date date) {
 		int result = 0;
 		Calendar calendar = Calendar.getInstance();
@@ -142,6 +239,12 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return result;
 	}
 	
+	/**
+	 * Adds the market value.
+	 *
+	 * @param values the values
+	 * @return true, if successful
+	 */
 	public boolean addMarketValue(MarketValue values) {
 		boolean success = false;
 		
@@ -155,6 +258,12 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return success;
 	}
 	
+	/**
+	 * Adds the market value without check.
+	 *
+	 * @param values the values
+	 * @return true, if successful
+	 */
 	public boolean addMarketValueWithoutCheck(MarketValue values) {
 		boolean success = false;
 		
@@ -166,7 +275,13 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return success;
 	}
 	
-	public boolean addKPIs(KeyPerformanceIndicator values) {
+	/**
+	 * Adds the kpi.
+	 *
+	 * @param values the kpi to add
+	 * @return true, if successful
+	 */
+	public boolean addKPI(KeyPerformanceIndicator values) {
 		boolean success = false;
 		if (this.kpis_list.add(values)){
 			success = values.saveToDB();
@@ -174,6 +289,12 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return success;
 	}
 	
+	/**
+	 * Gets the kpis corresponding to year.
+	 *
+	 * @param year the year
+	 * @return the kpis corresponding to year
+	 */
 	public KeyPerformanceIndicator getKpisCorrespondingToYear(int year) {
 		Calendar new_year = Calendar.getInstance();
 		Calendar existing_year = Calendar.getInstance();
@@ -190,6 +311,9 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return null;
 	}
 	
+	/**
+	 * Update kpis to calculate.
+	 */
 	public void updateKpisToCalculate() {
 		for(int i = 0; i < this.kpis_list.size(); i++) {
 			kpis_list.get(i).updateKpisToCalculate();
@@ -199,7 +323,12 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		}
 	}
 	
-	public List<CompanyNews> getCompanyNews() {
+	/**
+	 * Gets the company news.
+	 *
+	 * @return the company news
+	 */
+	public List<News> getCompanyNews() {
 		HibernateSupport.beginTransaction();
 		// refresh DB-Image
 		try{
@@ -215,10 +344,13 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return this.company_news;
 	}
 	
-	//*************************************************************************************************
-	// addNews:
-	// adds news to the news_list.
-	public boolean addNews(CompanyNews new_news) {
+	/**
+	 * Adds the news.
+	 *
+	 * @param new_news the new_news
+	 * @return true, if successful
+	 */
+	public boolean addNews(News new_news) {
 		boolean success = false;
 		
 		if(new_news != null){	
@@ -234,6 +366,12 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 			return false;
 	}
 	
+	/**
+	 * Check news already added.
+	 *
+	 * @param hash the hash of the news
+	 * @return true, if successful
+	 */
 	public boolean checkNewsAlreadyAdded(long hash) {
 		for(int i = 0; i < this.company_news.size(); i++) {
 			if(this.company_news.get(i).getHash() == hash) {
@@ -244,7 +382,13 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return false;
 	}
 	
-	public boolean checkUrlAlreadyAdded(String url) {
+	/**
+	 * Check url already added to news.
+	 *
+	 * @param url the url
+	 * @return true, if successful
+	 */
+	public boolean checkUrlAlreadyAddedToNews(String url) {
 		for(int i = 0; i < this.company_news.size(); i++) {
 			if(this.company_news.get(i).getUrl().equals(url)) {
 				return true;
@@ -254,12 +398,13 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return false;
 	}
 	
-	public String serializeCompany() {
-		return this.isin + "\t" + this.finance_query_string + "\t" + this.name + "\t" + 
-				this.ticker + "\t" + this.valor + "\t" + this.wallstreet_query_string + "\t" + 
-				this.wkn + "\t" +  this.origin + "\t" +this.wallstreet_id + "\t" + this.web_site;
-	}
-	
+	/**
+	 * Gets the market values between two dates [from, to].
+	 *
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the market values between dates
+	 */
 	public ArrayList<MarketValue> getMarketValuesBetweenDates(Date from, Date to) {
 		ArrayList<MarketValue> ret = new ArrayList<MarketValue>();
 		MarketValue current_value;
@@ -275,18 +420,33 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		
 		return ret;
 	}
+		
+	/* (non-Javadoc)
+	 * @see interfaces.ISaveAndDelete#serialize()
+	 */
+	@Override
+	public String serialize() {
+		return this.isin + "\t" + this.finance_query_string + "\t" + this.name + "\t" + 
+				this.ticker + "\t" + this.valor + "\t" + this.wallstreet_query_string + "\t" + 
+				this.wkn + "\t" +  this.origin + "\t" +this.wallstreet_id + "\t" + this.web_site;
+	}
 	
-	
+	/* (non-Javadoc)
+	 * @see interfaces.ISaveAndDelete#saveToDB()
+	 */
 	@Override
 	public boolean saveToDB() {
 		if(!HibernateSupport.commit(this))
 			return false;
 		return true;
 	}
+	
+	/* (non-Javadoc)
+	 * @see interfaces.ISaveAndDelete#deleteFromDB(java.lang.Object)
+	 */
 	@Override
 	public void deleteFromDB(Object obj) {
-		HibernateSupport.deleteObject(this);
-		
+		HibernateSupport.deleteObject(this);	
 	}
 
 }

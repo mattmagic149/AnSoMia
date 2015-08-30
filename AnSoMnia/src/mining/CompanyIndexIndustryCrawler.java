@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package mining;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -33,24 +52,53 @@ import utils.HttpRequestManager;
 import utils.HttpRequester;
 import database.*;
 
+/**
+ * The Class CompanyIndexIndustryCrawler.
+ */
 public class CompanyIndexIndustryCrawler implements Job
 {
+	
+	/** The wall_street_url. */
 	private String wall_street_url = "http://www.wallstreet-online.de";	
+	
+	/** The isin_filter. */
 	private String[] isin_filter = {"DE", "US", "AT"};
+	
+	/** The instrument_group_filter. */
 	private String[] instrument_group_filter = {"BOND", "EXCHANGE", "EB", "FOND", "EXTERNAL", "WARRANTS", "INSTRUMENTS"};
+	
+	/** The company_name_filter. */
 	private String[] company_name_filter = {"ETF", " ETN"," ETP", "ETC", "EXCH."};
+	
+	/** The isin_blacklist. */
 	private String[] isin_blacklist;
+	
+	/** The logger. */
 	private Logger logger; 
+	
+	/** The filehandler. */
 	private FileHandler fh; 
+	
+	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
+	
+	/** The number_of_companies_added. */
 	private int number_of_companies_added;
 	
-
-	@Override
-	public void execute(JobExecutionContext arg0) throws JobExecutionException {
-		logger = Logger.getLogger("MyLogger");
-		logger.setUseParentHandlers(false);
+	
+	private String csv_file_name;
+	
+	
+	/**
+	 * Instantiates a new company index industry crawler.
+	 */
+	public CompanyIndexIndustryCrawler() {
+		this.csv_file_name = "data/companies.csv";
+		this.logger = Logger.getLogger("MyLogger");
+		this.logger.setUseParentHandlers(false);
 		this.http_req_manager = HttpRequestManager.getInstance();
+		
+		this.isin_blacklist = readBlackList("data/blacklist.csv");
 	  
 		try {
 			// This block configure the logger with handler and formatter
@@ -66,7 +114,14 @@ public class CompanyIndexIndustryCrawler implements Job
 			e.printStackTrace();
 			return;
 		}  
+	}
 
+	/* (non-Javadoc)
+	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+	 */
+	@Override
+	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		
 		System.out.println("Downloading CompanyCSV now...");
 		if(!downloadCompanyCSV()) {
 			System.out.println("Could NOT dowload company csv file!!!");
@@ -77,13 +132,18 @@ public class CompanyIndexIndustryCrawler implements Job
 		filterAndAddToDB();
 	}
   
+	/**
+	 * Download company csv.
+	 *
+	 * @return true, if successful
+	 */
 	private boolean downloadCompanyCSV() {
 		URL website;
 		try {
 			website = new URL("http://www.deutsche-boerse-cash-market.com/blob/"
 				  		+ "1424940/97e907d4cfa55e17b4e201cb47d6852f/data/allTradableInstruments.csv");
 			ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-			FileOutputStream fos = new FileOutputStream("data/companies.csv");
+			FileOutputStream fos = new FileOutputStream(this.csv_file_name);
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			fos.close();
 		} catch (MalformedURLException e) {
@@ -97,6 +157,12 @@ public class CompanyIndexIndustryCrawler implements Job
 		return true;
 	}
   
+	/**
+	 * Read black list.
+	 *
+	 * @param filename the filename
+	 * @return the string[]
+	 */
 	private String[] readBlackList(String filename) {
 		FileReader file_reader;
 		String[] result = null;
@@ -121,19 +187,18 @@ public class CompanyIndexIndustryCrawler implements Job
 		return result;
 	}
   
+	/**
+	 * Filter and add to db.
+	 */
 	private void filterAndAddToDB() {
 	  
-		String csv_file = "data/companies.csv";
 		BufferedReader br = null;
-	 
 		this.number_of_companies_added = 0;
 		int row_counter = 0;
 		String line;
 		
-		this.isin_blacklist = readBlackList("data/blacklist.csv");
-		
 		try {
-			br = new BufferedReader(new FileReader(csv_file));
+			br = new BufferedReader(new FileReader(csv_file_name));
 			while ((line = br.readLine()) != null) {
 				if(row_counter++ < 5) {
 					continue;
@@ -158,6 +223,12 @@ public class CompanyIndexIndustryCrawler implements Job
 		System.out.println("Added " + number_of_companies_added + " companies");
 	}
 	
+	/**
+	 * Process company line.
+	 *
+	 * @param line the line
+	 * @return true, if successful
+	 */
 	private boolean processCompanyLine(String line) {
 		String company_name = "";
 		String company_isin = "";
@@ -234,7 +305,13 @@ public class CompanyIndexIndustryCrawler implements Job
 	}
 
   
-  	private boolean crawlCompanyWallstreetInformation(Company company) {
+  	/**
+	   * Crawl company wallstreet information.
+	   *
+	   * @param company the company
+	   * @return true, if successful
+	   */
+	  private boolean crawlCompanyWallstreetInformation(Company company) {
   		  		
   		String isin = company.getIsin();
   		HttpRequester http_requester = this.http_req_manager.getCorrespondingHttpRequester(this.wall_street_url);
@@ -333,7 +410,13 @@ public class CompanyIndexIndustryCrawler implements Job
   		return true;
   	}
   	
-  	private ArrayList<IndustrySector> createIndustrySectors(Elements industry_sectors) {
+  	/**
+	   * Creates the industry sectors.
+	   *
+	   * @param industry_sectors the industry_sectors
+	   * @return the array list
+	   */
+	  private ArrayList<IndustrySector> createIndustrySectors(Elements industry_sectors) {
   		ArrayList<IndustrySector> ret = new ArrayList<IndustrySector>();
   		IndustrySector industry_sector;
   		String industry_name;
@@ -369,7 +452,13 @@ public class CompanyIndexIndustryCrawler implements Job
   		return ret;
   	}
   	
-  	private ArrayList<Index> createIndexes(Elements indexes) {
+  	/**
+	   * Creates the indexes.
+	   *
+	   * @param indexes the indexes
+	   * @return the array list
+	   */
+	  private ArrayList<Index> createIndexes(Elements indexes) {
   		ArrayList<Index> ret = new ArrayList<Index>();
 		Index index;
 		String wall_street_query_string;
@@ -433,7 +522,13 @@ public class CompanyIndexIndustryCrawler implements Job
   		return ret;
   	}
   	
-  	private boolean crawlCompanyFinanceInformation(Company company) {
+  	/**
+	   * Crawl company finance information.
+	   *
+	   * @param company the company
+	   * @return true, if successful
+	   */
+	  private boolean crawlCompanyFinanceInformation(Company company) {
   		String isin = company.getIsin();
 
   		HttpRequester http_requester = http_req_manager.getCorrespondingHttpRequester("http://finanzen.net");
@@ -453,6 +548,15 @@ public class CompanyIndexIndustryCrawler implements Job
   		return true;
   	}
   
+    /**
+     * Filters unwanted companies.
+     *
+     * @param company_isin the company_isin
+     * @param company_instrument_group the company_instrument_group
+     * @param company_name the company_name
+     * @param company_ticker the company_ticker
+     * @return true, if successful
+     */
     private boolean filter(String company_isin, String company_instrument_group, String company_name,
     		String company_ticker) {
 	  

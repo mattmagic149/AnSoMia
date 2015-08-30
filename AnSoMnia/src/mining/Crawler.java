@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package mining;
 
 import general.MainApplication;
@@ -16,23 +35,59 @@ import java.util.logging.SimpleFormatter;
 import utils.HibernateSupport;
 import database.Company;
 
+/**
+ * The Class Crawler.
+ */
 public abstract class Crawler {
 
-	protected static List<Company> companies_not_crawled = new ArrayList<Company>();
+	/** The companies_not_crawled. */
+	protected List<Company> companies_not_crawled;
+	
+	/**
+	 * The Enum Decimals.
+	 */
 	protected enum Decimals {
-	    NONE, THOUSAND, MILLION, BILLION 
+    	NONE, 
+    	THOUSAND, 
+    	MILLION, 
+    	BILLION 
 	}
+	
+	/** The name. */
 	protected String name;
+	
+	/** The logger. */
 	protected Logger logger; 
+	
+	/** The fh. */
 	protected FileHandler fh;
+	
+	/** The reconnection_attempts. */
 	protected int reconnection_attempts;
 	
+	/**
+	 * Instantiates a new crawler.
+	 */
+	public Crawler() {
+		companies_not_crawled = new ArrayList<Company>();
+	}
+	
+	/**
+	 * Sets the name.
+	 *
+	 * @param name the new name
+	 */
 	public void setName(String name) {
 		this.name = name;
 		this.reconnection_attempts = 1;
 	}
 	
-	protected void startCrawling() throws Exception
+	/**
+	 * Start crawling.
+	 *
+	 * @throws Exception the exception
+	 */
+	protected void startCrawling()
 	{
 		
 		logger = Logger.getLogger("MyLogger");
@@ -53,7 +108,7 @@ public abstract class Crawler {
 		
 	    ArrayList<String> isin_list = new ArrayList<String>();
 	    
-	    for (String key : MainApplication.isin_mutex_map.keySet()) {
+	    for (String key : MainApplication.getInstance().getIsinMutexMap().keySet()) {
 	        isin_list.add(key);
 	    }
 	    
@@ -67,7 +122,7 @@ public abstract class Crawler {
 	    	isin = isin_list.get(0);
 	    	isin_list.remove(0);
 	    	
-	    	mutex = MainApplication.isin_mutex_map.get(isin);
+	    	mutex = MainApplication.getInstance().getIsinMutexMap().get(isin);
 	    	mutex.lock();
 	    	
 	    		company = HibernateSupport.readOneObjectByStringId(Company.class, isin);
@@ -85,9 +140,7 @@ public abstract class Crawler {
 	    		
 			  	System.out.print("Crawled ");
 			  	System.out.printf("%.2f", ((companies_size - isin_list.size())/(float)companies_size) * 100);
-			  	System.out.println(" % - " + (companies_not_crawled.size()) + " not crawled");
-				Thread.sleep(250);
-	    	
+			  	System.out.println(" % - " + (companies_not_crawled.size()) + " not crawled");	    	
 	    	mutex.unlock();
 	    	
 	    }
@@ -103,8 +156,21 @@ public abstract class Crawler {
 	  	  	 
 	}
 	
+	/**
+	 * Crawl infos.
+	 *
+	 * @param company the company
+	 * @return true, if successful
+	 */
 	protected boolean crawlInfos(Company company) {return false;}
 	
+	/**
+	 * Parses the float.
+	 *
+	 * @param s the s
+	 * @param return_on_error the return_on_error
+	 * @return the float
+	 */
 	protected float parseFloat(String s, float return_on_error) {
 		float ret = return_on_error;
 		String tmp = s.split(" ")[0];
@@ -122,6 +188,13 @@ public abstract class Crawler {
 		return ret;
 	}
 
+	/**
+	 * Parses the string to long.
+	 *
+	 * @param s the s
+	 * @param dec the dec
+	 * @return the long
+	 */
 	protected long parseStringToLong(String s, Decimals dec) {
 		long ret = Long.MIN_VALUE;
 		int decimal_place = 0;
@@ -165,6 +238,12 @@ public abstract class Crawler {
 		return ret;
 	}
 	
+	/**
+	 * Extract year from string.
+	 *
+	 * @param s the string
+	 * @return the int
+	 */
 	protected int extractYearFromString(String s) {
 		int ret = -1;
 		

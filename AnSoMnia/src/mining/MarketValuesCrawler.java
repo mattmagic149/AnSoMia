@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package mining;
 import org.javatuples.Pair;
 import org.jsoup.nodes.Element;
@@ -18,18 +37,38 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * The Class MarketValuesCrawler.
+ */
 public class MarketValuesCrawler extends Crawler implements Job
 {
 	
+	/**
+	 * The Enum ToCrawl.
+	 */
 	public enum ToCrawl {
-	    MONTH, HISTORY
+    	MONTH, 
+    	HISTORY
 	}
+	
+	/** The wall_street_url. */
 	private String wall_street_url = "http://www.wallstreet-online.de";
+	
+	/** The request_url. */
 	private String request_url = "/_plain/instrument/default/module/quotehistory/";
+	
+	/** The market_places. */
 	private ArrayList<Pair<Integer, String>> market_places;
+	
+	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
+	
+	/** The to_crawl. */
 	private MarketValuesCrawler.ToCrawl to_crawl;
 	
+	/**
+	 * Instantiates a new market values crawler.
+	 */
 	public MarketValuesCrawler() {
 		this.name = "HistoryMarketValuesCrawler";
 		this.http_req_manager = HttpRequestManager.getInstance();
@@ -50,17 +89,17 @@ public class MarketValuesCrawler extends Crawler implements Job
 		//market_places.add(Pair.with(45, "Swiss Exchange"));
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+	 */
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
-		
-		MarketValuesCrawler mvc = new MarketValuesCrawler();
-		try {
-			mvc.startCrawling();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		this.startCrawling();
 	}
 	
+	/* (non-Javadoc)
+	 * @see mining.Crawler#crawlInfos(database.Company)
+	 */
 	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getWallstreetQueryString() == null || 
 				company.getWallstreetQueryString() == "" || 
@@ -81,6 +120,12 @@ public class MarketValuesCrawler extends Crawler implements Job
 		return false;
 	}
 	
+	/**
+	 * Crawl this month.
+	 *
+	 * @param company the company
+	 * @return true, if successful
+	 */
 	private boolean crawlThisMonth(Company company) {
 		Date date = new Date();
 		Calendar calendar = Calendar.getInstance();
@@ -116,6 +161,12 @@ public class MarketValuesCrawler extends Crawler implements Job
 		
 	}
 	
+	/**
+	 * Crawl history.
+	 *
+	 * @param company the company
+	 * @return true, if successful
+	 */
 	private boolean crawlHistory(Company company) {
 		
 		Date date = new Date();
@@ -181,6 +232,14 @@ public class MarketValuesCrawler extends Crawler implements Job
 		return true;
 	}
 	
+	/**
+	 * Extracts stock values and adds them to the company.
+	 *
+	 * @param company the company
+	 * @param response the response
+	 * @param market_place the market_place
+	 * @return true, if successful
+	 */
 	private boolean addDatesToCompany(Company company, Element response, String market_place) {
 		
 		MarketValue market_value;

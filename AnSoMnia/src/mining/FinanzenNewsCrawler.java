@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package mining;
 
 import org.jsoup.nodes.Element;
@@ -26,14 +45,30 @@ import utils.HttpRequestManager;
 import utils.HttpRequester;
 import database.*;
 
+/**
+ * The Class FinanzenNewsCrawler.
+ */
 public class FinanzenNewsCrawler extends Crawler implements Job
 {
+	
+	/** The finance_url. */
 	private String finance_url = "http://www.finanzen.at";
+	
+	/** The sensium. */
 	private Sensium sensium;
+	
+	/** The req. */
 	private ExtractionRequest req;
+	
+	/** The resp. */
 	private ExtractionResponse resp;
+	
+	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
 	
+	/**
+	 * Instantiates a new finanzen news crawler.
+	 */
 	public FinanzenNewsCrawler() {
 		this.name = "finance_news_crawler";
 		this.http_req_manager = HttpRequestManager.getInstance();
@@ -42,20 +77,17 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 		System.out.println("FinanzenNewsCrawler ctor called");
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+	 */
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
-		FinanzenNewsCrawler fc = new FinanzenNewsCrawler();
-		try {
-			System.out.println("FinanzenNewsCrawler startCrawling");
-
-			fc.startCrawling();
-		} catch (Exception e) {
-			e.printStackTrace();
-			///TODO: log
-			System.out.println("WHY THE FUCK AM I HERE?!?!");
-		}
+		this.startCrawling();
 	}
 	
+	/* (non-Javadoc)
+	 * @see mining.Crawler#crawlInfos(database.Company)
+	 */
 	protected boolean crawlInfos(Company company) {
 		System.out.println("FinanzenNewsCrawler crawlInfos");
 
@@ -93,10 +125,17 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 		
 	}
 	
+	/**
+	 * Crawl single news.
+	 *
+	 * @param company the company
+	 * @param links the links
+	 * @param dates the dates
+	 */
 	private void crawlSingleNews(Company company, ArrayList<String> links, ArrayList<String> dates) {
 		Date date = new Date();
 		DateFormat format = new SimpleDateFormat("d.M.y");
-		CompanyNews news;
+		News news;
 		Element response;
 		Elements main_content;
 		String content;
@@ -110,7 +149,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 			link = links.get(i);
 			//System.out.println("link = " + link);
 			
-			if(company.checkUrlAlreadyAdded(link)) {
+			if(company.checkUrlAlreadyAddedToNews(link)) {
 				///TODO: log
 				System.out.println("skipped these news, because url is already added.");
 				continue;
@@ -135,7 +174,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 			if(main_content.html().contains("Weiter zum vollständigen Artikel bei")) {
 				link = main_content.select("a").last().attr("abs:href");
 				
-				if(company.checkUrlAlreadyAdded(link)) {
+				if(company.checkUrlAlreadyAddedToNews(link)) {
 					///TODO: log
 					System.out.println("skipped these news, because url is already added.");
 					continue;
@@ -190,7 +229,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 			md.update(data,0,data.length);
 			hash = new BigInteger(1,md.digest()).longValue();
 			
-			news = HibernateSupport.readOneObjectByID(CompanyNews.class, hash);
+			news = HibernateSupport.readOneObjectByID(News.class, hash);
 			
 			if(news == null && !company.checkNewsAlreadyAdded(hash)) {
 				
@@ -202,7 +241,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 					continue;
 				}
 				
-				news = new CompanyNews(hash, link, "finanzen.net", date, content, "translated_content", language);
+				news = new News(hash, link, "finanzen.net", date, content, "translated_content", language);
 				HibernateSupport.beginTransaction();
 				news.saveToDB();
 				company.addNews(news);

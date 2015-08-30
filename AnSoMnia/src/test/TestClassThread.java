@@ -28,13 +28,10 @@ public class TestClassThread extends Thread {
         
         System.out.println("Thread: " + this.id + " got HttpRequester.");
         
-        Element element = http_requester.getHtmlContent("");
+        @SuppressWarnings("unused")
+		Element element = http_requester.getHtmlContent("");
         
         System.out.println("Thread: " + this.id + " is done.");
     }
-
-    /*public static void main(String args[]) {
-        (new TestClassThread()).start();
-    }*/
     
 }

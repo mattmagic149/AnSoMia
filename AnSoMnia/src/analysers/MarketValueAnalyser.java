@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package analysers;
 
 import java.util.ArrayList;
@@ -7,8 +26,19 @@ import org.apache.commons.lang.time.DateUtils;
 
 import database.*;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MarketValueAnalyser.
+ */
 public class MarketValueAnalyser {
 	
+	/**
+	 * Calculate correlation coefficient.
+	 *
+	 * @param first_values the first_values
+	 * @param second_values the second_values
+	 * @return the float
+	 */
 	public float calculateCorrelationCoefficient(ArrayList<MarketValue> first_values,
 												ArrayList<MarketValue> second_values) {
 		
@@ -59,6 +89,13 @@ public class MarketValueAnalyser {
 		return correlation_coefficient;
 	}
 	
+	/**
+	 * Normalize arrays.
+	 *
+	 * @param values_1 the values_1
+	 * @param values_2 the values_2
+	 * @return true, if successful
+	 */
 	public boolean normalizeArrays(ArrayList<MarketValue> values_1, ArrayList<MarketValue> values_2) {
 
 		Collections.sort(values_1);
@@ -71,6 +108,13 @@ public class MarketValueAnalyser {
 		return true;
 	}
 	
+	/**
+	 * Removes the excess market values from first parameter.
+	 *
+	 * @param values_1 the values_1
+	 * @param values_2 the values_2
+	 * @return true, if successful
+	 */
 	private boolean removeExcessMarketValuesFromFirstParameter(ArrayList<MarketValue> values_1, 
 																ArrayList<MarketValue> values_2) {
 		

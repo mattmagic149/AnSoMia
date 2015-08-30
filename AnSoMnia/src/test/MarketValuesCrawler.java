@@ -1,7 +1,6 @@
 package test;
 import mining.Crawler;
 
-import org.hibernate.criterion.Criterion;
 import org.jsoup.*;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Element;
@@ -13,55 +12,25 @@ import org.quartz.JobExecutionException;
 import utils.HibernateSupport;
 import database.Company;
 import database.MarketValue;
-import general.MainApplication;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MarketValuesCrawler extends Crawler implements Job
 {
-	private static String wall_street_url = "http://www.wallstreet-online.de";
-	private static String share_string = "/aktien/";
-	private static String market_value_string = "/kurse";
-	private static String[] column_values = {"Handelsplatz", "Kurs", "Währung", "Bid", "Ask"};
-	private static String[] market_place_strings = {"Xetra", "Tradegate", "Frankfurt", "Berlin"};
+	private String wall_street_url = "http://www.wallstreet-online.de";
+	private String share_string = "/aktien/";
+	private String market_value_string = "/kurse";
+	private String[] column_values = {"Handelsplatz", "Kurs", "Währung", "Bid", "Ask"};
+	private String[] market_place_strings = {"Xetra", "Tradegate", "Frankfurt", "Berlin"};
 	private Date date;
 
 	
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
-		System.out.println(MainApplication.isin_mutex_map.size());
-		MainApplication.isin_mutex_map.clear();
-		List<Criterion>  criterions = new ArrayList<Criterion>();
-		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, criterions);
-		
-		for(int i = 0; i < companies.size(); i++) {
-			MainApplication.isin_mutex_map.put(companies.get(i).getIsin(), new ReentrantLock(true));
-		}
-		
-		
-		/*String inputStr = "13-08-2015";
-		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-		try {
-			date = dateFormat.parse(inputStr);
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
-		date = new Date();
-		
-		System.out.println(MainApplication.isin_mutex_map.size());
-		
 		MarketValuesCrawler mvc = new MarketValuesCrawler();
-		try {
-			mvc.startCrawling();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		mvc.startCrawling();
 	}
 	
 	protected boolean crawlInfos(Company company) {
@@ -142,7 +111,7 @@ public class MarketValuesCrawler extends Crawler implements Job
 		return true;
 	}
 	
-	private static int[] getTableColumnIndecis(Element market_place) {
+	private int[] getTableColumnIndecis(Element market_place) {
 		int[] ret = {-1,-1,-1,-1,-1};
 		
 		Elements table_header_columns = market_place.select(".module table").get(0).select("thead tr th");
@@ -158,7 +127,7 @@ public class MarketValuesCrawler extends Crawler implements Job
 		return ret;
 	}
 	
-	private static Element getMarketPlaceColumn(Element market_place) {
+	private Element getMarketPlaceColumn(Element market_place) {
 		
 		Elements tables = market_place.select("table");
 		for(int i = 0; i < market_place_strings.length; i++) {

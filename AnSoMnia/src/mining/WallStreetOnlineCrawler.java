@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package mining;
 
 import org.javatuples.Pair;
@@ -13,30 +32,47 @@ import utils.HttpRequester;
 import database.Company;
 import database.KeyPerformanceIndicator;
 
+/**
+ * The Class WallStreetOnlineCrawler.
+ */
 public class WallStreetOnlineCrawler extends Crawler implements Job
 {
+	
+	/** The wall_street_url. */
 	private String wall_street_url = "http://www.wallstreet-online.de";
+	
+	/** The share_string. */
 	private String share_string = "/aktien/";
+	
+	/** The balance_sheet_string. */
 	private String balance_sheet_string = "/bilanz";
+	
+	/** The company_profile. */
 	private String company_profile = "/unternehmensprofil";
+	
+	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
 	
+	/**
+	 * Instantiates a new wall street online crawler.
+	 */
 	public WallStreetOnlineCrawler() {
 		http_req_manager = HttpRequestManager.getInstance();
 		this.name = "wallstreet_crawler";
 		System.out.println("WallStreetOnlineCrawler ctor called");
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+	 */
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
-		WallStreetOnlineCrawler wsc = new WallStreetOnlineCrawler();
-		try {
-			wsc.startCrawling();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		this.startCrawling();
 	}
 	
+	/* (non-Javadoc)
+	 * @see mining.Crawler#crawlInfos(database.Company)
+	 */
 	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
@@ -106,6 +142,14 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		
 	}
 	
+	/**
+	 * Update profile kpis.
+	 *
+	 * @param company the company
+	 * @param tables the tables
+	 * @param year_pair the year_pair
+	 * @return true, if successful
+	 */
 	private boolean updateProfileKpis(Company company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
@@ -166,7 +210,7 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		
 		if(!existing_indicators) {
 			HibernateSupport.beginTransaction();
-			company.addKPIs(indicators);
+			company.addKPI(indicators);
 			HibernateSupport.commitTransaction();
 		}
 		
@@ -177,6 +221,14 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		return true;
 	}
 	
+	/**
+	 * Update balance sheet values.
+	 *
+	 * @param company the company
+	 * @param tables the tables
+	 * @param year_pair the year_pair
+	 * @return true, if successful
+	 */
 	private boolean updateBalanceSheetValues(Company company, Elements tables, Pair<Integer, Integer> year_pair) {
 		
 		boolean existing_indicators = true;
@@ -236,7 +288,7 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		
 		if(!existing_indicators) {
 			HibernateSupport.beginTransaction();
-			company.addKPIs(indicators);
+			company.addKPI(indicators);
 			HibernateSupport.commitTransaction();
 		}
 		

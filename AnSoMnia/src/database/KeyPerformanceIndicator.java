@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package database;
 
 import interfaces.ISaveAndDelete;
@@ -17,33 +36,70 @@ import javax.persistence.ManyToOne;
 import utils.HibernateSupport;
 import database.Company;
 
+/**
+ * The Class KeyPerformanceIndicator.
+ */
 @Entity
 public class KeyPerformanceIndicator implements ISaveAndDelete {
 	
+	/** The id. */
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE)
 	private long id;
 
+	/** The date. */
 	private Date date;
 	
+	/** The revenue. */
 	private long revenue; //Umsatz
+	
+	/** The number_of_employees. */
 	private long number_of_employees;
+	
+	/** The number_of_shares. */
 	private long number_of_shares;
+	
+	/** The operating_income. */
 	private long operating_income;
+	
+	/** The earnings_before_taxes. */
 	private long earnings_before_taxes;
+	
+	/** The earnings_after_taxes. */
 	private long earnings_after_taxes;
+	
+	/** The balance_sheet_total. */
 	private long balance_sheet_total; //Gesamtkapital
+	
+	/** The debt. */
 	private long debt;
+	
+	/** The equity. */
 	private long equity; //Eigenkapital
+	
+	/** The dividend. */
 	private float dividend;
+	
+	/** The earnings_per_share. */
 	private float earnings_per_share;
+	
+	/** The cashflow. */
 	private long cashflow;
+	
+	/** The gross_profit. */
 	private long gross_profit;
+	
+	/** The working_capital. */
 	private long working_capital;
 
+	/** The liquidity_1. */
 	// KPIs to crawl
 	private float liquidity_1;
+	
+	/** The liquidity_2. */
 	private float liquidity_2;
+	
+	/** The liquidity_3. */
 	private float liquidity_3;
 	
 	// KPIs to calculate
@@ -71,14 +127,24 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 	private float beta;*/
 
 
+	/** The company. */
 	@ManyToOne
 	@JoinColumn(name="isin",updatable=false)
 	protected Company company;
 	
+	/**
+	 * Instantiates a new key performance indicator.
+	 */
 	public KeyPerformanceIndicator() {
 		//this.date = new Date();
 	}
 
+	/**
+	 * Instantiates a new key performance indicator.
+	 *
+	 * @param year the year
+	 * @param company the company
+	 */
 	public KeyPerformanceIndicator(int year, Company company) {
 		Calendar c = Calendar.getInstance();
 		c.set(year, 1, 1);
@@ -104,6 +170,12 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		
 	}
 	
+	/**
+	 * Instantiates a new key performance indicator.
+	 *
+	 * @param serialized_kpi the serialized_kpi
+	 * @param company the company
+	 */
 	public KeyPerformanceIndicator(String[] serialized_kpi, Company company) {
 		
 		this.company = company;
@@ -133,17 +205,12 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		this.liquidity_2 = Float.parseFloat(serialized_kpi[17]);
 		this.liquidity_3 = Float.parseFloat(serialized_kpi[18]);
 		
-		/*return this.company.getIsin() + "\t" + this.date + "\t" + this.revenue + "\t" + 
-				this.number_of_employees + "\t" + this.number_of_shares + "\t" + 
-				this.operating_income + "\t" + this.earnings_before_taxes + "\t" + 
-				this.earnings_after_taxes + "\t" + this.balance_sheet_total + "\t" +
-				this.debt + "\t" + this.equity + "\t" + this.dividend + "\t" + 
-				this.earnings_per_share + "\t" + this.cashflow + "\t" + this.gross_profit + "\t" + 
-				this.working_capital + "\t" + this.liquidity_1 + "\t" + this.liquidity_2 + "\t" + 
-				this.liquidity_3;*/
 	}
 	
 	
+	/**
+	 * Update kpis to calculate.
+	 */
 	public void updateKpisToCalculate() {
 		// initialize directly calculated KPIs
 		//this.book_value_per_share = this.calculateBookValuePerShare(this.equity, this.number_of_shares);
@@ -170,6 +237,18 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		//this.sharpe = this.calculateSharpe();
 	}
 	
+	/**
+	 * Sets the profile values.
+	 *
+	 * @param dividend the dividend
+	 * @param equity_ratio the equity_ratio
+	 * @param liquidity_1 the liquidity_1
+	 * @param liquidity_2 the liquidity_2
+	 * @param liquidity_3 the liquidity_3
+	 * @param number_of_employees the number_of_employees
+	 * @param number_of_shares the number_of_shares
+	 * @param working_capital the working_capital
+	 */
 	public void setProfileValues(float dividend, float equity_ratio, 
 			float liquidity_1, float liquidity_2, float liquidity_3, long number_of_employees, 
 			long number_of_shares, long working_capital) {
@@ -197,6 +276,18 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		
 	}
 	
+	/**
+	 * Sets the balance sheet values.
+	 *
+	 * @param revenue the revenue
+	 * @param operating_income the operating_income
+	 * @param earings_after_taxes the earings_after_taxes
+	 * @param cashflow the cashflow
+	 * @param equity the equity
+	 * @param debt the debt
+	 * @param balance_sheet_total the balance_sheet_total
+	 * @param gross_profit the gross_profit
+	 */
 	public void setBalanceSheetValues(long revenue, long operating_income, long earings_after_taxes,
 			long cashflow, long equity, long debt, long balance_sheet_total, long gross_profit) {
 		
@@ -226,6 +317,21 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		
 	}
 	
+	/**
+	 * Sets the finance values.
+	 *
+	 * @param revenue the revenue
+	 * @param operating_income the operating_income
+	 * @param earnings_after_taxes the earnings_after_taxes
+	 * @param earnings_before_taxes the earnings_before_taxes
+	 * @param equity the equity
+	 * @param debt the debt
+	 * @param balance_sheet_total the balance_sheet_total
+	 * @param gross_profit the gross_profit
+	 * @param number_of_employees the number_of_employees
+	 * @param dividend the dividend
+	 * @param earnings_per_share the earnings_per_share
+	 */
 	public void setFinanceValues(long revenue, long operating_income, long earnings_after_taxes, 
 			long earnings_before_taxes, long equity, long debt, long balance_sheet_total, 
 			long gross_profit, long number_of_employees, float dividend, float earnings_per_share) {
@@ -265,94 +371,182 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		
 	}
 	
-	public void setAllValuesIfNotSet() {
-		
-	}
-	
+	/**
+	 * Gets the id.
+	 *
+	 * @return the id
+	 */
 	public long getId() {
 		return id;
 	}
 
+	/**
+	 * Gets the revenue.
+	 *
+	 * @return the revenue
+	 */
 	public long getRevenue() {
 		return revenue;
 	}
 
+	/**
+	 * Gets the number of employees.
+	 *
+	 * @return the number of employees
+	 */
 	public long getNumberOfEmployees() {
 		return number_of_employees;
 	}
 
+	/**
+	 * Gets the number of shares.
+	 *
+	 * @return the number of shares
+	 */
 	public long getNumberOfShares() {
 		return number_of_shares;
 	}
 
+	/**
+	 * Gets the operating income.
+	 *
+	 * @return the operating income
+	 */
 	public long getOperatingIncome() {
 		return operating_income;
 	}
 
+	/**
+	 * Gets the earnings before taxes.
+	 *
+	 * @return the earnings before taxes
+	 */
 	public long getEarningsBeforeTaxes() {
 		return earnings_before_taxes;
 	}
 
+	/**
+	 * Gets the earnings after taxes.
+	 *
+	 * @return the earnings after taxes
+	 */
 	public long getEarningsAfterTaxes() {
 		return earnings_after_taxes;
 	}
 
+	/**
+	 * Gets the balance sheet total.
+	 *
+	 * @return the balance sheet total
+	 */
 	public long getBalanceSheetTotal() {
 		return balance_sheet_total;
 	}
 
+	/**
+	 * Gets the debt.
+	 *
+	 * @return the debt
+	 */
 	public long getDebt() {
 		return debt;
 	}
 
+	/**
+	 * Gets the equity.
+	 *
+	 * @return the equity
+	 */
 	public long getEquity() {
 		return equity;
 	}
 
+	/**
+	 * Gets the dividend.
+	 *
+	 * @return the dividend
+	 */
 	public float getDividend() {
 		return dividend;
 	}
 
+	/**
+	 * Gets the earnings per share.
+	 *
+	 * @return the earnings per share
+	 */
 	public float getEarningsPerShare() {
 		return earnings_per_share;
 	}
 
+	/**
+	 * Gets the cashflow.
+	 *
+	 * @return the cashflow
+	 */
 	public long getCashflow() {
 		return cashflow;
 	}
 
+	/**
+	 * Gets the gross profit.
+	 *
+	 * @return the gross profit
+	 */
 	public long getGrossProfit() {
 		return gross_profit;
 	}
 
+	/**
+	 * Gets the working capital.
+	 *
+	 * @return the working capital
+	 */
 	public long getWorkingCapital() {
 		return working_capital;
 	}
 
+	/**
+	 * Gets the liquidity1.
+	 *
+	 * @return the liquidity1
+	 */
 	public float getLiquidity1() {
 		return liquidity_1;
 	}
 
+	/**
+	 * Gets the liquidity2.
+	 *
+	 * @return the liquidity2
+	 */
 	public float getLiquidity2() {
 		return liquidity_2;
 	}
 
+	/**
+	 * Gets the liquidity3.
+	 *
+	 * @return the liquidity3
+	 */
 	public float getLiquidity3() {
 		return liquidity_3;
 	}
 
+	/**
+	 * Gets the company.
+	 *
+	 * @return the company
+	 */
 	public Company getCompany() {
 		return company;
 	}
 
 	
-	/*
-	// TODO: Implement Alpha
-	private float calculateAlpha() {
+	/*private float calculateAlpha() {
 		return Float.MIN_VALUE;
 	}
 	
-	// TODO: Implement Beta
 	private float calculateBeta() {
 		return Float.MIN_VALUE;
 	}
@@ -456,7 +650,6 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 	}
 	
 	
-	// TODO: Implement Sharpe without ArrayLists monthly_return and riskfree as parameters
 	private float calculateSharpe(ArrayList<Float> monthly_return, ArrayList<Float> riskfree) {
 		int last = monthly_return.size() - 1;
 		float average_return;
@@ -482,32 +675,22 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		return (average_return / volatility);
 	}
 	*/
-	
-	/*
-	public static void main( String[] args ) {
-		ArrayList<Float> returns = new ArrayList<Float>();
-		returns.add(1.1f);
-		returns.add(1.2f);
-		returns.add(1.3f);
 
-		ArrayList<Float> riskfree = new ArrayList<Float>();
-		riskfree.add(1.0f);
-		riskfree.add(1.0f);
-		riskfree.add(1.0f);
-		
-		SingleCompany company = new SingleCompany();
-		Date date = new Date();
-		
-		Sharpe test = new Sharpe(company, returns, riskfree, date);
-		System.out.println(test.sharpe);
-	}
-	*/
 	
+	/**
+	 * Gets the date.
+	 *
+	 * @return the date
+	 */
 	public Date getDate() {
 		return date;
 	}
 	
-	public String serializeKPI() {
+	/* (non-Javadoc)
+	 * @see interfaces.ISaveAndDelete#serialize()
+	 */
+	@Override
+	public String serialize() {
 		
 		return this.company.getIsin() + "\t" + this.date + "\t" + this.revenue + "\t" + 
 				this.number_of_employees + "\t" + this.number_of_shares + "\t" + 
@@ -519,6 +702,9 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 				this.liquidity_3;
 	}
 	
+	/* (non-Javadoc)
+	 * @see interfaces.ISaveAndDelete#saveToDB()
+	 */
 	@Override
 	public boolean saveToDB() {
 		if(!HibernateSupport.commit(this))
@@ -526,6 +712,9 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see interfaces.ISaveAndDelete#deleteFromDB(java.lang.Object)
+	 */
 	@Override
 	public void deleteFromDB(Object obj) {
 		HibernateSupport.deleteObject(this);

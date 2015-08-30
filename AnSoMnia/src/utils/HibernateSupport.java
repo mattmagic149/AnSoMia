@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package utils;
 
 import java.io.File;
@@ -18,16 +37,15 @@ import database.*;
 
 
 
+// TODO: Auto-generated Javadoc
 /**
- * This Class handles everything for communicating with the database
- * 
- * @author Senkl/Ivantsits
- *
+ * This Class handles everything for communicating with the database.
  */
 
 @SuppressWarnings("deprecation")
 public class HibernateSupport {
 	
+	/** The session factory. */
 	private static SessionFactory sessionFactory;
 
 	static {
@@ -35,10 +53,16 @@ public class HibernateSupport {
 		init();
 	}
 	
+	/**
+	 * Creates the.
+	 */
 	public static void create(){
 		// function is not necessary it only activates the static construction above
 	}
 	
+	/**
+	 * Inits the.
+	 */
 	private static void init() {
 		//Change the path to your deployed config file !
 		File configFile = new File("/Users/matthiasivantsits/git/AnSoMia/AnSoMnia/src/hibernate.cfg.xml");
@@ -48,11 +72,12 @@ public class HibernateSupport {
 		
 		//add all classes you want to annotate
 		configuration.addAnnotatedClass(Index.class);
-
 		configuration.addAnnotatedClass(Company.class);
 		configuration.addAnnotatedClass(MarketValue.class);
 		configuration.addAnnotatedClass(KeyPerformanceIndicator.class);
-		configuration.addAnnotatedClass(CompanyNews.class);
+		configuration.addAnnotatedClass(News.class);
+		configuration.addAnnotatedClass(NewsDetail.class);
+		configuration.addAnnotatedClass(SentenceInformation.class);
 		configuration.addAnnotatedClass(IndustrySector.class);
 
 		configuration.configure(configFile);
@@ -61,19 +86,36 @@ public class HibernateSupport {
 		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 	}
 	
+	/**
+	 * Gets the current session.
+	 *
+	 * @return the current session
+	 */
 	public static Session getCurrentSession() {
 		return sessionFactory.getCurrentSession();
 	}
 	
 	
+	/**
+	 * Begin transaction.
+	 */
 	public static void beginTransaction() {
 		getCurrentSession().beginTransaction();
 	}
 	
+	/**
+	 * Commit transaction.
+	 */
 	public static void commitTransaction() {
 		getCurrentSession().getTransaction().commit();
 	}
 	
+	/**
+	 * Commit.
+	 *
+	 * @param obj the obj
+	 * @return true, if successful
+	 */
 	public static boolean commit(Object obj) {
 		try {
 			getCurrentSession().saveOrUpdate(obj);
@@ -84,6 +126,14 @@ public class HibernateSupport {
 		return true;
 	}
 
+	/**
+	 * Read more objects.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param criterions the criterions
+	 * @return the list
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List <T> readMoreObjects(Class<?> classToRetrieve, List<Criterion> criterions) {
 		beginTransaction();
@@ -96,6 +146,16 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	/**
+	 * Read more objects.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param criterions the criterions
+	 * @param offset the offset
+	 * @param increment_by the increment_by
+	 * @return the list
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List <T> readMoreObjects(Class<?> classToRetrieve, List<Criterion> criterions, int offset, int increment_by) {
 		beginTransaction();
@@ -110,11 +170,27 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	/**
+	 * Read one object.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param criterions the criterions
+	 * @return the t
+	 */
 	public static <T> T readOneObject(Class<?> classToRetrieve, List<Criterion> criterions) {
 		List<T> result = readMoreObjects(classToRetrieve, criterions);
 		return (result.size() > 0) ? (result.get(0)):(null);
 	}
 	
+	/**
+	 * Read one object by id.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param id the id
+	 * @return the t
+	 */
 	public static <T> T readOneObjectByID(Class<?> classToRetrieve, int id) {
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.idEq(id));
@@ -122,6 +198,14 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	/**
+	 * Read one object by id.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param id the id
+	 * @return the t
+	 */
 	public static <T> T readOneObjectByID(Class<?> classToRetrieve, long id) {
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.idEq(id));
@@ -129,6 +213,14 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	/**
+	 * Read one object by string id.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param id the id
+	 * @return the t
+	 */
 	public static <T> T readOneObjectByStringId(Class<?> classToRetrieve, String id) {
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.idEq(id));
@@ -136,6 +228,30 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	/**
+	 * Commit values to db.
+	 *
+	 * @param values the values
+	 * @return true, if successful
+	 */
+	public static boolean commitValuesToDB(ArrayList<MarketValue> values) {
+		
+		int size = values.size();
+		beginTransaction();
+		for(int i = 0; i < size; i++) {
+			values.get(i).saveToDB();
+		}
+		commitTransaction();
+		
+		return true;
+	}
+	
+	/**
+	 * Delete object.
+	 *
+	 * @param <T> the generic type
+	 * @param objectToDelete the object to delete
+	 */
 	public static <T> void deleteObject(T objectToDelete) {
 		getCurrentSession().delete(objectToDelete);
 	}

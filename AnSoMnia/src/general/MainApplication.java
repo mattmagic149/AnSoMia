@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package general;
 
 import java.util.LinkedHashMap;
@@ -12,33 +31,60 @@ import org.quartz.SchedulerFactory;
 import org.quartz.impl.matchers.KeyMatcher;
 
 import threadlisteners.*;
-
 import java.util.concurrent.locks.ReentrantLock;
-
 import static org.quartz.JobBuilder.*;
 
+/**
+ * The Class MainApplication.
+ */
 public class MainApplication {
 	
+	/** The Constant app. */
 	private static final MainApplication app = new MainApplication();
-	public static final Map<String, ReentrantLock> isin_mutex_map = new LinkedHashMap<String, ReentrantLock>();
+	
+	/** The Constant isin_mutex_map. */
+	private Map<String, ReentrantLock> isin_mutex_map ;
 
+	/** The sched_fact. */
 	private SchedulerFactory sched_fact;
+	
+	/** The scheduler. */
 	private Scheduler scheduler;
 	
+	/** The company_indexer_job. */
 	private JobDetail company_indexer_job;
+	
+	/** The isin_mutex_map_creation_job. */
 	private JobDetail isin_mutex_map_creation_job;
+	
+	/** The finance_crawler_job. */
 	private JobDetail finance_crawler_job;
+	
+	/** The wallstreet_crawler_job. */
 	private JobDetail wallstreet_crawler_job;
+	
+	/** The finance_news_crawler_job. */
 	private JobDetail finance_news_crawler_job;
+	
+	/** The yahoo_news_crawler_job. */
 	private JobDetail yahoo_news_crawler_job;
+	
+	/** The market_values_crawler_job. */
 	private JobDetail market_values_crawler_job;
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws SchedulerException the scheduler exception
+	 */
 	public static void main(String[] args) throws SchedulerException {
 		System.out.println("Starting MainApplication...");
 		System.out.println("Starting Scheduler...");
 
 		app.sched_fact = new org.quartz.impl.StdSchedulerFactory();
-		app.scheduler = app.sched_fact.getScheduler(); 
+		app.scheduler = app.sched_fact.getScheduler();
+		app.setIsinMutexMap(new LinkedHashMap<String, ReentrantLock>());
 		app.scheduler.start();
 		
 		System.out.println("Creating Jobs...");
@@ -84,6 +130,11 @@ public class MainApplication {
 
 	}
 	
+	/**
+	 * Adds the jobs to scheduler.
+	 *
+	 * @return true, if successful
+	 */
 	private boolean addJobsToScheduler() {
 		try {
 			app.scheduler.addJob(app.company_indexer_job, false);
@@ -103,6 +154,9 @@ public class MainApplication {
 		return true;
 	}
 	
+	/**
+	 * Creates the jobs.
+	 */
 	private void createJobs() {
 		app.company_indexer_job = newJob(CompanyIndexIndustryCrawler.class) 
 				.withIdentity("CompanyIndexer", "Indexer")
@@ -140,41 +194,94 @@ public class MainApplication {
 				.build();
 	}
 
+	/**
+	 * Gets the scheduler.
+	 *
+	 * @return the scheduler
+	 */
 	public Scheduler getScheduler() {
 		return scheduler;
 	}
 
+	/**
+	 * Gets the company indexer job.
+	 *
+	 * @return the company indexer job
+	 */
 	public JobDetail getCompanyIndexerJob() {
 		return company_indexer_job;
 	}
 
+	/**
+	 * Gets the isin mutex map creation job.
+	 *
+	 * @return the isin mutex map creation job
+	 */
 	public JobDetail getIsinMutexMapCreationJob() {
 		return isin_mutex_map_creation_job;
 	}
 
+	/**
+	 * Gets the finance crawler job.
+	 *
+	 * @return the finance crawler job
+	 */
 	public JobDetail getFinanceCrawlerJob() {
 		return finance_crawler_job;
 	}
 
+	/**
+	 * Gets the wallstreet crawler job.
+	 *
+	 * @return the wallstreet crawler job
+	 */
 	public JobDetail getWallstreetCrawlerJob() {
 		return wallstreet_crawler_job;
 	}
 	
+	/**
+	 * Gets the finance news crawler job.
+	 *
+	 * @return the finance news crawler job
+	 */
 	public JobDetail getFinanceNewsCrawlerJob() {
 		return finance_news_crawler_job;
 	}
 	
+	/**
+	 * Gets the yahoo news crawler job.
+	 *
+	 * @return the yahoo news crawler job
+	 */
 	public JobDetail getYahooNewsCrawlerJob() {
 		return yahoo_news_crawler_job;
 	}
 
+	/**
+	 * Gets the market values crawler job.
+	 *
+	 * @return the market values crawler job
+	 */
 	public JobDetail getMarketValuesCrawlerJob() {
 		return market_values_crawler_job;
 	}
 	
+	/**
+	 * Gets the single instance of MainApplication.
+	 *
+	 * @return single instance of MainApplication
+	 */
 	public static MainApplication getInstance() { 
 		return app; 
     }
+
+	public Map<String, ReentrantLock> getIsinMutexMap() {
+		return isin_mutex_map;
+	}
+
+	public void setIsinMutexMap(Map<String, ReentrantLock> isin_mutex_map) {
+		this.isin_mutex_map = isin_mutex_map;
+	}
 
 }
 
