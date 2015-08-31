@@ -1,5 +1,13 @@
 package test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.criterion.Criterion;
+
+import charts.NewsHistogram;
+import database.NewsDetail;
+import utils.HibernateSupport;
 import utils.HttpRequestManager;
 
 public class TestClass {
@@ -11,10 +19,6 @@ public class TestClass {
 		
 		/*Company company_1 = HibernateSupport.readOneObjectByStringId(Company.class, "AT000000STR1");
 		Company company_2 = HibernateSupport.readOneObjectByStringId(Company.class, "AT00000AMAG3");
-		Company company_3 = HibernateSupport.readOneObjectByStringId(Company.class, "AT00000BENE6");
-		Company company_4 = HibernateSupport.readOneObjectByStringId(Company.class, "AT00000FACC2");
-		
-		
 
 		DateFormat date_format = new SimpleDateFormat("dd.MM.yy");
 		Date from;
@@ -28,13 +32,29 @@ public class TestClass {
 			return;
 		}
 		
-		ArrayList<MarketValue> values_1 = company_3.getMarketValuesBetweenDates(from, to);
-		ArrayList<MarketValue> values_2 = company_4.getMarketValuesBetweenDates(from, to);
+		ArrayList<MarketValue> values_1 = company_1.getMarketValuesBetweenDates(from, to);
+		ArrayList<MarketValue> values_2 = company_2.getMarketValuesBetweenDates(from, to);
 		
 		MarketValueAnalyser mva = new MarketValueAnalyser();
 		mva.normalizeArrays(values_1, values_2);
 		
-		System.out.println(mva.calculateCorrelationCoefficient(values_1, values_2));*/
+		MarketValueChart mvc = new MarketValueChart("Test Chart 1", values_1, values_2);
+		mvc.execute();*/
+		
+		//System.out.println(mva.calculateCorrelationCoefficient(values_1, values_2));
+
+		
+		List<NewsDetail> details = HibernateSupport.readMoreObjects(NewsDetail.class, new ArrayList<Criterion>());
+		ArrayList<Double> values = new ArrayList<Double>();
+		
+		for(int i = 0; i < details.size(); i++) {
+			values.add(details.get(i).getTotalPolarity());
+		}
+		
+		NewsHistogram nh = new NewsHistogram("News Analysis", values, "description", 50, -1.0f, 1.0f);
+		nh.execute();
+		
+		
 	}
 
 }

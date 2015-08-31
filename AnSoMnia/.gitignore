@@ -18,5 +18,5 @@
 /AnsoMnia/.classpath
 /AnsoMnia/.project
 /AnsoMnia/.classpath
-/AnsoMnia/data/backups/
-/AnsoMnia/data/backups_copy/
+/AnsoMnia/data/backups/*
+/AnsoMnia/data/backups_copy/*
