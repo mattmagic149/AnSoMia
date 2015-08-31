@@ -83,6 +83,9 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 	 */
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		/*Map<String, ReentrantLock> isin_mutex_map = new LinkedHashMap<String, ReentrantLock>();
+		isin_mutex_map.put("DE0007236101", new ReentrantLock(false));
+		MainApplication.getInstance().setIsinMutexMap(isin_mutex_map);*/
 		this.startCrawling();
 	}
 	
@@ -102,6 +105,7 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 
 		
 		for(int i = 1; i <= 5; i++) {
+			System.out.println(i);
 			tmp = getLinksFromOnePage(company, i);
 			if(tmp != null) {
 				links_plus_dates.addAll(tmp);
@@ -272,8 +276,15 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 		String date_string;
 		
 		for(int i = 0; i < rows.size(); i++) {
-			url = rows.get(i).select("a").first().attr("abs:href");
-			date_string = rows.get(i).select("span").html();
+			
+			//continue if no anker in this row of the table.
+			ankers = rows.get(i).select("a");
+			if(ankers.size() == 0) {
+				continue;
+			}
+
+			url = ankers.first().attr("abs:href");
+			date_string = rows.get(i).select("span").text();
 			try {
 				current_calendar.setTime(formater.parse(date_string));
 				current_calendar.set(Calendar.YEAR, reference_calendar.get(Calendar.YEAR));

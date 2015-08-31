@@ -19,10 +19,9 @@
  */
 package analysers;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.criterion.Criterion;
+import org.hibernate.Query;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -53,12 +52,24 @@ public class TextAnalyserManager implements Job
 	/**
 	 * Instantiates a new text analyser manager.
 	 */
+	@SuppressWarnings("unchecked")
 	public TextAnalyserManager() {
 		System.out.println("SensiumAnalyser ctor called");
 		this.google_translator = new GoogleTranslator();
 		this.sensium_analyser = new SensiumAnalyser();
 		
-		this.news_list = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>());
+		HibernateSupport.beginTransaction();
+		Query query = HibernateSupport.getCurrentSession().createSQLQuery(
+				"SELECT * FROM News t1 "
+				+ "LEFT JOIN NewsDetail t2 "
+				+ "ON t1.md5_hash = t2.md5_hash "
+				+ "WHERE t2.md5_hash IS NULL;")
+				.addEntity(News.class);
+		
+		this.news_list = query.list();
+		HibernateSupport.commitTransaction();	
+		
+		//this.news_list = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>());
 	}
 	
 	/* (non-Javadoc)
@@ -97,6 +108,7 @@ public class TextAnalyserManager implements Job
 		String translated_text;
 
 		int size = tam.news_list.size();
+		System.out.println("news_size = " + size);
 		for(int i = 0; i < size; i++) {
 			tam.current_news = tam.news_list.get(i);
 			
@@ -125,10 +137,12 @@ public class TextAnalyserManager implements Job
 			}
 			
 			System.out.print("Analysed ");
-		  	System.out.printf("%.2f", (i/(float)size) * 100);
+		  	System.out.printf("%.2f", ((i + 1)/(float)size) * 100);
 		  	System.out.println(" %");
 			
 		}
+		
+		return;
 
 	}
 
