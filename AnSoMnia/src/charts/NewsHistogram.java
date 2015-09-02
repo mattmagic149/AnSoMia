@@ -19,8 +19,6 @@
  */
 package charts;
 
-import java.util.ArrayList;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -30,6 +28,7 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class NewsHistogram.
  */
@@ -42,10 +41,16 @@ public class NewsHistogram extends ApplicationFrame {
 	private String title;
 
 	/** The values. */
-	private ArrayList<Double> values;
+	private double[] values;
 	
 	/** The description. */
 	private String description;
+	
+	/** The x_axis. */
+	private String x_axis;
+	
+	/** The y_axis. */
+	private String y_axis;
 	
 	/** The number_of_bins. */
 	private int number_of_bins;
@@ -62,16 +67,21 @@ public class NewsHistogram extends ApplicationFrame {
 	 * @param title the title
 	 * @param values the values
 	 * @param description the description
+	 * @param x_axis the x_axis
+	 * @param y_axis the y_axis
 	 * @param number_of_bins the number_of_bins
 	 * @param start the start
 	 * @param end the end
 	 */
-	public NewsHistogram(String title, ArrayList<Double> values, String description, 
+	public NewsHistogram(String title, double[] values, String description,
+							String x_axis, String y_axis,
 							int number_of_bins, float start, float end) {
         super(title);
         this.title = title;
         this.values = values;
         this.description = description;
+        this.x_axis = x_axis;
+        this.y_axis = y_axis;
         this.number_of_bins = number_of_bins;
         this.start = start;
         this.end = end;
@@ -85,14 +95,12 @@ public class NewsHistogram extends ApplicationFrame {
      */
     private IntervalXYDataset createDataset() {
     	HistogramDataset dataset = new HistogramDataset();
-
-    	double[] target = new double[this.values.size()];
-    	for (int i = 0; i < target.length; i++) {
-    		target[i] = this.values.get(i);
-    	}
+    	
+    	//dataset.setType(HistogramType.RELATIVE_FREQUENCY);
+    	//dataset.addSeries(this.description, target, this.number_of_bins);
     	
     	dataset.addSeries(this.description, 
-    					  target, 
+    					  this.values, 
     					  this.number_of_bins, 
     					  this.start,
     					  this.end);
@@ -108,9 +116,9 @@ public class NewsHistogram extends ApplicationFrame {
     private JFreeChart createChart(IntervalXYDataset dataset) {
         JFreeChart chart = ChartFactory.createXYBarChart(
             this.title,
-            "Sentiment", 
+            this.x_axis, 
             false,
-            "#News", 
+            this.y_axis, 
             dataset,
             PlotOrientation.VERTICAL,
             true,

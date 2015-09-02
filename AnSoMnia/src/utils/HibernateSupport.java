@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
@@ -144,6 +145,18 @@ public class HibernateSupport {
 		List<T> result = criteria.list();
 		commitTransaction();
 		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> ArrayList <T> readMoreObjectsDesc(Class<?> classToRetrieve, List<Criterion> criterions, String field) {
+		beginTransaction();
+		Criteria criteria = getCurrentSession().createCriteria(classToRetrieve).addOrder(Order.asc(field));
+		for(Criterion criterion: criterions) {
+			criteria.add(criterion);
+		}
+		List<T> result = criteria.list();
+		commitTransaction();
+		return (ArrayList<T>) result;
 	}
 	
 	/**

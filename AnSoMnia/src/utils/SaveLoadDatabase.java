@@ -76,7 +76,7 @@ public class SaveLoadDatabase {
 	private String file_extension = ".txt";
 	
 	/** The directory. */
-	private String directory = "data/backups/";
+	private String directory = "data/backups2/";
 	
 	/** The writer. */
 	private PrintWriter writer;
@@ -103,10 +103,9 @@ public class SaveLoadDatabase {
 	 * @param args the arguments
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		SaveLoadDatabase sldb = new SaveLoadDatabase();		
-		//sldb.storeDatabase();
-		sldb.loadDataBase();
+		sldb.storeDatabase();
+		//sldb.loadDataBase();
 	}
 	
 	/**
@@ -172,30 +171,52 @@ public class SaveLoadDatabase {
 			return false;
 		}
 		
-		List<News> company_news = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>());
+		List<News> company_news = new ArrayList<News>();
 		List<Company> companies;
+		Company company;
 		News single_company_news;
 		List<NewsDetail> details;
 		NewsDetail detail;
 		List<SentenceInformation> info;
 		SentenceInformation single_info;
 		
-		for(int i = 0; i < company_news.size(); i++) {
-			single_company_news = company_news.get(i);
-			writer.println(single_company_news.serialize());
-			companies = single_company_news.getCompanies();
-			for(int j = 0; j < companies.size(); j++) {
-				writer2.println(single_company_news.getHash() + "\t" + companies.get(j).getIsin());
-			}
-			
-			details = single_company_news.getNewsDetails();
-			for(int j = 0; j < details.size(); j++) {
-				detail = details.get(j);
-				writer3.println(detail.serialize());
-				info = detail.getSentenceInformation();
-				for(int k = 0; k < info.size(); k++) {
-					single_info = info.get(k);
-					writer4.println(single_info.serialize());
+		HibernateSupport.beginTransaction();
+		int news_size = ((Long)HibernateSupport.getCurrentSession()
+									.createQuery("select count(*) from News")
+									.uniqueResult()).intValue();
+		HibernateSupport.commitTransaction();
+		System.out.println(news_size);
+		
+		int increment_by = 10000;
+		for(int offset = 0; offset < news_size; offset += increment_by) {
+			company_news.clear();
+			System.gc();
+			company_news = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>(), offset, increment_by);
+			System.out.println(offset + " news, of " + news_size + " stored to file.");
+
+		
+			while(company_news.size() > 0) {
+				single_company_news = company_news.get(0);
+				company_news.remove(0);
+				writer.println(single_company_news.serialize());
+				companies = single_company_news.getCompanies();
+				while(companies.size() > 0) {
+					company = companies.get(0);
+					companies.remove(0);
+					writer2.println(single_company_news.getHash() + "\t" + company.getIsin());
+				}
+				
+				details = single_company_news.getNewsDetails();
+				while(details.size() > 0) {
+					detail = details.get(0);
+					details.remove(0);
+					writer3.println(detail.serialize());
+					info = detail.getSentenceInformation();
+					while(info.size() > 0) {
+						single_info = info.get(0);
+						info.remove(0);
+						writer4.println(single_info.serialize());
+					}
 				}
 			}
 		}
@@ -225,15 +246,20 @@ public class SaveLoadDatabase {
 		}
 		
 		List<IndustrySector> industry_sectors = HibernateSupport.readMoreObjects(IndustrySector.class, new ArrayList<Criterion>());
-		List<Company> companies;
 		IndustrySector industry_sector;
+
+		List<Company> companies;
+		Company company;
 		
-		for(int i = 0; i < industry_sectors.size(); i++) {
-			industry_sector = industry_sectors.get(i);
+		while(industry_sectors.size() > 0) {
+			industry_sector = industry_sectors.get(0);
+			industry_sectors.remove(0);
 			writer.println(industry_sector.serialize());
 			companies = industry_sector.getCompanies();
-			for(int j = 0; j < companies.size(); j++) {
-				writer2.println(industry_sector.getName() + "\t" + companies.get(j).getIsin());
+			while(companies.size() > 0) {
+				company = companies.get(0);
+				companies.remove(0);
+				writer2.println(industry_sector.getName() + "\t" + company.getIsin());
 			}
 		}
 		writer.close();
@@ -260,15 +286,20 @@ public class SaveLoadDatabase {
 		}
 		
 		List<Index> indexes = HibernateSupport.readMoreObjects(Index.class, new ArrayList<Criterion>());
-		List<Company> companies;
 		Index index;
+
+		List<Company> companies;
+		Company company;
 		
-		for(int i = 0; i < indexes.size(); i++) {
-			index = indexes.get(i);
+		while(indexes.size() > 0) {
+			index = indexes.get(0);
+			indexes.remove(0);
 			writer.println(index.serialize());
 			companies = index.getCompanies();
-			for(int j = 0; j < companies.size(); j++) {
-				writer2.println(index.getIsin() + "\t" + companies.get(j).getIsin());
+			while(companies.size() > 0) {
+				company = companies.get(0);
+				companies.remove(0);
+				writer2.println(index.getIsin() + "\t" + company.getIsin());
 			}
 		}
 		writer.close();
@@ -294,9 +325,12 @@ public class SaveLoadDatabase {
 		}
 		
 		List<KeyPerformanceIndicator> kpis = HibernateSupport.readMoreObjects(KeyPerformanceIndicator.class, new ArrayList<Criterion>());
-
-		for(int i = 0; i < kpis.size(); i++) {
-			writer.println(kpis.get(i).serialize());
+		KeyPerformanceIndicator kpi;
+		
+		while(kpis.size() > 0) {
+			kpi = kpis.get(0);
+			kpis.remove(0);
+			writer.println(kpi.serialize());
 		}
 		writer.close();
 		System.out.println("Finished storing KPIs!");
@@ -320,17 +354,14 @@ public class SaveLoadDatabase {
 		}
 		
 		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, new ArrayList<Criterion>());
-
-		for(int i = 0; i < companies.size(); i++) {
-			writer.println(companies.get(i).serialize());
+		Company company;
+		
+		while(companies.size() > 0) {
+			company = companies.get(0);
+			companies.remove(0);
+			writer.println(company.serialize());
 		}
 		writer.close();
-		
-		/*HibernateSupport.beginTransaction();
-		HibernateSupport.getCurrentSession().createSQLQuery("select * from Company into outfile :file FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'")
-								.setString("file", directory + company_string + file_extension);
-
-		HibernateSupport.commitTransaction();*/
 
 		System.out.println("Finished storing companies!");
 		
@@ -359,6 +390,7 @@ public class SaveLoadDatabase {
 		HibernateSupport.commitTransaction();
 		System.out.println(market_values_size);
 		List<MarketValue> market_values = new ArrayList<MarketValue>();
+		MarketValue market_value;
 		int increment_by = 30000;
 		for(int offset = 0; offset < market_values_size; offset += increment_by) {
 			market_values.clear();
@@ -366,8 +398,10 @@ public class SaveLoadDatabase {
 			market_values = HibernateSupport.readMoreObjects(MarketValue.class, new ArrayList<Criterion>(), offset, increment_by);
 			System.out.println(offset + " market values, of " + market_values_size + " stored to file.");
 
-			for(int i = 0; i < market_values.size(); i++) {
-				writer.println(market_values.get(i).serialize());
+			while(market_values.size() > 0) {
+				market_value = market_values.get(0);
+				market_values.remove(0);
+				writer.println(market_value.serialize());
 			}
 		}
 		writer.close();
@@ -415,6 +449,8 @@ public class SaveLoadDatabase {
 			return false;
 		}
 		
+		System.out.println("Finished loading database!");
+		
 		return true;
 	}
 	
@@ -455,14 +491,24 @@ public class SaveLoadDatabase {
 			}
 
 			HibernateSupport.beginTransaction();
-			
+			int counter = 0;
 			while ((line = buffered_reader.readLine()) != null) {
+				//System.out.println(line);
 				single_company_news = new News(line);
 				md5_news_map.put(single_company_news.getHash(), single_company_news);
 				single_company_news.saveToDB();
 				addDetails(single_company_news, details_buffer, info_buffer);
 				
+				if(++counter % 10000 == 0) {
+					System.out.println("saved " + counter + "news to db");
+					HibernateSupport.commitTransaction();
+					HibernateSupport.beginTransaction();
+				}
+				
 			}
+			
+			HibernateSupport.commitTransaction();
+			HibernateSupport.beginTransaction();
 			
 			buffered_reader.close();
 			buffered_reader2.close();
@@ -733,10 +779,11 @@ public class SaveLoadDatabase {
 			BufferedReader buffered_reader = new BufferedReader(file_reader);
 			String line = null;
 			int counter = 0;
+			int lines_to_skip = 0;
 			HibernateSupport.beginTransaction();
 			while ((line = buffered_reader.readLine()) != null) {
 				
-				if((++counter) <= 8490000) {
+				if((++counter) <= lines_to_skip) {
 					continue;
 				}
 				

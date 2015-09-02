@@ -129,14 +129,11 @@ public abstract class Crawler {
 	    		System.out.println("Crawling Company: " + company.getName() + ", "
 						  + company.getIsin() + ", " + company.getTicker());
 	    		
-	    		for(int i = 0; i < 3; i++) {
-	    			if(this.crawlInfos(company)) {
-	    				break;
-	    			} else if(i == (2)) {
-						companies_not_crawled.add(company);
-						this.logger.info("Company " + company.getIsin() + " not crawled from wallstreet-online.de");
-	    			}
-	    		}
+    			if(!this.crawlInfos(company)) {
+    				companies_not_crawled.add(company);
+					this.logger.info("Company " + company.getIsin() + " not crawled from " + this.name);
+    			
+    			}
 	    		
 			  	System.out.print("Crawled ");
 			  	System.out.printf("%.2f", ((companies_size - isin_list.size())/(float)companies_size) * 100);

@@ -21,7 +21,6 @@ package analysers;
 
 import java.util.List;
 
-import org.hibernate.Query;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -59,14 +58,13 @@ public class TextAnalyserManager implements Job
 		this.sensium_analyser = new SensiumAnalyser();
 		
 		HibernateSupport.beginTransaction();
-		Query query = HibernateSupport.getCurrentSession().createSQLQuery(
+		this.news_list = HibernateSupport.getCurrentSession().createSQLQuery(
 				"SELECT * FROM News t1 "
 				+ "LEFT JOIN NewsDetail t2 "
 				+ "ON t1.md5_hash = t2.md5_hash "
 				+ "WHERE t2.md5_hash IS NULL;")
-				.addEntity(News.class);
+				.addEntity(News.class).list();
 		
-		this.news_list = query.list();
 		HibernateSupport.commitTransaction();	
 		
 		//this.news_list = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>());
@@ -78,21 +76,47 @@ public class TextAnalyserManager implements Job
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		
+		System.out.println("start of main");
+		String translated_text;
+
 		int size = this.news_list.size();
-		for(int i = 0; i < size; i++) {
-			this.current_news = this.news_list.get(i);
+		int i = 0;
+		System.out.println("news_size = " + size);
+		while(this.news_list.size() > 0) {
+			this.current_news = this.news_list.get(0);
+			this.news_list.remove(0);
+			
+			if(this.current_news.getLanguage().equals("de") && 
+					this.current_news.getTranslatedContent().equals("translated_content")) {
+				
+				System.out.println("Now translating text.");
+				translated_text = this.google_translator.translateText(this.current_news.getContent());
+				
+				if(translated_text != null) {
+					this.current_news.setTranslatedContent(translated_text);
+					HibernateSupport.beginTransaction();
+					this.current_news.saveToDB();
+					HibernateSupport.commitTransaction();
+				} else {
+					System.out.println("Translating FAILED!!!");
+				}
+			}
 			
 			if(!this.current_news.containsDetailsWithSpecificAnalyser("sensium") &&
 					(this.current_news.getLanguage().equals("en") ||
 					!this.current_news.getTranslatedContent().equals("translated_content"))) {
+				
+				System.out.println("Now analysing text.");
 				this.sensium_analyser.analyseText(this.current_news);
 			}
 			
-			System.out.print("Crawled ");
-		  	System.out.printf("%.2f", (i/(float)size) * 100);
-		  	System.out.println(" % - " + (size) + " not crawled");	
+			System.out.print("Analysed ");
+		  	System.out.printf("%.2f", ((++i)/(float)size) * 100);
+		  	System.out.println(" %");
 			
 		}
+		
+		return;
 		
 		
 	}
@@ -103,46 +127,12 @@ public class TextAnalyserManager implements Job
 	 * @param argv the arguments
 	 */
 	public static void main(String[] argv) {
-		System.out.println("start of main");
 		TextAnalyserManager tam = new TextAnalyserManager();
-		String translated_text;
-
-		int size = tam.news_list.size();
-		System.out.println("news_size = " + size);
-		for(int i = 0; i < size; i++) {
-			tam.current_news = tam.news_list.get(i);
-			
-			if(tam.current_news.getLanguage().equals("de") && 
-				tam.current_news.getTranslatedContent().equals("translated_content")) {
-				
-				System.out.println("Now translating text.");
-				translated_text = tam.google_translator.translateText(tam.current_news.getContent());
-				
-				if(translated_text != null) {
-					tam.current_news.setTranslatedContent(translated_text);
-					HibernateSupport.beginTransaction();
-					tam.current_news.saveToDB();
-					HibernateSupport.commitTransaction();
-				} else {
-					System.out.println("Translating FAILED!!!");
-				}
-			}
-			
-			if(!tam.current_news.containsDetailsWithSpecificAnalyser("sensium") &&
-					(tam.current_news.getLanguage().equals("en") ||
-					!tam.current_news.getTranslatedContent().equals("translated_content"))) {
-				
-				System.out.println("Now analysing text.");
-				tam.sensium_analyser.analyseText(tam.current_news);
-			}
-			
-			System.out.print("Analysed ");
-		  	System.out.printf("%.2f", ((i + 1)/(float)size) * 100);
-		  	System.out.println(" %");
-			
+		try {
+			tam.execute(null);
+		} catch (JobExecutionException e) {
+			e.printStackTrace();
 		}
-		
-		return;
 
 	}
 

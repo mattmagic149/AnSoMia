@@ -268,7 +268,8 @@ public class News implements ISaveAndDelete {
 	@Override
 	public String serialize() {
 		return this.md5_hash + "\t" + this.news_url + "\t" + this.author + "\t" + 
-				this.date + "\t" + this.original_content + "\t" +  this.translated_content + "\t" + 
+				this.date + "\t" + this.original_content.replace("\n", "").replace("\t", "").replace("\r", "") + "\t" +  
+				this.translated_content.replace("\n", "").replace("\t", "").replace("\r", "") + "\t" + 
 				this.language;
 	}
 	

@@ -32,6 +32,8 @@ import javax.persistence.*;
 
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 
 import utils.*;
 
@@ -419,6 +421,20 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		}
 		
 		return ret;
+	}
+	
+	/**
+	 * Gets the market values between two dates from database (from, to].
+	 *
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the market values between dates
+	 */
+	public ArrayList<MarketValue> getMarketValuesBetweenDatesFromDB(Date from, Date to) {
+		List<Criterion> list = new ArrayList<Criterion>();
+		list.add(Restrictions.eq("company", this));
+		list.add(Restrictions.between("date", from, to));
+		return HibernateSupport.readMoreObjectsDesc(MarketValue.class, list, "date");
 	}
 		
 	/* (non-Javadoc)

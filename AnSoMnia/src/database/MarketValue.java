@@ -94,9 +94,7 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 	/**
 	 * Instantiates a new market value.
 	 */
-	public MarketValue() {
-		this.date = new Date();
-	}
+	public MarketValue() {}
 	
 	/**
 	 * Instantiates a new market value.
@@ -118,6 +116,11 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 		this.bid_price = bid_price;
 		this.ask_price = ask_price;
 		this.currency = currency;
+	}
+	
+	public MarketValue(float high, Date date) {
+		this.date = date;
+		this.high = high;
 	}
 	
 	/**

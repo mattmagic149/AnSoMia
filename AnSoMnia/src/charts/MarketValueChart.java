@@ -65,6 +65,8 @@ public class MarketValueChart extends ApplicationFrame {
     
     /** The values2_name. */
     private String values2_name;
+    
+    private double value;
 
     static {
         // set a theme using the new shadow generator feature available in
@@ -81,18 +83,19 @@ public class MarketValueChart extends ApplicationFrame {
      * @param values1 the values1
      * @param values2 the values2
      */
-    public MarketValueChart(String title, ArrayList<MarketValue> values1, ArrayList<MarketValue> values2) {
+    public MarketValueChart(String title, ArrayList<MarketValue> values1, ArrayList<MarketValue> values2, double value) {
         super(title);
         this.values1 = values1;
         this.values2 = values2;
+        this.value = value;
         if(values1.size() > 0) {
-        	this.values1_name = values1.get(0).getCompany().getName();
+        	this.values1_name = values1.get(0).getCompany().getName() + " (" + values1.get(0).getCompany().getIsin() + ")";
         } else {
         	this.values1_name = "Stock prices1";
         }
         
         if(values2.size() > 0) {
-        	this.values2_name = values2.get(0).getCompany().getName();
+        	this.values2_name = values2.get(0).getCompany().getName() + " (" + values2.get(0).getCompany().getIsin() + ")";
         } else {
         	this.values1_name = "Stock prices2";
         }
@@ -111,7 +114,7 @@ public class MarketValueChart extends ApplicationFrame {
     private JFreeChart createChart(XYDataset dataset) {
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-            title,  // title
+            title + " " + value,  // title
             "Date",             // x-axis label
             "Price Per Unit",   // y-axis label
             dataset,            // data

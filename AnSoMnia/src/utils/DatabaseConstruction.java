@@ -1,5 +1,5 @@
 /*
- * @Author: Matthias Ivantsits
+  * @Author: Matthias Ivantsits
  * Supported by TU-Graz (KTI)
  * 
  * Tool, to gather market information, in quantitative and qualitative manner.
