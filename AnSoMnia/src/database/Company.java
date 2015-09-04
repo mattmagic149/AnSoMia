@@ -424,7 +424,7 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 	}
 	
 	/**
-	 * Gets the market values between two dates from database (from, to].
+	 * Gets the market values between two dates from database [from, to].
 	 *
 	 * @param from the start date
 	 * @param to the end date
@@ -435,6 +435,15 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		list.add(Restrictions.eq("company", this));
 		list.add(Restrictions.between("date", from, to));
 		return HibernateSupport.readMoreObjectsDesc(MarketValue.class, list, "date");
+	}
+	
+	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.EXTRA)
+	public int getNumberOfNews() {
+		HibernateSupport.beginTransaction();
+		int result = this.company_news.size();
+		HibernateSupport.commitTransaction();
+
+		return result;
 	}
 		
 	/* (non-Javadoc)

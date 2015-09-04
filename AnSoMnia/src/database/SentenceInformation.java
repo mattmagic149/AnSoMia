@@ -48,7 +48,10 @@ public class SentenceInformation implements ISaveAndDelete {
 	private int end_index;
 	
 	/** The polarity. */
-	private float polarity;
+	private double polarity;
+	
+	/** The objectivity. */
+	private double objectivity;
 	
 	/** The details. */
 	@ManyToOne
@@ -68,11 +71,12 @@ public class SentenceInformation implements ISaveAndDelete {
 	 * @param end_index the end_index
 	 * @param polarity the polarity
 	 */
-	public SentenceInformation(NewsDetail details, int start_index, int end_index, float polarity) {
+	public SentenceInformation(NewsDetail details, int start_index, int end_index, double polarity, double objectivity) {
 		this.details = details;
 		this.start_index = start_index;
 		this.end_index = end_index;
 		this.polarity = polarity;
+		this.objectivity = objectivity;
 	}
 	
 	/**
@@ -86,6 +90,7 @@ public class SentenceInformation implements ISaveAndDelete {
 		this.start_index = Integer.parseInt(serialized_info[1]);
 		this.end_index = Integer.parseInt(serialized_info[2]);
 		this.polarity = Float.parseFloat(serialized_info[3]);
+		this.objectivity = Float.parseFloat(serialized_info[5]);
 	}
 	
 	/**
@@ -111,7 +116,7 @@ public class SentenceInformation implements ISaveAndDelete {
 	 *
 	 * @return the polarity
 	 */
-	public float getPolarity() {
+	public double getPolarity() {
 		return polarity;
 	}
 
@@ -124,13 +129,25 @@ public class SentenceInformation implements ISaveAndDelete {
 		return details;
 	}
 	
+	public double getObjectivity() {
+		return objectivity;
+	}
+
+	public void setObjectivity(double objectivity) {
+		this.objectivity = objectivity;
+	}
+
+	public void setPolarity(double polarity) {
+		this.polarity = polarity;
+	}
+
 	/* (non-Javadoc)
 	 * @see interfaces.ISaveAndDelete#serialize()
 	 */
 	@Override
 	public String serialize() {
 		return details.getId() + "\t" + this.start_index + "\t" +  this.end_index + "\t" + 
-				this.polarity + "\t" + this.details.getNews().getHash();
+				this.polarity + "\t" + this.details.getNews().getHash() + "\t" + this.objectivity;
 	}
 	
 	/* (non-Javadoc)

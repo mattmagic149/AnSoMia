@@ -19,12 +19,21 @@
  */
 package analysers;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import charts.NewsHistogram;
 import utils.GoogleTranslator;
 import utils.HibernateSupport;
 import database.*;
@@ -120,19 +129,79 @@ public class TextAnalyserManager implements Job
 		
 		
 	}
+	
+	public void createNumberOfNewsPerCompanyHist() {
+		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, new ArrayList<Criterion>());
+		int size = companies.size();
+		double[] news_count_values = new double[size];
+		for(int i = 0; i < size; i++) {
+			System.out.println((i + 1) + "/" + size);
+			news_count_values[i] = companies.get(i).getNumberOfNews();
+		}
+		
+		NewsHistogram nh = new NewsHistogram("title", 
+				news_count_values, 
+				 "description",
+			     "Correlation Coefficient",
+			     "#News",
+			     200);
+		
+		nh.execute();
+	}
 
 	/**
 	 * The main method.
 	 *
 	 * @param argv the arguments
+	 * @throws IOException 
+	 * @throws SecurityException 
 	 */
-	public static void main(String[] argv) {
+	public static void main(String[] argv) throws SecurityException, IOException {
 		TextAnalyserManager tam = new TextAnalyserManager();
-		try {
+		
+		Logger logger = Logger.getLogger("MyLogger");
+		logger.setUseParentHandlers(false);
+		String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+	  	FileHandler fh = new FileHandler("data/tmp/addsentencesentiment-"+ date + ".log", true);  
+	  	logger.addHandler(fh);
+		
+		List<News> company_news = new ArrayList<News>();
+		News single_company_news;
+		HibernateSupport.beginTransaction();
+		int news_size = (int) HibernateSupport.getCurrentSession().createCriteria(News.class)
+				.setProjection(Projections.rowCount())
+				.uniqueResult();
+		HibernateSupport.commitTransaction();
+		System.out.println(news_size);
+		
+		int counter = 0;
+		int increment_by = 500;
+		for(int offset = 0; offset < news_size; offset += increment_by) {
+			company_news.clear();
+			System.gc();
+			company_news = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>(), offset, increment_by);
+			System.out.println(offset + " news, of " + news_size + " edited.");
+
+			//HibernateSupport.beginTransaction();
+
+			while(company_news.size() > 0) {
+				single_company_news = company_news.get(0);
+				company_news.remove(0);
+				if(!tam.sensium_analyser.addSentenceSentiment(single_company_news)) {
+					logger.info("language: " + single_company_news.getLanguage() + " news-hash: " + single_company_news.getHash());
+				}
+				System.out.println(++counter + "/" + news_size);
+			}
+			//HibernateSupport.commitTransaction();
+
+		}
+		
+		return;
+		/*try {
 			tam.execute(null);
 		} catch (JobExecutionException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 	}
 

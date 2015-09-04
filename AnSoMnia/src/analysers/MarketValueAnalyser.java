@@ -24,13 +24,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.Calendar;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.correlation.*;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.javatuples.Triplet;
-import org.python.icu.util.Calendar;
 
 import utils.HibernateSupport;
+import utils.MathUtils;
 import charts.MarketValueChart;
 import charts.NewsHistogram;
 import database.*;
@@ -324,7 +331,7 @@ public class MarketValueAnalyser {
 	 */
 	public void correlationTest() throws ParseException {
 		ArrayList<MarketValue> values1 = new ArrayList<MarketValue>();
-		SimpleDateFormat formater = new SimpleDateFormat("dd.MM.YY");
+		SimpleDateFormat formater = new SimpleDateFormat("dd.MM.yy");
 		values1.add(new MarketValue(21.4f, formater.parse("22.07.11")));
 		values1.add(new MarketValue(21.71f, formater.parse("23.07.11")));
 		values1.add(new MarketValue(21.2f, formater.parse("24.07.11")));
@@ -349,6 +356,8 @@ public class MarketValueAnalyser {
 		values1.add(new MarketValue(22.28f, formater.parse("18.08.11")));
 		values1.add(new MarketValue(23.06f, formater.parse("19.08.11")));
 		values1.add(new MarketValue(22.99f, formater.parse("20.08.11")));
+		
+		System.out.println(values1.get(0).getDate());
 		
 		
 		
@@ -412,13 +421,41 @@ public class MarketValueAnalyser {
 		
 		int charts_to_print = num_charts > correlations.size() ? correlations.size() : num_charts;
 		
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		List<MarketValue> values1_list;
+		List<MarketValue> values2_list;
+		List<Date> dates = new ArrayList<Date>();
+		
+		double[] values1;
+		double[] values2;
+
+		String values1_des;
+		String values2_des;
+		
 		for(int i = 0; i < charts_to_print; i++) {
-			MarketValueChart mvc = new MarketValueChart(title, 
-					correlations.get(i).getValue0(), 
-					correlations.get(i).getValue1(),
-					correlations.get(i).getValue2());
+			values1_list = correlations.get(i).getValue0();
+			values2_list = correlations.get(i).getValue1();
+			dates.clear();
+
+			values1 = new double[values1_list.size()];
+			values2 = new double[values1_list.size()];
+			for(int j = 0; j < values1_list.size(); j++) {
+				values1[j] = values1_list.get(i).getHigh();
+				values2[j] = values2_list.get(i).getHigh();
+				dates.add(values1_list.get(i).getDate());
+			}
+			from.setTime(values1_list.get(0).getDate());
+			to.setTime(values1_list.get(values1_list.size() - 1).getDate());
+			values1_des = values1_list.get(0).getCompany().getName() + 
+						" (" + values1_list.get(0).getCompany().getIsin() + ")";
 			
-			mvc.execute();
+			values2_des = values2_list.get(0).getCompany().getName() + 
+						" (" + values2_list.get(0).getCompany().getIsin() + ")";
+			
+			MarketValueChart mvc = new MarketValueChart(title, "Date", "Price Per Unit");
+			
+			mvc.execute(values1, values2, values1_des, values2_des, dates);
 		}
 		
 	}
@@ -436,9 +473,7 @@ public class MarketValueAnalyser {
 				 description,
 			     "Correlation Coefficient",
 			     "#News",
-			     200, 
-			     -1.0f, 
-			     1.0f);
+			     200);
 		
 		nh.execute();
 	}
@@ -486,27 +521,11 @@ public class MarketValueAnalyser {
 				+ "ON n.md5_hash = ctn.md5_hash "
 				+ "GROUP BY  "
 				+ "n.md5_hash "
-				+ "HAVING news_entries > 1 AND news_entries < 5;")
+				+ "HAVING news_entries > 1;")// AND news_entries < 5;")
 				.addEntity(News.class).list();
 		HibernateSupport.commitTransaction();
 		
 		return news_list;
-	}
-	
-	/**
-	 * Map value.
-	 *
-	 * @param old_min the old_min
-	 * @param old_max the old_max
-	 * @param new_min the new_min
-	 * @param new_max the new_max
-	 * @param value the value
-	 * @return the double
-	 */
-	private double mapValue(double old_min, double old_max, double new_min, double new_max, double value) {
-		double old_range = old_max - old_min;
-		double new_range = new_max - new_min;
-		return (((value - old_min) * new_range) / old_range) + new_min;
 	}
 
 	/**
@@ -576,16 +595,17 @@ public class MarketValueAnalyser {
 		ArrayList<Double> tmp = new ArrayList<Double>();
 		
 		int counter = 0;
+		int size = news_list.size();
 		while(news_list.size() > 0) {
 
 			news = news_list.get(0);
 			news_list.remove(0);
-			System.out.println(++counter);
+			System.out.println(++counter + "/" + size);
 				
 			cal_from.setTime(news.getDate());
 			cal_to.setTime(news.getDate());
 
-			cal_from.set(Calendar.DAY_OF_YEAR, cal_from.get(Calendar.DAY_OF_YEAR) - 1);
+			//cal_from.set(Calendar.DAY_OF_YEAR, cal_from.get(Calendar.DAY_OF_YEAR) - 1);
 			cal_to.set(Calendar.DAY_OF_YEAR, cal_to.get(Calendar.DAY_OF_YEAR) + this.days_to_correlate);
 			tmp = this.calculateCorrelationOfMultipleCompanies(news.getCompanies(), 
 							cal_from.getTime(), 
@@ -604,7 +624,7 @@ public class MarketValueAnalyser {
 		
     	for (int i = 0; i < target.length; i++) {
     		target[i] = correlations.get(i);
-    		mapped[i] = mapValue(-1.0f, 1.0f, 0.0f, 1.0f, correlations.get(i));
+    		mapped[i] = MathUtils.mapValue(-1.0f, 1.0f, 0.0f, 1.0f, correlations.get(i));
 			target_average += target[i];
 			mapped_average += mapped[i];
     	}
@@ -616,4 +636,333 @@ public class MarketValueAnalyser {
 		return target;
 		
 	}
+	
+	public double[] correlateAllCompanies() {
+		
+		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, new ArrayList<Criterion>());
+
+		SimpleDateFormat format = new SimpleDateFormat("dd.MM.yy");
+
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		try {
+			from.setTime(format.parse("01.07.15"));
+			to.setTime(format.parse("31.07.15"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		ArrayList<double[]> tmp = new ArrayList<double[]>();
+		ArrayList<PolynomialSplineFunction> psf_list = new ArrayList<PolynomialSplineFunction>();
+		PolynomialSplineFunction psf;
+		Company current_company;
+		int c_size = companies.size();
+
+		for(int i = 0; i < c_size; i++) {
+			System.out.println("adding: " + (i + 1) +"/" + c_size);
+
+			current_company = companies.get(i);
+			if((psf = getMarketValueSplineFromTo(current_company, from, to)) != null) {
+				psf_list.add(psf);
+			}			
+		}
+		
+		
+		for(int i = 0; i < psf_list.size(); i++) {
+			tmp.add(getValuesFromPsf(psf_list.get(i), from, to));
+		}
+
+		double[] values1;
+		double[] values2;
+		ArrayList<Double> correlations = new ArrayList<Double>();
+		double corr_tmp;
+		for(int i = 0; i < tmp.size(); i++) {
+			values1 = tmp.get(i);
+			System.out.println("correlations: " + (i + 1) + "/" + tmp.size());
+
+			for(int j = (i + 1); j < tmp.size(); j++) {
+				values2 = tmp.get(j);
+				if(Double.isFinite(corr_tmp = this.p_corr.correlation(values1, values2))) {
+					correlations.add(corr_tmp);
+				}
+			}
+		}
+		
+		double[] corr_result = new double[correlations.size()];
+		
+		for(int i = 0; i < correlations.size(); i++) {
+			corr_result[i] = correlations.get(i);
+			if(Double.isInfinite(corr_result[i]) || Double.isNaN(corr_result[i])) {
+				assert false;
+			}
+		}
+		
+		Mean mean = new Mean();
+		
+		System.out.println("psf_list = " + psf_list.size());
+		System.out.println("result = " + tmp.size());
+		System.out.println("correlations = " + correlations.size());
+		System.out.println("mean = " + mean.evaluate(corr_result));
+
+		
+		return corr_result;	
+		
+	}
+	
+	public List<Double> correlateCompanyWithMultipleCompanies(double[] values,
+													  List<double[]> values_list) {
+		
+		int values_list_size = values_list.size();
+		List<Double> result = new ArrayList<Double>();
+		double correlation;
+		
+		for(int i = 0; i < values_list_size; i++) {
+			if(Double.isFinite((correlation = this.p_corr.correlation(values, values_list.get(i))))) {
+				result.add(correlation);
+			}
+		}
+		
+		return result;
+	}
+	
+	public List<double[]> getMultipleMarketValuesFromCompanies(List<Company> companies,
+													 Calendar from,
+													 Calendar to) {
+		
+		List<double[]> result = new ArrayList<double[]>();
+		PolynomialSplineFunction psf;
+		
+		Company company;
+		int companies_size = companies.size();
+		for(int i = 0; i < companies_size; i++) {
+			company = companies.get(i);
+			if((psf = this.getMarketValueSplineFromTo(company, from, to)) != null) {
+				result.add(this.getValuesFromPsf(psf, from, to));
+			}	
+		}
+		
+		return result;
+	}
+	
+	public List<Double> correlateTwoSectors(List<double[]> sector1, 
+											List<double[]> sector2,
+											Calendar from,
+											Calendar to) {
+		
+		List<Double> result = new ArrayList<Double>();
+		double[] values_sector1;
+
+		List<Double> tmp;
+		for(int i = 0; i < sector1.size(); i++) {
+			values_sector1 = sector1.get(i);
+			
+			tmp = this.correlateCompanyWithMultipleCompanies(values_sector1, sector2);
+			if(tmp != null) {
+				result.addAll(tmp);
+			}
+		}
+		
+		return result;
+		
+	}
+	
+	public void correlateIndustrySectors(Calendar from, Calendar to) {
+		List<IndustrySector> sectors = HibernateSupport.readMoreObjects(IndustrySector.class, new ArrayList<Criterion>());
+		int sectors_size = sectors.size();
+		IndustrySector sector1;
+		IndustrySector sector2;
+		
+		List<Company> sector1_companies;
+		List<Company> sector2_companies;
+		
+		List<double[]> values_list_sector1;
+		List<double[]> values_list_sector2;
+		
+		List<Double> list_result;
+		double[] double_result;
+		Mean mean = new Mean();
+		List<Double> total_result = new ArrayList<Double>();
+		double mean_tmp;
+		
+		System.out.println(sectors.size());
+		
+		for(int i = 0; i < sectors_size; i++) {
+			sector1 = sectors.get(i);
+			sector1_companies = sector1.getCompanies();
+			//System.out.println("sector1_companies size = " + sector1_companies.size());
+			if(sector1_companies.size() < 200) {
+				//continue;
+			}
+			
+			values_list_sector1 = this.getMultipleMarketValuesFromCompanies(sector1_companies, from, to);
+			
+			for(int j = (i + 1); j < sectors_size; j++) {
+				System.out.println((i + 1) + "/" + (j + 1) + "/" + sectors_size);
+				sector2 = sectors.get(j);
+				sector2_companies = sector2.getCompanies();
+				//System.out.println("sector2_companies size = " + sector2_companies.size());
+				if(sector2_companies.size() < 200) {
+					//continue;
+				}
+				
+				values_list_sector2 = this.getMultipleMarketValuesFromCompanies(sector2_companies, from, to);
+
+				list_result = this.correlateTwoSectors(values_list_sector1, values_list_sector2, from, to);
+				total_result.addAll(list_result);
+				double_result = MathUtils.convertDoubleListToArray(list_result);
+				mean_tmp = mean.evaluate(double_result);
+				NewsHistogram nh = new NewsHistogram("Correlation " 
+													+ sector1.getName()
+													+ " correlated with "
+													+ sector2.getName(), 
+													double_result, 
+													"Mean = " + mean_tmp,
+													"Correlation Coefficient",
+													"#Correlations",
+													200);
+				
+				nh.execute();
+				
+				
+			}
+			
+		}
+		
+		double[] total_result_arr = MathUtils.convertDoubleListToArray(total_result);
+		mean_tmp = mean.evaluate(total_result_arr);
+		System.out.println("Total mean = " + mean_tmp);
+		
+		NewsHistogram nh = new NewsHistogram("Total-Correlation", 
+				total_result_arr, 
+				"Mean = " + mean_tmp,
+				"Correlation Coefficient",
+				"#Correlations",
+				200);
+
+		nh.execute();
+		
+	}
+	
+	public double[] getValuesFromPsf(PolynomialSplineFunction psf, Calendar from, Calendar to) {
+		
+		int diff = (int) TimeUnit.DAYS.convert(to.getTimeInMillis() 
+									   - from.getTimeInMillis(), 
+									   TimeUnit.MILLISECONDS);
+		
+		double[] result = new double[diff];
+		Calendar tmp_date = Calendar.getInstance();
+		tmp_date.setTime(from.getTime());
+		tmp_date.set(Calendar.DAY_OF_YEAR, from.get(Calendar.DAY_OF_YEAR) + 1);
+		
+		for(int i = 0; i < result.length; i++) {
+			result[i] = psf.value(tmp_date.getTimeInMillis());
+			if(Double.isInfinite(result[i]) || Double.isNaN(result[i])) {
+				assert false;
+			}
+
+			//increment
+			tmp_date.set(Calendar.DAY_OF_YEAR, tmp_date.get(Calendar.DAY_OF_YEAR) + 1);
+		}
+		
+		return result;
+	}
+	
+	public double[] getSharePriceDevelopement(PolynomialSplineFunction psf, Calendar from, Calendar to) {
+		
+		int diff = (int) TimeUnit.DAYS.convert(to.getTimeInMillis() 
+									   - from.getTimeInMillis(), 
+									   TimeUnit.MILLISECONDS);
+		
+		double[] result = new double[diff];
+		double reference = psf.value(from.getTimeInMillis());
+		double tmp;
+		
+		Calendar tmp_date = Calendar.getInstance();
+		tmp_date.setTime(from.getTime());
+		tmp_date.set(Calendar.DAY_OF_YEAR, from.get(Calendar.DAY_OF_YEAR) + 1);
+		
+		for(int i = 0; i < result.length; i++) {
+			tmp = psf.value(tmp_date.getTimeInMillis());
+			result[i] = 100 / reference * (tmp - reference);
+			//reference = tmp;
+			
+			//increment
+			tmp_date.set(Calendar.DAY_OF_YEAR, tmp_date.get(Calendar.DAY_OF_YEAR) + 1);
+		}
+		
+		return result;
+	}
+	
+	public PolynomialSplineFunction getMarketValueSplineFromTo(Company company, Calendar from, Calendar to) {
+		
+		List<MarketValue> values = company.getMarketValuesBetweenDatesFromDB(from.getTime(), to.getTime());
+		
+		if(values.size() == 0 || !normalizeMarketValues(company, values, from, to)) {
+			return null;
+		}
+						
+		double[] x = new double[values.size()];
+		double[] y = new double[values.size()];
+		Calendar cal = Calendar.getInstance();
+		for(int i = 0; i < values.size(); i++) {
+			cal.setTime(values.get(i).getDate());
+			x[i] = cal.getTimeInMillis();
+			y[i] = values.get(i).getHigh();
+		}
+		
+		return new LinearInterpolator().interpolate(x, y);
+		
+	}
+	
+	public boolean normalizeMarketValues(Company company, List<MarketValue> values, Calendar from, Calendar to) {
+				
+		MarketValue value;
+		if(values.get(0).getDate().getTime() > from.getTime().getTime()) {
+
+			value = getDateBeforeOrAfter(company, from, -1);
+			if(value != null) {
+				values.add(0, value);
+			} else {
+				return false;
+			}
+		}
+		
+		if(values.get(values.size() - 1).getDate().getTime() < to.getTime().getTime()) {
+			
+			value = getDateBeforeOrAfter(company, to, 1);
+			if(value != null) {
+				values.add(values.size(), value);
+			} else {
+				return false;
+			}
+		}
+		
+		return true;
+		
+	}
+	
+	public MarketValue getDateBeforeOrAfter(Company company, Calendar date, int dec_inc) {
+		MarketValue value;
+		List<Criterion> cr;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date.getTime());
+
+		for(int count = 0; count < 10; count++) {
+			//System.out.println("I am trying to fetch a value...");
+			cal.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR) + dec_inc);
+
+			cr = new ArrayList<Criterion>();
+			cr.add(Restrictions.eq("company", company));
+			cr.add(Restrictions.eq("date", cal.getTime()));
+			value = HibernateSupport.readOneObject(MarketValue.class, cr);
+			if(value != null) {
+				return value;
+			}
+		}
+		
+		return null;
+	}
+	
+	
 }

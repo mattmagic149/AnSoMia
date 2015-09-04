@@ -36,6 +36,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+
+import utils.FileUtils;
 import utils.HibernateSupport;
 
 /**
@@ -260,6 +265,49 @@ public class News implements ISaveAndDelete {
 			assert(false);
 		}
 		return success;
+	}
+	
+	public static List<News> getNewsCompaniesGoodRepGePolarity(double polarity) {
+		
+
+		Criterion polarity_cr = Restrictions.ge("detail.total_polarity", polarity);
+		//Criterion objectivity_cr = Restrictions.ge("detail.total_objectivity", 0.95);
+		Criterion disj_cr = getNewsOfCompaniesWithGoodReputation();
+		
+		return getResultsWithTwoCriterions(polarity_cr, disj_cr);
+		
+	}
+	
+	public static List<News> getNewsCompaniesGoodRepLePolarity(double polarity) {
+		
+		Criterion polarity_cr = Restrictions.le("detail.total_polarity", polarity);
+		Criterion disj_cr = getNewsOfCompaniesWithGoodReputation();
+		
+		return getResultsWithTwoCriterions(polarity_cr, disj_cr);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static List<News> getResultsWithTwoCriterions(Criterion cr1, Criterion cr2) {
+		HibernateSupport.beginTransaction();
+		Criteria c = HibernateSupport.getCurrentSession().createCriteria(News.class);
+		c.createAlias("companies", "company");
+		c.createAlias("news_details", "detail");
+		//c.add(Restrictions.between("detail.total_polarity", 0.0, 1.0));
+		c.add(cr1);
+		c.add(cr2);
+		List<News> result = c.list();
+
+		HibernateSupport.commitTransaction();
+		
+		return result;
+	}
+	
+	private static Criterion getNewsOfCompaniesWithGoodReputation() {
+		String property = "company.name";
+		List<String> companies = FileUtils.readGoodReputationCompanies();
+		Criterion disj = HibernateSupport.getStringLikeDisjunction(companies, property);
+		return disj;
 	}
 	
 	/* (non-Javadoc)

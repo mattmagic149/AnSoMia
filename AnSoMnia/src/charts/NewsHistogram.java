@@ -19,6 +19,7 @@
  */
 package charts;
 
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -27,6 +28,14 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
+
+import java.awt.Rectangle;
+import java.io.*;
+
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -55,12 +64,6 @@ public class NewsHistogram extends ApplicationFrame {
 	/** The number_of_bins. */
 	private int number_of_bins;
 	
-	/** The start. */
-	private float start;
-	
-	/** The end. */
-	private float end;
-	
 	/**
 	 * Instantiates a new news histogram.
 	 *
@@ -75,7 +78,7 @@ public class NewsHistogram extends ApplicationFrame {
 	 */
 	public NewsHistogram(String title, double[] values, String description,
 							String x_axis, String y_axis,
-							int number_of_bins, float start, float end) {
+							int number_of_bins) {
         super(title);
         this.title = title;
         this.values = values;
@@ -83,8 +86,6 @@ public class NewsHistogram extends ApplicationFrame {
         this.x_axis = x_axis;
         this.y_axis = y_axis;
         this.number_of_bins = number_of_bins;
-        this.start = start;
-        this.end = end;
         
     }
     
@@ -101,9 +102,9 @@ public class NewsHistogram extends ApplicationFrame {
     	
     	dataset.addSeries(this.description, 
     					  this.values, 
-    					  this.number_of_bins, 
+    					  this.number_of_bins);/*, 
     					  this.start,
-    					  this.end);
+    					  this.end);*/
         return dataset;
     }
 
@@ -128,6 +129,44 @@ public class NewsHistogram extends ApplicationFrame {
         
         return chart;    
     }
+    
+    private void exportFigure(JFreeChart jfreechart) {
+    	// TODO: use a dialog to ask for the filename
+    	File svgFile = new File("data/plots/" + this.title.replace("/", "") + ".svg");
+    	
+    	// write it to file
+    	try {
+			exportChartAsSVG(jfreechart, 
+				getContentPane().getBounds(), svgFile);
+
+	    	// TODO: notify the user the file has been saved (e.g. status bar)
+	    	System.out.println("Figured saved as " + svgFile.getAbsolutePath());
+    	
+    	} catch (IOException e) {
+			System.err.println("Error saving file:\n" + e.getMessage());
+		}
+    }
+    
+    private void exportChartAsSVG(JFreeChart chart, Rectangle bounds, File svgFile) throws IOException {
+        // Get a DOMImplementation and create an XML document
+        DOMImplementation domImpl =
+            GenericDOMImplementation.getDOMImplementation();
+        Document document = domImpl.createDocument(null, "svg", null);
+
+        // Create an instance of the SVG Generator
+        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+
+        // draw the chart in the SVG generator
+        chart.draw(svgGenerator, bounds);
+
+        // Write svg file
+        OutputStream outputStream = new FileOutputStream(svgFile);
+        Writer out = new OutputStreamWriter(outputStream, "UTF-8");
+        svgGenerator.stream(out, true /* use css */);						
+        outputStream.flush();
+        outputStream.close();
+	}  
+
 
     /**
      * Execute.
@@ -136,13 +175,16 @@ public class NewsHistogram extends ApplicationFrame {
     	
     	IntervalXYDataset dataset = createDataset();
         JFreeChart chart = createChart(dataset);
+
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
         setContentPane(chartPanel);
 
         this.pack();
         RefineryUtilities.centerFrameOnScreen(this);
-        this.setVisible(true);
+        exportFigure(chart);
+        //this.setVisible(true);
+        
 
     }
 

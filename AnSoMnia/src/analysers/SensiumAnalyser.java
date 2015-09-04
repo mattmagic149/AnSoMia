@@ -19,6 +19,9 @@
  */
 package analysers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import utils.HibernateSupport;
 import database.News;
 import database.NewsDetail;
@@ -29,6 +32,7 @@ import io.sensium.ExtractionResponse;
 import io.sensium.Sensium;
 import io.sensium.SensiumException;
 import io.sensium.Sentence;
+import io.sensium.SentimentOccurrence;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -67,6 +71,8 @@ public class SensiumAnalyser
 			this.req.text = news.getContent();
 		} else if(news.getLanguage().equals("de")) {
 			this.req.text = news.getTranslatedContent();
+		} else {
+			return false;
 		}
 		
 		req.extractors = new Extractor[] { Extractor.Sentences, 
@@ -80,21 +86,106 @@ public class SensiumAnalyser
 			return false;
 		}
 		
-		NewsDetail details = new NewsDetail(news, 
-															"sensium", 
-															"en", 
-															resp.polarity.score, 
-															resp.objectivity.score);
+		NewsDetail detail = new NewsDetail(news, 
+											"sensium", 
+											"en", 
+											resp.polarity.score, 
+											resp.objectivity.score);
 
 		HibernateSupport.beginTransaction();
 		
-		news.addCompanyNewsDetails(details);
+		news.addCompanyNewsDetails(detail);
+		
+		ArrayList<SentenceInformation> infos = new ArrayList<SentenceInformation>();
 		SentenceInformation info;
-		for(Sentence sentence: resp.sentences) {
-			info = new SentenceInformation(details, sentence.start, sentence.end, Float.MIN_VALUE);
-			details.addSentenceInformation(info);
+		List<SentimentOccurrence> polarity_occ = resp.polarity.occurrences;
+		List<SentimentOccurrence> objectivity_occ = resp.objectivity.occurrences;
+		List<Sentence> sentences = resp.sentences;
+		
+		for(int i = 0; i < sentences.size(); i++) {
+			info = new SentenceInformation(detail, 
+									sentences.get(i).start, 
+									sentences.get(i).end, 
+									Double.MAX_VALUE, 
+									Double.MAX_VALUE);
+			
+			infos.add(info);
 		}
 		
+		for(int i = 0; i < polarity_occ.size(); i++) {
+			infos.get(i).setPolarity(polarity_occ.get(i).score);;
+		}
+		
+		for(int i = 0; i < objectivity_occ.size(); i++) {
+			infos.get(i).setObjectivity(objectivity_occ.get(i).score);;
+		}
+		
+		for(int i = 0; i < infos.size(); i++) {
+			infos.get(i).saveToDB();
+		}
+		
+		detail.setSentenceInformation(infos);	
+		
+		HibernateSupport.commitTransaction();
+		
+		return true;
+	}
+	
+	public boolean addSentenceSentiment(News news) {
+		
+		if(news.getLanguage().equals("en")) {
+			this.req.text = news.getContent();
+		} else if(news.getLanguage().equals("de")) {
+			this.req.text = news.getTranslatedContent();
+		} else {
+			return false;
+		}
+		
+		req.extractors = new Extractor[] { Extractor.Sentences, 
+										   Extractor.Sentiment
+										  };
+		
+		try {
+			this.resp = this.sensium.extract(req);
+		} catch (SensiumException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		NewsDetail detail = news.getNewsDetails().get(0);
+ 		ArrayList<SentenceInformation> infos = new ArrayList<SentenceInformation>();
+ 		SentenceInformation info;
+ 		
+		List<SentimentOccurrence> polarity_occ = resp.polarity.occurrences;
+		List<SentimentOccurrence> objectivity_occ = resp.objectivity.occurrences;
+		List<Sentence> sentences = resp.sentences;
+		
+		HibernateSupport.beginTransaction();
+		detail.removeAllSentenceInformation();
+
+		for(int i = 0; i < sentences.size(); i++) {
+			info = new SentenceInformation(detail, 
+									sentences.get(i).start, 
+									sentences.get(i).end, 
+									Double.MAX_VALUE, 
+									Double.MAX_VALUE);
+			
+			infos.add(info);
+		}
+		
+		for(int i = 0; i < polarity_occ.size(); i++) {
+			infos.get(i).setPolarity(polarity_occ.get(i).score);;
+		}
+		
+		for(int i = 0; i < objectivity_occ.size(); i++) {
+			infos.get(i).setObjectivity(objectivity_occ.get(i).score);;
+		}
+		
+		for(int i = 0; i < infos.size(); i++) {
+			infos.get(i).saveToDB();
+		}
+		
+		detail.setSentenceInformation(infos);		
 		HibernateSupport.commitTransaction();
 		
 		return true;

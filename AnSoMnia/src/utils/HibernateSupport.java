@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.service.ServiceRegistry;
@@ -267,6 +268,16 @@ public class HibernateSupport {
 	 */
 	public static <T> void deleteObject(T objectToDelete) {
 		getCurrentSession().delete(objectToDelete);
+	}
+	
+	public static Criterion getStringLikeDisjunction(List<String> to_read, String property) {
+		
+		Disjunction disj = Restrictions.disjunction();
+		for(int i = 0; i < to_read.size(); i++) {
+			disj.add(Restrictions.like(property, "%" + to_read.get(i) + "%"));
+		}
+		
+		return disj;
 	}
 
 }

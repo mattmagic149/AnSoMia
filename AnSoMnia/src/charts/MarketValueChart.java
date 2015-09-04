@@ -19,9 +19,12 @@
  */
 package charts;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -29,19 +32,27 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYDrawableAnnotation;
+import org.jfree.chart.annotations.XYPointerAnnotation;
+import org.jfree.chart.annotations.XYTitleAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.title.Title;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
+import org.jfree.ui.TextAnchor;
 
-import database.MarketValue;
+import demo.CircleDrawer;
 
 /**
  * The Class MarketValueChart.
@@ -55,19 +66,21 @@ public class MarketValueChart extends ApplicationFrame {
     private String title;
     
     /** The values1. */
-    private ArrayList<MarketValue> values1;
+    private double[] values1;
     
     /** The values2. */
-    private ArrayList<MarketValue> values2;
+    private double[] values2;
     
-    /** The values1_name. */
-    private String values1_name;
+    private String x_axis;
     
-    /** The values2_name. */
-    private String values2_name;
+    private String y_axis;
     
-    private double value;
+    private List<Date> dates;
 
+    private String values1_des;
+    
+    private String values2_des;
+    
     static {
         // set a theme using the new shadow generator feature available in
         // 1.0.14 - for backwards compatibility it is not enabled by default
@@ -80,28 +93,17 @@ public class MarketValueChart extends ApplicationFrame {
      * Instantiates a new market value chart.
      *
      * @param title the title
-     * @param values1 the values1
+     * @param values the values1
      * @param values2 the values2
      */
-    public MarketValueChart(String title, ArrayList<MarketValue> values1, ArrayList<MarketValue> values2, double value) {
+    public MarketValueChart(String title, String x_axis, String y_axis) {
         super(title);
-        this.values1 = values1;
-        this.values2 = values2;
-        this.value = value;
-        if(values1.size() > 0) {
-        	this.values1_name = values1.get(0).getCompany().getName() + " (" + values1.get(0).getCompany().getIsin() + ")";
-        } else {
-        	this.values1_name = "Stock prices1";
-        }
-        
-        if(values2.size() > 0) {
-        	this.values2_name = values2.get(0).getCompany().getName() + " (" + values2.get(0).getCompany().getIsin() + ")";
-        } else {
-        	this.values1_name = "Stock prices2";
-        }
-        
-        this.title = "Comparision: " + this.values1_name + " & " + this.values2_name;
 
+        this.title = title;
+        this.x_axis = x_axis;
+        this.y_axis = y_axis;
+        this.values1 = null;
+        this.values2 = null;
         
     }
 
@@ -114,9 +116,9 @@ public class MarketValueChart extends ApplicationFrame {
     private JFreeChart createChart(XYDataset dataset) {
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-            title + " " + value,  // title
-            "Date",             // x-axis label
-            "Price Per Unit",   // y-axis label
+            title,  // title
+            x_axis,             // x-axis label
+            y_axis,   // y-axis label
             dataset,            // data
             true,               // create legend?
             true,               // generate tooltips?
@@ -143,6 +145,32 @@ public class MarketValueChart extends ApplicationFrame {
 
         DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("dd-MMM"));
+        
+        
+        final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
+        XYAnnotation bestBid = null;
+        XYPointerAnnotation pointer = null;
+			
+        bestBid = new XYDrawableAnnotation(dates.get(0).getTime(), this.values1[0], 11, 11, cd);
+		plot.addAnnotation(bestBid);
+        pointer = new XYPointerAnnotation("News Published", 
+        									dates.get(0).getTime(), 
+        									this.values1[0],
+                                            1.0 * Math.PI / 4.0);
+        
+
+        Title textTitle = new TextTitle("HAAAAAAALLO");
+		XYTitleAnnotation xyTitleAnnotation = new XYTitleAnnotation(dates.get(0).getTime(), this.values1[0], textTitle , RectangleAnchor.TOP_LEFT);
+        
+        plot.addAnnotation(xyTitleAnnotation);
+
+        
+		pointer.setBaseRadius(35.0);
+        pointer.setTipRadius(10.0);
+        pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
+        pointer.setPaint(Color.black);
+        pointer.setTextAnchor(TextAnchor.HALF_ASCENT_LEFT);
+        plot.addAnnotation(pointer);
 
         return chart;
 
@@ -156,24 +184,23 @@ public class MarketValueChart extends ApplicationFrame {
      */
     private XYDataset createDataset() {
 
-        TimeSeries s1 = new TimeSeries(this.values1_name);
-        
-        MarketValue tmp;
-        for(int i = 0; i < this.values1.size(); i++) {
-        	tmp = this.values1.get(i);
-        	s1.add(new Day(tmp.getDate()), tmp.getHigh());
-        }
-
-        TimeSeries s2 = new TimeSeries(this.values2_name);
-        
-        for(int i = 0; i < this.values2.size(); i++) {
-        	tmp = this.values2.get(i);
-        	s2.add(new Day(tmp.getDate()), tmp.getHigh());
-        }
-        
         TimeSeriesCollection dataset = new TimeSeriesCollection();
+        TimeSeries s1 = new TimeSeries(this.values1_des);
+        
+        for(int i = 0; i < this.values1.length; i++) {
+        	s1.add(new Day(dates.get(i)), this.values1[i]);
+        }
         dataset.addSeries(s1);
-        dataset.addSeries(s2);
+        
+        if(this.values2 != null) {
+	        TimeSeries s2 = new TimeSeries(this.values2_des);
+	        
+	        for(int i = 0; i < this.values2.length; i++) {
+	        	s2.add(new Day(dates.get(i)), this.values2[i]);
+	        }
+	        
+	        dataset.addSeries(s2);
+        }
 
         return dataset;
 
@@ -191,19 +218,41 @@ public class MarketValueChart extends ApplicationFrame {
         panel.setMouseWheelEnabled(true);
         return panel;
     }
-
-    /**
-     * Execute.
-     */
-    public void execute() {
+    
+    private void init(double[] values1, double[] values2, String values1_des, String values2_des, List<Date> dates, boolean save, boolean show) {
+    	this.values2 = values2;
+    	this.values2_des = values2_des;
+    	init(values1, values1_des, dates, save, show);
+    }
+    
+    private void init(double[] values, String values_des, List<Date> dates, boolean save, boolean show) {
+    	this.values1 = values;
+    	this.values1_des = values_des;
+    	this.dates = dates;
+    	
     	ChartPanel chartPanel = (ChartPanel) createDemoPanel();
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
         setContentPane(chartPanel);
     	
         this.pack();
         RefineryUtilities.centerFrameOnScreen(this);
-        this.setVisible(true);
+        
+        if(show) {
+        	this.setVisible(true);
+        }
+    }
 
+    /**
+     * Execute.
+     */
+    public void execute(double[] values1, double[] values2, String values1_des, String values2_des, List<Date> dates) {
+    	init(values1, values2, values1_des, values2_des, dates, false, true);
+    }
+    
+    
+    
+    public void execute(double[] values, String values_des, List<Date> dates) {
+    	init(values, values_des, dates, false, true);
     }
 
 }

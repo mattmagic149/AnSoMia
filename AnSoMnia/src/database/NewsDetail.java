@@ -165,6 +165,10 @@ public class NewsDetail implements ISaveAndDelete  {
 	}
 	
 	
+	public void setSentenceInformation(List<SentenceInformation> sentence_information) {
+		this.sentence_information = sentence_information;
+	}
+
 	/**
 	 * Gets the total objectivity.
 	 *
@@ -190,6 +194,15 @@ public class NewsDetail implements ISaveAndDelete  {
 			assert(false);
 		}
 		return success;
+	}
+	
+	public void removeAllSentenceInformation() {
+		SentenceInformation info;
+		while(this.sentence_information.size() > 0) {
+			info = this.sentence_information.get(0);
+			this.sentence_information.remove(0);
+			info.deleteFromDB(info);
+		}
 	}
 	
 	/* (non-Javadoc)

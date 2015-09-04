@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 
 import database.*;
 
@@ -73,7 +74,7 @@ public class SaveLoadDatabase {
 	private String news_to_company_string = "news_to_company_backup";
 	
 	/** The file_extension. */
-	private String file_extension = ".txt";
+	private String file_extension = ".csv";
 	
 	/** The directory. */
 	private String directory = "data/backups2/";
@@ -181,9 +182,9 @@ public class SaveLoadDatabase {
 		SentenceInformation single_info;
 		
 		HibernateSupport.beginTransaction();
-		int news_size = ((Long)HibernateSupport.getCurrentSession()
-									.createQuery("select count(*) from News")
-									.uniqueResult()).intValue();
+		int news_size = (int) HibernateSupport.getCurrentSession().createCriteria(News.class)
+				.setProjection(Projections.rowCount())
+				.uniqueResult();
 		HibernateSupport.commitTransaction();
 		System.out.println(news_size);
 		
@@ -384,10 +385,12 @@ public class SaveLoadDatabase {
 		}
 		
 		HibernateSupport.beginTransaction();
-		int market_values_size = ((Long)HibernateSupport.getCurrentSession()
-									.createQuery("select count(*) from MarketValue")
-									.uniqueResult()).intValue();
+		int market_values_size = (int) HibernateSupport.getCurrentSession()
+				.createCriteria(MarketValue.class)
+				.setProjection(Projections.rowCount())
+				.uniqueResult();
 		HibernateSupport.commitTransaction();
+
 		System.out.println(market_values_size);
 		List<MarketValue> market_values = new ArrayList<MarketValue>();
 		MarketValue market_value;

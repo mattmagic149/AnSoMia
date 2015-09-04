@@ -101,6 +101,10 @@ public class IndustrySector implements ISaveAndDelete {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	/**
 	 * Gets the wallstreet query string.
 	 *
