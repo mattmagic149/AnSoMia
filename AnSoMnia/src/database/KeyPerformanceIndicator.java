@@ -36,6 +36,7 @@ import javax.persistence.ManyToOne;
 import utils.HibernateSupport;
 import database.Company;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class KeyPerformanceIndicator.
  */
@@ -49,6 +50,9 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 
 	/** The date. */
 	private Date date;
+	
+	/** The date_added. */
+	private Date date_added;
 	
 	/** The revenue. */
 	private long revenue; //Umsatz
@@ -144,11 +148,13 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 	 *
 	 * @param year the year
 	 * @param company the company
+	 * @param date_added the date_added
 	 */
-	public KeyPerformanceIndicator(int year, Company company) {
+	public KeyPerformanceIndicator(int year, Company company, Date date_added) {
 		Calendar c = Calendar.getInstance();
 		c.set(year, 1, 1);
 		this.date = c.getTime();
+		this.date_added = date_added;
 		this.company = company;
 		
 		this.balance_sheet_total = Long.MIN_VALUE;
@@ -182,6 +188,7 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			this.date = formatter.parse(serialized_kpi[1]);
+			this.date_added = formatter.parse(serialized_kpi[19]);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			assert(false);
@@ -699,7 +706,7 @@ public class KeyPerformanceIndicator implements ISaveAndDelete {
 				this.debt + "\t" + this.equity + "\t" + this.dividend + "\t" + 
 				this.earnings_per_share + "\t" + this.cashflow + "\t" + this.gross_profit + "\t" + 
 				this.working_capital + "\t" + this.liquidity_1 + "\t" + this.liquidity_2 + "\t" + 
-				this.liquidity_3;
+				this.liquidity_3 + "\t" + this.date_added;
 	}
 	
 	/* (non-Javadoc)

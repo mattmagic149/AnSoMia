@@ -73,8 +73,6 @@ public class NewsHistogram extends ApplicationFrame {
 	 * @param x_axis the x_axis
 	 * @param y_axis the y_axis
 	 * @param number_of_bins the number_of_bins
-	 * @param start the start
-	 * @param end the end
 	 */
 	public NewsHistogram(String title, double[] values, String description,
 							String x_axis, String y_axis,
@@ -130,6 +128,11 @@ public class NewsHistogram extends ApplicationFrame {
         return chart;    
     }
     
+    /**
+     * Export figure.
+     *
+     * @param jfreechart the jfreechart
+     */
     private void exportFigure(JFreeChart jfreechart) {
     	// TODO: use a dialog to ask for the filename
     	File svgFile = new File("data/plots/" + this.title.replace("/", "") + ".svg");
@@ -147,6 +150,14 @@ public class NewsHistogram extends ApplicationFrame {
 		}
     }
     
+    /**
+     * Export chart as svg.
+     *
+     * @param chart the chart
+     * @param bounds the bounds
+     * @param svgFile the svg file
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private void exportChartAsSVG(JFreeChart chart, Rectangle bounds, File svgFile) throws IOException {
         // Get a DOMImplementation and create an XML document
         DOMImplementation domImpl =

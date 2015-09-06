@@ -24,6 +24,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import database.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * This Class is for Constructing the Database.
  *
@@ -50,6 +51,7 @@ public class DatabaseConstruction {
 		configuration.addAnnotatedClass(NewsDetail.class);
 		configuration.addAnnotatedClass(SentenceInformation.class);
 		configuration.addAnnotatedClass(IndustrySector.class);
+		configuration.addAnnotatedClass(CompanyInformation.class);
 		
 		configuration.configure("hibernate.cfg.xml");
 

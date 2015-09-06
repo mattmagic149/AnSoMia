@@ -20,15 +20,10 @@
 package analysers;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
 
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Projections;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -130,6 +125,9 @@ public class TextAnalyserManager implements Job
 		
 	}
 	
+	/**
+	 * Creates the number of news per company hist.
+	 */
 	public void createNumberOfNewsPerCompanyHist() {
 		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, new ArrayList<Criterion>());
 		int size = companies.size();
@@ -153,13 +151,18 @@ public class TextAnalyserManager implements Job
 	 * The main method.
 	 *
 	 * @param argv the arguments
-	 * @throws IOException 
-	 * @throws SecurityException 
+	 * @throws SecurityException the security exception
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public static void main(String[] argv) throws SecurityException, IOException {
 		TextAnalyserManager tam = new TextAnalyserManager();
+		long id = -9196334014482206897L;
 		
-		Logger logger = Logger.getLogger("MyLogger");
+		News news = HibernateSupport.readOneObjectByLongID(News.class, id);
+		
+		tam.sensium_analyser.getEntities(news);
+		
+		/*Logger logger = Logger.getLogger("MyLogger");
 		logger.setUseParentHandlers(false);
 		String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
 	  	FileHandler fh = new FileHandler("data/tmp/addsentencesentiment-"+ date + ".log", true);  
@@ -196,7 +199,7 @@ public class TextAnalyserManager implements Job
 
 		}
 		
-		return;
+		return;*/
 		/*try {
 			tam.execute(null);
 		} catch (JobExecutionException e) {

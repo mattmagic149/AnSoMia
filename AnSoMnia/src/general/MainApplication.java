@@ -34,6 +34,7 @@ import threadlisteners.*;
 import java.util.concurrent.locks.ReentrantLock;
 import static org.quartz.JobBuilder.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class MainApplication.
  */
@@ -123,7 +124,7 @@ public class MainApplication {
 		app.scheduler.scheduleJob(app.market_values_crawler_job, daily_trigger);
 		app.scheduler.scheduleJob(app.company_indexer_job, weekly_trigger);*/
 		
-		MainApplication.app.getMarketValuesCrawlerJob().getJobDataMap().put("to_crawl", MarketValuesCrawler.ToCrawl.MONTH.ordinal());
+		MainApplication.app.getMarketValuesCrawlerJob().getJobDataMap().put("to_crawl", MarketValuesCrawler.ToCrawl.HISTORY.ordinal());
 		//app.getScheduler().triggerJob(MainApplication.app.company_indexer_job.getKey());
 		app.getScheduler().triggerJob(MainApplication.app.getIsinMutexMapCreationJob().getKey());
 		//app.getScheduler().triggerJob(MainApplication.app.history_market_values_crawler_job.getKey());
@@ -293,10 +294,20 @@ public class MainApplication {
 		return app; 
     }
 
+	/**
+	 * Gets the isin mutex map.
+	 *
+	 * @return the isin mutex map
+	 */
 	public Map<String, ReentrantLock> getIsinMutexMap() {
 		return isin_mutex_map;
 	}
 
+	/**
+	 * Sets the isin mutex map.
+	 *
+	 * @param isin_mutex_map the isin_mutex_map
+	 */
 	public void setIsinMutexMap(Map<String, ReentrantLock> isin_mutex_map) {
 		this.isin_mutex_map = isin_mutex_map;
 	}

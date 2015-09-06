@@ -52,6 +52,7 @@ import utils.HttpRequestManager;
 import utils.HttpRequester;
 import database.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class CompanyIndexIndustryCrawler.
  */
@@ -85,7 +86,10 @@ public class CompanyIndexIndustryCrawler implements Job
 	/** The number_of_companies_added. */
 	private int number_of_companies_added;
 	
+	/** The date_added. */
+	private Date date_added;
 	
+	/** The csv_file_name. */
 	private String csv_file_name;
 	
 	
@@ -97,6 +101,7 @@ public class CompanyIndexIndustryCrawler implements Job
 		this.logger = Logger.getLogger("MyLogger");
 		this.logger.setUseParentHandlers(false);
 		this.http_req_manager = HttpRequestManager.getInstance();
+		this.date_added = new Date();
 		
 		this.isin_blacklist = readBlackList("data/blacklist.csv");
 	  
@@ -249,7 +254,7 @@ public class CompanyIndexIndustryCrawler implements Job
 		criterions.add(Restrictions.eq("isin", company_isin));
 		company = HibernateSupport.readOneObject(Company.class, criterions);
 		if(company == null) {
-			company = new Company(company_isin, company_name, company_ticker);
+			company = new Company(company_isin, company_name, company_ticker, this.date_added);
 	  		System.out.println("now crawling " + company.getIsin());
 
 	  		if(!this.crawlCompanyWallstreetInformation(company)) {
@@ -423,7 +428,7 @@ public class CompanyIndexIndustryCrawler implements Job
   		String wallstreet_query_string;
   		
   		for(int k = 0; k < industry_sectors.size(); k++) {
-			industry_name = industry_sectors.get(k).html();
+			industry_name = industry_sectors.get(k).html().replace("&amp;", "");
 			if(industry_sectors.get(k).attr("href").split("/").length >= 4) {
 				wallstreet_query_string = industry_sectors.get(k).attr("href").split("/")[3];
 			} else {
@@ -433,7 +438,7 @@ public class CompanyIndexIndustryCrawler implements Job
 			
 			if(industry_sector == null) {
 				System.out.println("industry_sector == NULL");
-				industry_sector = new IndustrySector(industry_name, wallstreet_query_string);
+				industry_sector = new IndustrySector(industry_name, wallstreet_query_string, this.date_added);
 				
 				HibernateSupport.beginTransaction();
 				industry_sector.saveToDB();
@@ -508,7 +513,7 @@ public class CompanyIndexIndustryCrawler implements Job
 					}
 				}
 				
-				index = new Index(isin, name, symbol, wkn, valor, wall_street_query_string);
+				index = new Index(isin, name, symbol, wkn, valor, wall_street_query_string, this.date_added);
 				HibernateSupport.beginTransaction();
 				index.saveToDB();
 				HibernateSupport.commitTransaction();

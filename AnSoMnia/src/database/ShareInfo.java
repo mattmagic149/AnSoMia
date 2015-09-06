@@ -19,9 +19,12 @@
  */
 package database;
 
+import java.util.Date;
+
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class ShareInfo.
  */
@@ -49,6 +52,9 @@ public abstract class ShareInfo {
 	
 	/** The finance_query_string. */
 	protected String finance_query_string;
+	
+	/** The date_added. */
+	protected Date date_added;
 	
 	/**
 	 * Gets the finance query string.
@@ -174,6 +180,15 @@ public abstract class ShareInfo {
 	 */
 	public void setValor(String valor) {
 		this.valor = valor;
+	}
+
+	/**
+	 * Gets the date added.
+	 *
+	 * @return the date added
+	 */
+	public Date getDateAdded() {
+		return date_added;
 	}
 	
 }

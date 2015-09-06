@@ -21,13 +21,17 @@ package database;
 
 import interfaces.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.*;
 
 import utils.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class Index.
  */
@@ -54,15 +58,17 @@ public class Index extends ShareInfo implements ISaveAndDelete {
 	 * @param wkn the wkn
 	 * @param valor the valor
 	 * @param wallstreet the wallstreet
+	 * @param date_added the date_added
 	 */
 	public Index(String isin, String index_name, String ticker, String wkn,
-			String valor, String wallstreet) {
+			String valor, String wallstreet, Date date_added) {
 		this.isin = isin;
 		this.name = index_name;
 		this.ticker = ticker;
 		this.wkn = wkn;
 		this.valor = valor;
 		this.wallstreet_query_string = wallstreet;
+		this.date_added = date_added;
 
 		this.companies = new ArrayList<Company>();
 
@@ -74,10 +80,6 @@ public class Index extends ShareInfo implements ISaveAndDelete {
 	 * @param serialized_index the serialized_index
 	 */
 	public Index(String serialized_index) {
-		/*
-		 * return this.isin + "\t" + this.name + "\t" + this.ticker + "\t" +
-		 * this.wkn + "\t" + this.valor + "\t" + this.wallstreet_query_string;
-		 */
 
 		String[] tmp = serialized_index.split("\t");
 		this.isin = tmp[0];
@@ -86,6 +88,14 @@ public class Index extends ShareInfo implements ISaveAndDelete {
 		this.wkn = tmp[3];
 		this.valor = tmp[4];
 		this.wallstreet_query_string = tmp[5];
+		
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			this.date_added = formatter.parse(tmp[6]);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			assert(false);
+		}
 
 		this.companies = new ArrayList<Company>();
 
@@ -124,7 +134,7 @@ public class Index extends ShareInfo implements ISaveAndDelete {
 	public String serialize() {
 		return this.isin + "\t" + this.name + "\t" + this.ticker + "\t"
 				+ this.wkn + "\t" + this.valor + "\t"
-				+ this.wallstreet_query_string;
+				+ this.wallstreet_query_string  + "\t" + this.date_added;
 	}
 
 	/* (non-Javadoc)

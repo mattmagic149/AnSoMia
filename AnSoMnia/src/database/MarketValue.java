@@ -35,6 +35,7 @@ import javax.persistence.ManyToOne;
 import utils.HibernateSupport;
 import database.Company;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class MarketValue.
  */
@@ -48,6 +49,9 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 	
 	/** The date. */
 	private Date date;
+	
+	/** The date_added. */
+	private Date date_added;
 	
 	/** The market_place. */
 	private String market_place;
@@ -106,10 +110,13 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 	 * @param ask_price the ask_price
 	 * @param currency the currency
 	 * @param date the date
+	 * @param date_added the date_added
 	 */
 	public MarketValue(Company company, String market_place, float stock_price, float bid_price, 
-			float ask_price, String currency, Date date) {
+			float ask_price, String currency, Date date, Date date_added) {
 		this.date = date;
+		this.date_added = date_added;
+		
 		this.company = company;
 		this.market_place = market_place;
 		this.stock_price = stock_price;
@@ -118,6 +125,12 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 		this.currency = currency;
 	}
 	
+	/**
+	 * Instantiates a new market value.
+	 *
+	 * @param high the high
+	 * @param date the date
+	 */
 	public MarketValue(float high, Date date) {
 		this.date = date;
 		this.high = high;
@@ -137,9 +150,10 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 	 * @param revenue the revenue
 	 * @param currency the currency
 	 * @param market_place the market_place
+	 * @param date_added the date_added
 	 */
 	public MarketValue(Company company, Date date, float open, float high, float low, float close, float performance,
-						float volume, float revenue, String currency, String market_place) {
+						float volume, float revenue, String currency, String market_place, Date date_added) {
 		this.open = open;
 		this.high = high;
 		this.low = low;
@@ -149,6 +163,7 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 		this.revenue = revenue;
 		this.currency = currency;
 		this.date = date;
+		this.date_added = date_added;
 		this.market_place = market_place;
 		this.company = company;
 	}
@@ -169,6 +184,7 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			this.date = formatter.parse(serialized_market_value[5]);
+			this.date_added = formatter.parse(serialized_market_value[14]);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			assert(false);
@@ -331,7 +347,8 @@ public class MarketValue implements ISaveAndDelete, Comparable<MarketValue> {
 				this.bid_price + "\t" + this.stock_price + "\t" + this.currency + "\t" +
 				this.date + "\t" + this.market_place + "\t" + this.open + "\t" + 
 				this.high + "\t" + this.low + "\t" + this.close + "\t" + 
-				this.performance + "\t" + this.volume + "\t" + this.revenue;
+				this.performance + "\t" + this.volume + "\t" + this.revenue + "\t" + 
+				this.date_added;
 	}
 	
 	/* (non-Javadoc)

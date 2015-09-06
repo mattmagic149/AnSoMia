@@ -43,6 +43,7 @@ import org.hibernate.criterion.Restrictions;
 import utils.FileUtils;
 import utils.HibernateSupport;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class News.
  */
@@ -63,6 +64,9 @@ public class News implements ISaveAndDelete {
 	
 	/** The date. */
 	private Date date;
+	
+	/** The date_added. */
+	private Date date_added;
 	
 	/** The original_content. */
 	@Column(length = 8000)
@@ -101,9 +105,10 @@ public class News implements ISaveAndDelete {
 	 * @param original_content the original_content
 	 * @param translated_content the translated_content
 	 * @param language the language
+	 * @param date_added the date_added
 	 */
 	public News(long hash, String url, String author, Date date, String original_content, 
-			String translated_content, String language) {
+			String translated_content, String language, Date date_added) {
 		
 		this.news_details = new ArrayList<NewsDetail>();
 		
@@ -111,6 +116,7 @@ public class News implements ISaveAndDelete {
 		this.news_url = url;
 		this.author = author;
 		this.date = date;
+		this.date_added = date_added;
 		this.original_content = original_content;
 		this.translated_content = translated_content;
 		this.language = language;
@@ -133,9 +139,10 @@ public class News implements ISaveAndDelete {
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			this.date = formatter.parse(tmp[3]);
+			this.date_added = formatter.parse(tmp[7]);
 		} catch (ParseException e) {
 			e.printStackTrace();
-			assert(false);
+			assert false;
 		}
 		
 		this.original_content = tmp[4];
@@ -267,6 +274,12 @@ public class News implements ISaveAndDelete {
 		return success;
 	}
 	
+	/**
+	 * Gets the news companies good rep ge polarity.
+	 *
+	 * @param polarity the polarity
+	 * @return the news companies good rep ge polarity
+	 */
 	public static List<News> getNewsCompaniesGoodRepGePolarity(double polarity) {
 		
 
@@ -278,6 +291,12 @@ public class News implements ISaveAndDelete {
 		
 	}
 	
+	/**
+	 * Gets the news companies good rep le polarity.
+	 *
+	 * @param polarity the polarity
+	 * @return the news companies good rep le polarity
+	 */
 	public static List<News> getNewsCompaniesGoodRepLePolarity(double polarity) {
 		
 		Criterion polarity_cr = Restrictions.le("detail.total_polarity", polarity);
@@ -287,6 +306,13 @@ public class News implements ISaveAndDelete {
 		
 	}
 	
+	/**
+	 * Gets the results with two criterions.
+	 *
+	 * @param cr1 the cr1
+	 * @param cr2 the cr2
+	 * @return the results with two criterions
+	 */
 	@SuppressWarnings("unchecked")
 	private static List<News> getResultsWithTwoCriterions(Criterion cr1, Criterion cr2) {
 		HibernateSupport.beginTransaction();
@@ -294,6 +320,13 @@ public class News implements ISaveAndDelete {
 		c.createAlias("companies", "company");
 		c.createAlias("news_details", "detail");
 		//c.add(Restrictions.between("detail.total_polarity", 0.0, 1.0));
+		/*SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			c.add(Restrictions.lt("date_added", format.parse("2015-06-02 00:00:00")));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 		c.add(cr1);
 		c.add(cr2);
 		List<News> result = c.list();
@@ -303,6 +336,11 @@ public class News implements ISaveAndDelete {
 		return result;
 	}
 	
+	/**
+	 * Gets the news of companies with good reputation.
+	 *
+	 * @return the news of companies with good reputation
+	 */
 	private static Criterion getNewsOfCompaniesWithGoodReputation() {
 		String property = "company.name";
 		List<String> companies = FileUtils.readGoodReputationCompanies();
@@ -318,7 +356,7 @@ public class News implements ISaveAndDelete {
 		return this.md5_hash + "\t" + this.news_url + "\t" + this.author + "\t" + 
 				this.date + "\t" + this.original_content.replace("\n", "").replace("\t", "").replace("\r", "") + "\t" +  
 				this.translated_content.replace("\n", "").replace("\t", "").replace("\r", "") + "\t" + 
-				this.language;
+				this.language + "\t" + this.date_added;
 	}
 	
 	/* (non-Javadoc)

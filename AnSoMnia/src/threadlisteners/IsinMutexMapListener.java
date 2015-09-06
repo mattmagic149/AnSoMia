@@ -26,6 +26,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
 import org.quartz.SchedulerException;
 
+// TODO: Auto-generated Javadoc
 /**
  * The listener interface for receiving isinMutexMap events.
  * The class that is interested in processing a isinMutexMap
@@ -91,18 +92,24 @@ public class IsinMutexMapListener implements JobListener {
 						   .getScheduler()
 						   .triggerJob(MainApplication.getInstance()
 								   					  .getFinanceNewsCrawlerJob()
-								   					  .getKey());
+								   					  .getKey());*/
 			
-			MainApplication.getInstance()
+			/*MainApplication.getInstance()
 						   .getScheduler()
 						   .triggerJob(MainApplication.getInstance()
 								   					  .getWallstreetNewsCrawlerJob()
-								   					  .getKey());*/
+								   					  .getKey());
+			
+			MainApplication.getInstance()
+			   				.getScheduler()
+			   				.triggerJob(MainApplication.getInstance()
+					   					  				.getMarketValuesCrawlerJob()
+					   					  				.getKey());*/
 			
 			MainApplication.getInstance()
 			   .getScheduler()
 			   .triggerJob(MainApplication.getInstance()
-					   					  .getMarketValuesCrawlerJob()
+					   					  .getCompanyIndexerJob()
 					   					  .getKey());
 			
 		} catch (SchedulerException e) {

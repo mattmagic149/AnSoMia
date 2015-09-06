@@ -45,6 +45,7 @@ import utils.HttpRequestManager;
 import utils.HttpRequester;
 import database.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class FinanzenNewsCrawler.
  */
@@ -66,6 +67,9 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
 	
+	/** The date_added. */
+	private Date date_added;
+	
 	/**
 	 * Instantiates a new finanzen news crawler.
 	 */
@@ -74,6 +78,7 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 		this.http_req_manager = HttpRequestManager.getInstance();
 		this.sensium = new Sensium("e16c27a8-e309-47aa-838d-cc2e6ffc5007");
 		this.req = new ExtractionRequest();
+		this.date_added = new Date();
 		System.out.println("FinanzenNewsCrawler ctor called");
 	}
 	
@@ -241,7 +246,10 @@ public class FinanzenNewsCrawler extends Crawler implements Job
 					continue;
 				}
 				
-				news = new News(hash, link, "finanzen.net", date, content, "translated_content", language);
+				news = new News(hash, link, "finanzen.net", 
+								date, content, "translated_content", 
+								language, this.date_added);
+				
 				HibernateSupport.beginTransaction();
 				news.saveToDB();
 				company.addNews(news);

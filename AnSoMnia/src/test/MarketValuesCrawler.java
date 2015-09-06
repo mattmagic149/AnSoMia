@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package test;
 import mining.Crawler;
 
@@ -17,22 +36,54 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Date;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MarketValuesCrawler.
+ */
 public class MarketValuesCrawler extends Crawler implements Job
 {
+	
+	/** The wall_street_url. */
 	private String wall_street_url = "http://www.wallstreet-online.de";
+	
+	/** The share_string. */
 	private String share_string = "/aktien/";
+	
+	/** The market_value_string. */
 	private String market_value_string = "/kurse";
+	
+	/** The column_values. */
 	private String[] column_values = {"Handelsplatz", "Kurs", "Währung", "Bid", "Ask"};
+	
+	/** The market_place_strings. */
 	private String[] market_place_strings = {"Xetra", "Tradegate", "Frankfurt", "Berlin"};
+	
+	/** The date. */
 	private Date date;
+	
+	/** The date_added. */
+	private Date date_added;
 
 	
+	/**
+	 * Instantiates a new market values crawler.
+	 */
+	public MarketValuesCrawler() {
+		this.date_added = new Date();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+	 */
 	@Override	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		MarketValuesCrawler mvc = new MarketValuesCrawler();
 		mvc.startCrawling();
 	}
 	
+	/* (non-Javadoc)
+	 * @see mining.Crawler#crawlInfos(database.Company)
+	 */
 	protected boolean crawlInfos(Company company) {
 		if(company == null || company.getWallstreetQueryString() == null || company.getWallstreetQueryString() == "") {
 			System.out.println("Company is NULL...");
@@ -100,7 +151,10 @@ public class MarketValuesCrawler extends Crawler implements Job
 				System.out.println("ask_price = " + ask_price);
 			}
 			
-			MarketValue market_values = new MarketValue(company, market_place_string, stock_price, bid_price, ask_price, currency, date);
+			MarketValue market_values = new MarketValue(company, market_place_string, 
+														stock_price, bid_price, 
+														ask_price, currency, 
+														date, this.date_added);
 			
 			HibernateSupport.beginTransaction();
 			company.addMarketValue(market_values);		
@@ -111,6 +165,12 @@ public class MarketValuesCrawler extends Crawler implements Job
 		return true;
 	}
 	
+	/**
+	 * Gets the table column indecis.
+	 *
+	 * @param market_place the market_place
+	 * @return the table column indecis
+	 */
 	private int[] getTableColumnIndecis(Element market_place) {
 		int[] ret = {-1,-1,-1,-1,-1};
 		
@@ -127,6 +187,12 @@ public class MarketValuesCrawler extends Crawler implements Job
 		return ret;
 	}
 	
+	/**
+	 * Gets the market place column.
+	 *
+	 * @param market_place the market_place
+	 * @return the market place column
+	 */
 	private Element getMarketPlaceColumn(Element market_place) {
 		
 		Elements tables = market_place.select("table");

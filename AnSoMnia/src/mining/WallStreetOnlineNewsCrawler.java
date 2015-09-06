@@ -46,6 +46,7 @@ import utils.HttpRequestManager;
 import utils.HttpRequester;
 import database.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class FinanzenNewsCrawler.
  */
@@ -67,6 +68,9 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
 	
+	/** The date_added. */
+	private Date date_added;
+	
 	/**
 	 * Instantiates a new finanzen news crawler.
 	 */
@@ -75,6 +79,7 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 		this.http_req_manager = HttpRequestManager.getInstance();
 		this.sensium = new Sensium("e16c27a8-e309-47aa-838d-cc2e6ffc5007");
 		this.req = new ExtractionRequest();
+		this.date_added = new Date();
 		System.out.println("FinanzenNewsCrawler ctor called");
 	}
 	
@@ -104,13 +109,26 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 		ArrayList<Pair<String, Date>> tmp = new ArrayList<Pair<String, Date>>();
 
 		
-		for(int i = 1; i <= 5; i++) {
-			System.out.println(i);
-			tmp = getLinksFromOnePage(company, i);
-			if(tmp != null) {
+		Date reference_date = new Date();
+		int j = 1;
+		int attempts = 0;
+		while(true) {
+			System.out.println(j);
+			tmp = getLinksFromOnePage(company, j, reference_date);
+			if(tmp != null && tmp.size() > 0) {
 				links_plus_dates.addAll(tmp);
+				reference_date = tmp.get(tmp.size() - 1).getValue1();
+				j++;
+				attempts = 0;
+			} else {
+				if(attempts++ < 3) {
+					continue;
+				} else {
+					break;
+				}
 			}
 		}
+
 
 		System.out.println(links_plus_dates.size());
 		
@@ -199,7 +217,9 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 			news = HibernateSupport.readOneObjectByID(News.class, hash);
 			
 			if(news == null && !company.checkNewsAlreadyAdded(hash)) {
-				news = new News(hash, link, "wallstreet-online.de", date, content, "translated_content", language);
+				news = new News(hash, link, "wallstreet-online.de", 
+								date, content, "translated_content", 
+								language, this.date_added);
 				HibernateSupport.beginTransaction();
 				news.saveToDB();
 				company.addNews(news);
@@ -223,9 +243,11 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 	 *
 	 * @param company the company
 	 * @param page_number the page_number
+	 * @param ref_date the ref_date
 	 * @return the links from one page
 	 */
-	private ArrayList<Pair<String, Date>> getLinksFromOnePage(Company company, int page_number) {
+	private ArrayList<Pair<String, Date>> getLinksFromOnePage(Company company, int page_number,
+			Date ref_date) {
 		ArrayList<Pair<String, Date>> result = new ArrayList<Pair<String, Date>>();
 		
 		
@@ -289,9 +311,11 @@ public class WallStreetOnlineNewsCrawler extends Crawler implements Job
 				current_calendar.setTime(formater.parse(date_string));
 				current_calendar.set(Calendar.YEAR, reference_calendar.get(Calendar.YEAR));
 				
-				while(current_calendar.after(reference_calendar)) {
+				while(current_calendar.getTimeInMillis() > ref_date.getTime()) {//current_calendar.after(reference_calendar)) {
 					current_calendar.set(Calendar.YEAR, current_calendar.get(Calendar.YEAR) - 1);
+					//System.out.println("SETTING NEW YEAR!!!");
 				}
+				ref_date = current_calendar.getTime();
 				
 				result.add(new Pair<String, Date>(url, current_calendar.getTime()));
 

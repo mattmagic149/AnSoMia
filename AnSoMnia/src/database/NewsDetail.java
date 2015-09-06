@@ -19,7 +19,10 @@
  */
 package database;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import interfaces.ISaveAndDelete;
@@ -34,6 +37,7 @@ import javax.persistence.OneToMany;
 
 import utils.HibernateSupport;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class NewsDetail.
  */
@@ -61,6 +65,9 @@ public class NewsDetail implements ISaveAndDelete  {
 	
 	/** The total_objectivity. */
 	private double total_objectivity;
+	
+	/** The date_added. */
+	private Date date_added;
 
 	/** The sentence_information. */
 	@OneToMany
@@ -80,15 +87,17 @@ public class NewsDetail implements ISaveAndDelete  {
 	 * @param language the language
 	 * @param total_rating the total_rating
 	 * @param total_objectivity the total_objectivity
+	 * @param date_added the date_added
 	 */
 	public NewsDetail(News news, String analyser, String language, double total_rating,
-			double total_objectivity) {
+			double total_objectivity, Date date_added) {
 		this.sentence_information = new ArrayList<SentenceInformation>();
 		this.news = news;
 		this.analyser = analyser;
 		this.language = language;
 		this.total_polarity = total_rating;
 		this.total_objectivity = total_objectivity;
+		this.date_added = date_added;
 	}
 	
 	/**
@@ -108,6 +117,14 @@ public class NewsDetail implements ISaveAndDelete  {
 		this.language = serialized_details[2];
 		this.total_polarity = Double.parseDouble(serialized_details[3]);
 		this.total_objectivity = Double.parseDouble(serialized_details[4]);
+		
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			this.date_added = formatter.parse(serialized_details[5]);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			assert false;
+		}
 	}
 	
 	/**
@@ -165,6 +182,11 @@ public class NewsDetail implements ISaveAndDelete  {
 	}
 	
 	
+	/**
+	 * Sets the sentence information.
+	 *
+	 * @param sentence_information the new sentence information
+	 */
 	public void setSentenceInformation(List<SentenceInformation> sentence_information) {
 		this.sentence_information = sentence_information;
 	}
@@ -196,6 +218,9 @@ public class NewsDetail implements ISaveAndDelete  {
 		return success;
 	}
 	
+	/**
+	 * Removes the all sentence information.
+	 */
 	public void removeAllSentenceInformation() {
 		SentenceInformation info;
 		while(this.sentence_information.size() > 0) {
@@ -211,7 +236,8 @@ public class NewsDetail implements ISaveAndDelete  {
 	@Override
 	public String serialize() {
 		return news.getHash() + "\t" + this.analyser + "\t" + this.language + "\t" + 
-				this.total_polarity + "\t" + this.total_objectivity + "\t" + this.details_id;
+				this.total_polarity + "\t" + this.total_objectivity + "\t" + 
+				this.details_id + "\t" + this.date_added;
 	}
 
 	/* (non-Javadoc)

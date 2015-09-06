@@ -1,7 +1,25 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,24 +28,35 @@ import java.util.Calendar;
 
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
-import org.javatuples.Triplet;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-import charts.MarketValueChart;
 import analysers.MarketValueAnalyser;
 import database.Company;
+import database.CompanyInformation;
+import database.Index;
+import database.IndustrySector;
 import database.MarketValue;
-import database.News;
 import utils.HibernateSupport;
-import utils.MyDateUtils;
+import utils.HttpRequestManager;
+import utils.HttpRequester;
 
+/**
+ * The Class TestClass.
+ */
 public class TestClass {
+
+	/** The already_viewed. */
 	
-	static ArrayList<Triplet<String, Date, Date>> already_viewed = new ArrayList<Triplet<String, 
-			Date, Date>>();
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws ParseException the parse exception
+	 */
 	public static void main(String[] args) throws ParseException {
 		
 		
@@ -102,85 +131,20 @@ public class TestClass {
 		
 		MarketValueAnalyser mva = new MarketValueAnalyser(20, 10);
 		mva.correlateIndustrySectors(from, to);*/
-		
-		MarketValueAnalyser mva = new MarketValueAnalyser(20, 10);
-		PolynomialSplineFunction psf;
-		
-		//List<News> news_list = News.getNewsCompaniesGoodRepGePolarity(0.5); //EXTREM GUTES ERGEBNIS!
-		List<News> news_list = News.getNewsCompaniesGoodRepLePolarity(-0.20); //EXTREM GUTES ERGEBNIS!
 
-		//List<News> news_list = News.getNewsCompaniesGoodRepLePolarity(-0.6);
-		if(news_list == null || news_list.size() == 0) {
-			System.out.println("Quit, because Query provided no result.");
-			return;
-		}
-		News news;
-		List<Company> companies;
-		Company company;
-		
-		Calendar from = Calendar.getInstance();
-		Calendar to = Calendar.getInstance();
-		List<Date> dates;
-		double[] stock_prices;
-		List<double[]> stock_price_developement = new ArrayList<double[]>();
-		List<String> infos = new ArrayList<String>();
-		
-		String title = "Stock Price Developement";
-		String description;
-		
-		int news_size = news_list.size();
-		System.out.println(news_size);
 
-		for(int i = 0; i < news_size; i++) {
-			news = news_list.get(i);
-			companies = news.getCompanies();
-			for(int j = 0; j < companies.size(); j++) {
-				from.setTime(news.getDate());
-				from.set(Calendar.HOUR, 0);
-				from.set(Calendar.MINUTE, 0);
-				from.set(Calendar.SECOND, 0);
-				
-				to.setTime(from.getTime());
-				to.set(Calendar.DAY_OF_YEAR, from.get(Calendar.DAY_OF_YEAR) + 14);				
-				
-				company = companies.get(j);
-				
-				if(alreadyViewed(company.getName(), from.getTime(), to.getTime())) {
-						//|| company.getName().contains("ADIDAS")) {
-					System.out.println("continue..");
-					continue;
-				}
-
-				if((psf = mva.getMarketValueSplineFromTo(company, from, to)) != null) {
-					stock_prices = mva.getValuesFromPsf(psf, from, to);
-					description = company.getName() + " (" + company.getIsin() + ")"
-									+ " - polarity: " + news.getNewsDetails().get(0).getTotalPolarity();
-					
-					//values = company.getMarketValuesBetweenDatesFromDB(from.getTime(), to.getTime());
-					MarketValueChart mvc = new MarketValueChart(title, "Date", "Price Per Unit");
-					dates = MyDateUtils.getListOfDatesFromToCalendar(from, to);
-					mvc.execute(stock_prices, description, dates);
-					stock_price_developement.add(mva.getSharePriceDevelopement(psf, from, to));
-					infos.add(description + " - objectivity" + news.getNewsDetails().get(0).getTotalObjectivity() + " hash = " + news.getHash());
-				}
-			}
-		}
 		
-		Mean mean = new Mean();
-		double[] stock_price_tmp = new double[stock_price_developement.size()];
-		int array_size = stock_price_developement.get(0).length;
-		for(int i = 0; i < array_size; i++) {
-			for(int j = 0; j < stock_price_developement.size(); j++) {
-				stock_price_tmp[j] = stock_price_developement.get(j)[i];
-			}
-			System.out.println((i +1 ) + ". day mean = " + mean.evaluate(stock_price_tmp));
-		}
-
-		System.out.println(infos.size());
-
-		for(int i = 0; i < infos.size(); i++) {
-			System.out.println(infos.get(i));
-		}
+		
+		
+		/*MarketValueAnalyser mva = new MarketValueAnalyser(20, 10);
+		mva.analyseStockPriceDevelopementOfCompaniesWithGoodRep(14, 
+				MarketValueAnalyser.Analyse.AFTER,
+				MarketValueAnalyser.Analyse.LESS,
+				-0.2,
+				0.0);*/
+		
+		
+		
 		
 		//double[] correlations = mva.correlateAllCompanies();
 		//mva.createCorrelationHist("News Analysis", "description", correlations);
@@ -195,6 +159,13 @@ public class TestClass {
 				 20, MarketValueAnalyser.ChartType.MID);
 		
 		mva.createCorrelationHist("News Analysis", "description", correlations);*/
+		
+		
+		
+		Company company = HibernateSupport.readOneObjectByStringId(Company.class, "AT000000STR1");
+		
+		//CompanyInformation info = new CompanyInformation("name", "link", "content", "homepage", new Date());
+		
 		
 		
 		
@@ -282,67 +253,26 @@ public class TestClass {
 			
 		}*/
 		
-		/*Company company = HibernateSupport.readOneObjectByStringId(Company.class, "AT000000STR1");
-		List<MarketValue> mvalues = company.getMarketValuesBetweenDatesFromDB(format.parse("27.07.15"), format.parse("07.08.15"));
-		
-		for(int i = 0; i < mvalues.size(); i++) {
-			System.out.println(mvalues.get(i).getDate());
-		}
-		
-		MarketValueAnalyser mva = new MarketValueAnalyser(20, 10);
-		mva.correlationTest();*/
-
-		/*Company company = HibernateSupport.readOneObjectByStringId(Company.class, "AT000000STR1");
-		
-		Date date = new Date();
-		Calendar from = Calendar.getInstance();
-		Calendar to = Calendar.getInstance();
-		Calendar tmp_date = Calendar.getInstance();
-		
-		from.setTime(date);
-		to.setTime(date);
-
-		from.set(Calendar.MONTH, 5);
-		from.set(Calendar.DAY_OF_MONTH, 7);
-		from.set(Calendar.HOUR, 0);
-		from.set(Calendar.MINUTE, 0);
-		from.set(Calendar.SECOND, 0);
-		
-		to.set(Calendar.MONTH, 5);
-		to.set(Calendar.DAY_OF_MONTH, 28);
-		to.set(Calendar.HOUR, 0);
-		to.set(Calendar.MINUTE, 0);
-		to.set(Calendar.SECOND, 0);
-		
-		PolynomialSplineFunction psf = getMarketValueSplineFromTo(company, from, to);
-		if(psf == null) {
-			return;
-		}
-		
-
-		tmp_date.setTime(from.getTime());
-		while(tmp_date.compareTo(to) <= 0) {
-			System.out.println(psf.value(tmp_date.getTimeInMillis()) + " - " + tmp_date.getTime());
-			
-			tmp_date.set(Calendar.DAY_OF_YEAR, tmp_date.get(Calendar.DAY_OF_YEAR) + 1);
-
-		}*/
-		
 	}
 	
-	public static boolean alreadyViewed(String name, Date from, Date to) {
-		
-		Triplet<String, Date, Date> to_check = new Triplet<String, Date, Date>(name, from, to);
-		
-		for(int i = 0; i < already_viewed.size(); i++) {
-			if(already_viewed.get(i).equals(to_check)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
+	/**
+	 * Gets the share price developement.
+	 *
+	 * @param psf the psf
+	 * @param from the from
+	 * @param to the to
+	 * @return the share price developement
+	 */
 	public static double[] getSharePriceDevelopement(PolynomialSplineFunction psf,
 													 Calendar from, 
 													 Calendar to) {
@@ -374,6 +304,14 @@ public class TestClass {
 		return result;
 	}
 	
+	/**
+	 * Gets the market value spline from to.
+	 *
+	 * @param company the company
+	 * @param from the from
+	 * @param to the to
+	 * @return the market value spline from to
+	 */
 	public static PolynomialSplineFunction getMarketValueSplineFromTo(Company company,
 																	  Calendar from,
 																	  Calendar to) {
@@ -399,6 +337,15 @@ public class TestClass {
 		
 	}
 	
+	/**
+	 * Normalize market values.
+	 *
+	 * @param company the company
+	 * @param values the values
+	 * @param from the from
+	 * @param to the to
+	 * @return true, if successful
+	 */
 	public static boolean normalizeMarketValues(Company company,
 												List<MarketValue> values,
 												Calendar from,
@@ -445,6 +392,14 @@ public class TestClass {
 		
 	}
 	
+	/**
+	 * Gets the date before or after.
+	 *
+	 * @param company the company
+	 * @param date the date
+	 * @param dec_inc the dec_inc
+	 * @return the date before or after
+	 */
 	public static MarketValue getDateBeforeOrAfter(Company company, Calendar date, int dec_inc) {
 		MarketValue value;
 		List<Criterion> cr;

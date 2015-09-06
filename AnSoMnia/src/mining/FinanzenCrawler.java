@@ -19,6 +19,8 @@
  */
 package mining;
 
+import java.util.Date;
+
 import org.javatuples.Pair;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -32,6 +34,7 @@ import utils.HttpRequester;
 import database.Company;
 import database.KeyPerformanceIndicator;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class FinanzenCrawler.
  */
@@ -47,12 +50,16 @@ public class FinanzenCrawler extends Crawler implements Job
 	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
 	
+	/** The date_added. */
+	private Date date_added;
+	
 	/**
 	 * Instantiates a new finanzen crawler.
 	 */
 	public FinanzenCrawler() {
 		this.name = "finance_crawler";
 		this.http_req_manager = HttpRequestManager.getInstance();
+		this.date_added = new Date();
 		System.out.println("FinanzenCrawler ctor called");
 	}
 	
@@ -121,7 +128,7 @@ public class FinanzenCrawler extends Crawler implements Job
 		KeyPerformanceIndicator indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
 		
 		if(indicators == null){
-			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company);
+			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company, this.date_added);
 			existing_indicators = false;
 		}
 		

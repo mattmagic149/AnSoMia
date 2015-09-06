@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class MarketValuesCrawler.
  */
@@ -47,8 +48,12 @@ public class MarketValuesCrawler extends Crawler implements Job
 	 * The Enum ToCrawl.
 	 */
 	public enum ToCrawl {
-    	MONTH, 
-    	HISTORY
+    	
+	    /** The month. */
+	    MONTH, 
+    	
+	    /** The history. */
+	    HISTORY
 	}
 	
 	/** The wall_street_url. */
@@ -66,12 +71,16 @@ public class MarketValuesCrawler extends Crawler implements Job
 	/** The to_crawl. */
 	private MarketValuesCrawler.ToCrawl to_crawl;
 	
+	/** The date_added. */
+	private Date date_added;
+	
 	/**
 	 * Instantiates a new market values crawler.
 	 */
 	public MarketValuesCrawler() {
 		this.name = "HistoryMarketValuesCrawler";
 		this.http_req_manager = HttpRequestManager.getInstance();
+		this.date_added = new Date();
 		//this.to_crawl = 
 		JobDataMap data = MainApplication.getInstance().getMarketValuesCrawlerJob().getJobDataMap();
 		this.to_crawl = MarketValuesCrawler.ToCrawl.values()[data.getInt("to_crawl")];
@@ -191,11 +200,10 @@ public class MarketValuesCrawler extends Crawler implements Job
 			current_calendar.set(Calendar.YEAR, year);
 			current_month = current_calendar.getTime();
 			
-			//don't crawl market values if, there already exists 10 or more values.
-			number_of_added_values = company.getNumberOfAddedDatesOfParticularMonthAndYear(current_month);
+			//don't crawl market values if, there already exists 20 or more values.
+			number_of_added_values = company.getNumberOfAddedDatesOfParticularMonthAndYearFromDB(current_month);
 			System.out.println(current_month);
 			if(number_of_added_values >= 20) {
-				System.out.println("getNumberOfAddedDatesOfParticularMonthAndYear = " + number_of_added_values);
 				if(--month == 0) {
 					month = 12;
 					year--;
@@ -308,7 +316,7 @@ public class MarketValuesCrawler extends Crawler implements Job
 			
 			
 			market_value = new MarketValue(company, date, open, high, low, close, performance,
-						volume, revenue, "EUR", market_place);
+						volume, revenue, "EUR", market_place, this.date_added);
 			
 			company.addMarketValue(market_value);
 

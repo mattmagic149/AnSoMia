@@ -42,6 +42,7 @@ import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class HttpRequester.
  */
@@ -51,8 +52,12 @@ public class HttpRequester {
 	 * The Enum ReturnType.
 	 */
 	public enum ReturnType {	    
-    	HTML, 
-    	JSON_STRING 
+    	
+	    /** The html. */
+	    HTML, 
+    	
+	    /** The json string. */
+	    JSON_STRING 
 	}
 
 	/** The hrm. */

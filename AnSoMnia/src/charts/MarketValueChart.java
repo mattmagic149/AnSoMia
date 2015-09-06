@@ -35,25 +35,23 @@ import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYDrawableAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
-import org.jfree.chart.annotations.XYTitleAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.title.TextTitle;
-import org.jfree.chart.title.Title;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
 import org.jfree.ui.TextAnchor;
 
+import analysers.MarketValueAnalyser;
 import demo.CircleDrawer;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class MarketValueChart.
  */
@@ -71,15 +69,22 @@ public class MarketValueChart extends ApplicationFrame {
     /** The values2. */
     private double[] values2;
     
+    /** The x_axis. */
     private String x_axis;
     
+    /** The y_axis. */
     private String y_axis;
     
+    /** The dates. */
     private List<Date> dates;
 
+    /** The values1_des. */
     private String values1_des;
     
+    /** The values2_des. */
     private String values2_des;
+    
+    private MarketValueAnalyser.Analyse period;
     
     static {
         // set a theme using the new shadow generator feature available in
@@ -93,8 +98,8 @@ public class MarketValueChart extends ApplicationFrame {
      * Instantiates a new market value chart.
      *
      * @param title the title
-     * @param values the values1
-     * @param values2 the values2
+     * @param x_axis the x_axis
+     * @param y_axis the y_axis
      */
     public MarketValueChart(String title, String x_axis, String y_axis) {
         super(title);
@@ -104,6 +109,19 @@ public class MarketValueChart extends ApplicationFrame {
         this.y_axis = y_axis;
         this.values1 = null;
         this.values2 = null;
+        
+    }
+    
+    public MarketValueChart(String title, String x_axis, String y_axis, 
+    						MarketValueAnalyser.Analyse period) {
+        super(title);
+     
+        this.title = title;
+        this.x_axis = x_axis;
+        this.y_axis = y_axis;
+        this.values1 = null;
+        this.values2 = null;
+        this.period = period;
         
     }
 
@@ -146,34 +164,48 @@ public class MarketValueChart extends ApplicationFrame {
         DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("dd-MMM"));
         
-        
-        final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
-        XYAnnotation bestBid = null;
-        XYPointerAnnotation pointer = null;
-			
-        bestBid = new XYDrawableAnnotation(dates.get(0).getTime(), this.values1[0], 11, 11, cd);
-		plot.addAnnotation(bestBid);
-        pointer = new XYPointerAnnotation("News Published", 
-        									dates.get(0).getTime(), 
-        									this.values1[0],
-                                            1.0 * Math.PI / 4.0);
-        
-
-        Title textTitle = new TextTitle("HAAAAAAALLO");
-		XYTitleAnnotation xyTitleAnnotation = new XYTitleAnnotation(dates.get(0).getTime(), this.values1[0], textTitle , RectangleAnchor.TOP_LEFT);
-        
-        plot.addAnnotation(xyTitleAnnotation);
-
-        
-		pointer.setBaseRadius(35.0);
-        pointer.setTipRadius(10.0);
-        pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
-        pointer.setPaint(Color.black);
-        pointer.setTextAnchor(TextAnchor.HALF_ASCENT_LEFT);
-        plot.addAnnotation(pointer);
+        if(this.values2 == null) {
+        	this.drawDescriptionToDataPoint(plot);
+        }
 
         return chart;
 
+    }
+    
+    private void drawDescriptionToDataPoint(XYPlot plot) {
+    	 final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
+         XYAnnotation bestBid = null;
+         XYPointerAnnotation pointer = null;
+         long x = 0;
+         double y = 0;
+         double mult = 0;
+         
+         if(this.period == MarketValueAnalyser.Analyse.AFTER) {
+        	 x = dates.get(0).getTime();
+        	 y = this.values1[0];
+        	 mult = 1.0;
+         } else if(this.period == MarketValueAnalyser.Analyse.BEFORE) {
+        	 x = dates.get(dates.size() - 2).getTime();
+        	 y = this.values1[this.values1.length - 1];
+        	 mult = 3.0;
+         } else if(this.period == MarketValueAnalyser.Analyse.BEFORE_AFTER) {
+        	 int tmp = dates.size() - 1;
+        	 int to_add = (int) Math.floor(tmp/2.0);
+        	 x = dates.get(to_add).getTime();
+        	 y = this.values1[to_add];
+         }
+ 			
+         bestBid = new XYDrawableAnnotation(x, y, 11, 11, cd);
+ 		 plot.addAnnotation(bestBid);
+         pointer = new XYPointerAnnotation("News Published", x, y, mult * Math.PI / 4.0);
+
+         
+ 		 pointer.setBaseRadius(35.0);
+         pointer.setTipRadius(10.0);
+         pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
+         pointer.setPaint(Color.black);
+         pointer.setTextAnchor(TextAnchor.TOP_CENTER);
+         plot.addAnnotation(pointer);
     }
 
 
@@ -219,12 +251,32 @@ public class MarketValueChart extends ApplicationFrame {
         return panel;
     }
     
+    /**
+     * Inits the.
+     *
+     * @param values1 the values1
+     * @param values2 the values2
+     * @param values1_des the values1_des
+     * @param values2_des the values2_des
+     * @param dates the dates
+     * @param save the save
+     * @param show the show
+     */
     private void init(double[] values1, double[] values2, String values1_des, String values2_des, List<Date> dates, boolean save, boolean show) {
     	this.values2 = values2;
     	this.values2_des = values2_des;
     	init(values1, values1_des, dates, save, show);
     }
     
+    /**
+     * Inits the.
+     *
+     * @param values the values
+     * @param values_des the values_des
+     * @param dates the dates
+     * @param save the save
+     * @param show the show
+     */
     private void init(double[] values, String values_des, List<Date> dates, boolean save, boolean show) {
     	this.values1 = values;
     	this.values1_des = values_des;
@@ -244,6 +296,12 @@ public class MarketValueChart extends ApplicationFrame {
 
     /**
      * Execute.
+     *
+     * @param values1 the values1
+     * @param values2 the values2
+     * @param values1_des the values1_des
+     * @param values2_des the values2_des
+     * @param dates the dates
      */
     public void execute(double[] values1, double[] values2, String values1_des, String values2_des, List<Date> dates) {
     	init(values1, values2, values1_des, values2_des, dates, false, true);
@@ -251,6 +309,13 @@ public class MarketValueChart extends ApplicationFrame {
     
     
     
+    /**
+     * Execute.
+     *
+     * @param values the values
+     * @param values_des the values_des
+     * @param dates the dates
+     */
     public void execute(double[] values, String values_des, List<Date> dates) {
     	init(values, values_des, dates, false, true);
     }

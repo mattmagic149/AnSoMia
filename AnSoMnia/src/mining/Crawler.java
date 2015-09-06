@@ -35,6 +35,7 @@ import java.util.logging.SimpleFormatter;
 import utils.HibernateSupport;
 import database.Company;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class Crawler.
  */
@@ -47,10 +48,18 @@ public abstract class Crawler {
 	 * The Enum Decimals.
 	 */
 	protected enum Decimals {
-    	NONE, 
-    	THOUSAND, 
-    	MILLION, 
-    	BILLION 
+    	
+	    /** The none. */
+	    NONE, 
+    	
+	    /** The thousand. */
+	    THOUSAND, 
+    	
+	    /** The million. */
+	    MILLION, 
+    	
+	    /** The billion. */
+	    BILLION 
 	}
 	
 	/** The name. */
@@ -84,8 +93,6 @@ public abstract class Crawler {
 	
 	/**
 	 * Start crawling.
-	 *
-	 * @throws Exception the exception
 	 */
 	protected void startCrawling()
 	{

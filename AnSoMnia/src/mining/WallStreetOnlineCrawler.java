@@ -19,6 +19,8 @@
  */
 package mining;
 
+import java.util.Date;
+
 import org.javatuples.Pair;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -32,6 +34,7 @@ import utils.HttpRequester;
 import database.Company;
 import database.KeyPerformanceIndicator;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class WallStreetOnlineCrawler.
  */
@@ -53,12 +56,16 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 	/** The http_req_manager. */
 	private HttpRequestManager http_req_manager;
 	
+	/** The date_added. */
+	private Date date_added;
+	
 	/**
 	 * Instantiates a new wall street online crawler.
 	 */
 	public WallStreetOnlineCrawler() {
 		http_req_manager = HttpRequestManager.getInstance();
 		this.name = "wallstreet_crawler";
+		this.date_added = new Date();
 		System.out.println("WallStreetOnlineCrawler ctor called");
 	}
 	
@@ -156,7 +163,7 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		KeyPerformanceIndicator indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
 		
 		if(indicators == null){
-			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company);
+			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company, this.date_added);
 			existing_indicators = false;
 		}
 		
@@ -235,7 +242,7 @@ public class WallStreetOnlineCrawler extends Crawler implements Job
 		KeyPerformanceIndicator indicators = company.getKpisCorrespondingToYear(year_pair.getValue1());
 		
 		if(indicators == null){
-			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company);
+			indicators = new KeyPerformanceIndicator(year_pair.getValue1(), company, this.date_added);
 			existing_indicators = false;
 		}
 		

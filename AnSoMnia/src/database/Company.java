@@ -21,6 +21,8 @@ package database;
 
 import interfaces.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,10 +35,13 @@ import javax.persistence.*;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.javatuples.Pair;
 
 import utils.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class Company.
  */
@@ -76,6 +81,10 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 	/** List of all industry sectors. */
 	@ManyToMany(mappedBy="companies")
 	private List<Index> industry_sectors;
+	
+	@ManyToOne
+	@JoinColumn(name="info",updatable=true)
+	private CompanyInformation info;
 
 	
 	/**
@@ -91,11 +100,13 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 	 * @param isin the isin
 	 * @param company_name the company_name
 	 * @param ticker the ticker
+	 * @param date_added the date_added
 	 */
-	public Company(String isin, String company_name, String ticker) {
+	public Company(String isin, String company_name, String ticker, Date date_added) {
 		this.isin = isin;
 		this.name = company_name;
 		this.ticker = ticker;
+		this.date_added = date_added;
 		
 		this.market_values_list = new ArrayList<MarketValue>();
 		this.kpis_list = new ArrayList<KeyPerformanceIndicator>();
@@ -120,6 +131,15 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		this.origin = tmp[7];
 		this.wallstreet_id = Integer.parseInt(tmp[8]);
 		this.web_site = tmp[9];
+		
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			this.date_added = formatter.parse(tmp[10]);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			assert(false);
+		}
+		
 		
 		this.market_values_list = new ArrayList<MarketValue>();
 		this.kpis_list = new ArrayList<KeyPerformanceIndicator>();
@@ -239,6 +259,30 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Gets the number of added dates of particular month and year from db.
+	 *
+	 * @param date the date
+	 * @return the number of added dates of particular month and year from db
+	 */
+	public int getNumberOfAddedDatesOfParticularMonthAndYearFromDB(Date date) {
+		Pair<Calendar, Calendar> from_to = MyDateUtils.getMaxAndMinOfMonth(date);
+		Calendar from = from_to.getValue0();
+		Calendar to = from_to.getValue1();	
+		
+		HibernateSupport.beginTransaction();
+		
+		long values_size = (long)HibernateSupport.getCurrentSession().createCriteria(MarketValue.class)
+				.add(Restrictions.eq("company", this))
+				.add(Restrictions.between("date", from.getTime(), to.getTime()))
+				.setProjection(Projections.rowCount())
+				.uniqueResult();
+		
+		HibernateSupport.commitTransaction();
+		
+		return (int) values_size;
 	}
 	
 	/**
@@ -437,6 +481,11 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 		return HibernateSupport.readMoreObjectsDesc(MarketValue.class, list, "date");
 	}
 	
+	/**
+	 * Gets the number of news.
+	 *
+	 * @return the number of news
+	 */
 	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.EXTRA)
 	public int getNumberOfNews() {
 		HibernateSupport.beginTransaction();
@@ -453,7 +502,8 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 	public String serialize() {
 		return this.isin + "\t" + this.finance_query_string + "\t" + this.name + "\t" + 
 				this.ticker + "\t" + this.valor + "\t" + this.wallstreet_query_string + "\t" + 
-				this.wkn + "\t" +  this.origin + "\t" +this.wallstreet_id + "\t" + this.web_site;
+				this.wkn + "\t" +  this.origin + "\t" +this.wallstreet_id + "\t" + 
+				this.web_site  + "\t" + this.date_added;
 	}
 	
 	/* (non-Javadoc)

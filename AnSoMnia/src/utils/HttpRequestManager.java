@@ -35,6 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.javatuples.Pair;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class HttpRequestManager.
  */
@@ -124,7 +125,7 @@ public class HttpRequestManager {
 	 */
 	private HttpRequester addHttpRequester(String domain) {
 		System.out.println("HttpRequestManager is adding " + domain);
-		return new HttpRequester(this, domain, 3, 1000);
+		return new HttpRequester(this, domain, 3, 1500);
 	}
 	
 	/**

@@ -19,30 +19,34 @@
  */
 package interfaces;
 
+// TODO: Auto-generated Javadoc
 /**
- * Interface for saving Objects into Database or into a file
- * 
- * @author Senkl/Ivantsits
+ * Interface for saving Objects into Database or into a file.
  *
+ * @author Senkl/Ivantsits
  */
 
 public interface ISaveAndDelete {
 	
 	/**
-	 * Save Method
-	 * 
+	 * Save Method.
+	 *
 	 * @return true if save was successful - false otherwise
 	 */
 	public boolean saveToDB();
 	
 	
 	/**
-	 * Deletes the Object from the Database
+	 * Deletes the Object from the Database.
+	 *
+	 * @param obj the obj
 	 */
 	public void deleteFromDB(Object obj);
 	
 	/**
-	 * Serializes the object, to store it in a file
+	 * Serializes the object, to store it in a file.
+	 *
+	 * @return the string
 	 */
 	public String serialize();
 

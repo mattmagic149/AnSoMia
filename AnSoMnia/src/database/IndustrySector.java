@@ -21,13 +21,17 @@ package database;
 
 import interfaces.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.*;
 
 import utils.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class IndustrySector.
  */
@@ -40,6 +44,9 @@ public class IndustrySector implements ISaveAndDelete {
 
 	/** The wallstreet_query_string. */
 	private String wallstreet_query_string;
+	
+	/** The date_added. */
+	private Date date_added;
 	
 
 	/** The companies. */
@@ -61,10 +68,12 @@ public class IndustrySector implements ISaveAndDelete {
 	 *
 	 * @param name the name
 	 * @param wallstreet the wallstreet
+	 * @param date_added the date_added
 	 */
-	public IndustrySector(String name, String wallstreet) {
+	public IndustrySector(String name, String wallstreet, Date date_added) {
 		this.name = name;
 		this.wallstreet_query_string = wallstreet;
+		this.date_added = date_added;
 		
 		this.companies = new ArrayList<Company>();
 
@@ -79,6 +88,14 @@ public class IndustrySector implements ISaveAndDelete {
 		String[] tmp = serialized_industry_sector.split("\t");
 		this.name = tmp[0];
 		this.wallstreet_query_string = tmp[1];
+		
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			this.date_added = formatter.parse(tmp[2]);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			assert(false);
+		}
 		
 		this.companies = new ArrayList<Company>();
 	}
@@ -101,6 +118,11 @@ public class IndustrySector implements ISaveAndDelete {
 		return name;
 	}
 
+	/**
+	 * Sets the name.
+	 *
+	 * @param name the new name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -114,6 +136,15 @@ public class IndustrySector implements ISaveAndDelete {
 		return wallstreet_query_string;
 	}
 	
+	/**
+	 * Gets the date added.
+	 *
+	 * @return the date added
+	 */
+	public Date getDateAdded() {
+		return date_added;
+	}
+
 	/**
 	 * Adds the company.
 	 *
@@ -137,7 +168,7 @@ public class IndustrySector implements ISaveAndDelete {
 	 */
 	@Override
 	public String serialize() {
-		return this.name + "\t" + this.wallstreet_query_string;
+		return this.name + "\t" + this.wallstreet_query_string + "\t" + this.date_added;
 	}
 	
 	/* (non-Javadoc)

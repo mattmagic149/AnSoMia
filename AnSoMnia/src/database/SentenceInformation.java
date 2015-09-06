@@ -30,6 +30,7 @@ import javax.persistence.ManyToOne;
 
 import utils.HibernateSupport;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class SentenceInformation.
  */
@@ -70,6 +71,7 @@ public class SentenceInformation implements ISaveAndDelete {
 	 * @param start_index the start_index
 	 * @param end_index the end_index
 	 * @param polarity the polarity
+	 * @param objectivity the objectivity
 	 */
 	public SentenceInformation(NewsDetail details, int start_index, int end_index, double polarity, double objectivity) {
 		this.details = details;
@@ -129,14 +131,29 @@ public class SentenceInformation implements ISaveAndDelete {
 		return details;
 	}
 	
+	/**
+	 * Gets the objectivity.
+	 *
+	 * @return the objectivity
+	 */
 	public double getObjectivity() {
 		return objectivity;
 	}
 
+	/**
+	 * Sets the objectivity.
+	 *
+	 * @param objectivity the new objectivity
+	 */
 	public void setObjectivity(double objectivity) {
 		this.objectivity = objectivity;
 	}
 
+	/**
+	 * Sets the polarity.
+	 *
+	 * @param polarity the new polarity
+	 */
 	public void setPolarity(double polarity) {
 		this.polarity = polarity;
 	}

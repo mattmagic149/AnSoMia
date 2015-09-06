@@ -31,6 +31,7 @@ import utils.HttpRequestManager;
 import utils.HttpRequester;
 import database.Company;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class YahooNewsCrawler.
  */

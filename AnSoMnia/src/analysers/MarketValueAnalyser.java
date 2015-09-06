@@ -34,15 +34,16 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.lang.time.DateUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import utils.HibernateSupport;
 import utils.MathUtils;
+import utils.MyDateUtils;
 import charts.MarketValueChart;
 import charts.NewsHistogram;
 import database.*;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class MarketValueAnalyser.
  */
@@ -51,11 +52,167 @@ public class MarketValueAnalyser {
 	/**
 	 * The Enum ChartType.
 	 */
-	public enum ChartType {		
-		LOW,		
-		MID, 		
+	public enum ChartType {
+		LOW,
+		MID,
 		HIGH
 	};
+	
+	/**
+	 * The Enum Analyse.
+	 */
+	public enum Analyse {
+		BEFORE,
+		AFTER,
+		BEFORE_AFTER,
+		LESS,
+		GREATER,
+		BETWEEN
+	};
+	
+	/**
+	 * The Class MVAReturnValues.
+	 */
+	private class MVAReturnValues {
+		
+		/** The charts. */
+		private ArrayList<MarketValueChart> charts;
+		
+		/** The infos. */
+		private List<String> infos;
+		
+		/** The descriptions. */
+		private List<String> descriptions;
+		
+		/** The dates. */
+		private List<ArrayList<Date>> dates;
+		
+		/** The stock_price_developements. */
+		private List<double[]> stock_price_developements;
+		
+		/** The stock_prices. */
+		private List<double[]> stock_prices;
+		
+		/**
+		 * Instantiates a new MVA return values.
+		 */
+		public MVAReturnValues() {
+			this.charts = new ArrayList<MarketValueChart>();
+			this.infos = new ArrayList<String>();
+			this.descriptions = new ArrayList<String>();
+			this.dates = new ArrayList<ArrayList<Date>>();
+			this.stock_price_developements = new ArrayList<double[]>();
+			this.stock_prices = new ArrayList<double[]>();
+		}
+		
+		/**
+		 * Adds the chart.
+		 *
+		 * @param mvc the mvc
+		 */
+		public void addChart(MarketValueChart mvc) {
+			this.charts.add(mvc);
+		}
+		
+		/**
+		 * Adds the info.
+		 *
+		 * @param info the info
+		 */
+		public void addInfo(String info) {
+			this.infos.add(info);
+		}
+		
+		/**
+		 * Adds the description.
+		 *
+		 * @param des the des
+		 */
+		public void addDescription(String des) {
+			this.descriptions.add(des);
+		}
+		
+		/**
+		 * Adds the dates.
+		 *
+		 * @param list the list
+		 */
+		public void addDates(ArrayList<Date> list) {
+			this.dates.add(list);
+		}
+		
+		/**
+		 * Adds the stock price dev.
+		 *
+		 * @param stock_price_developement the stock_price_developement
+		 */
+		public void addStockPriceDev(double[] stock_price_developement) {
+			this.stock_price_developements.add(stock_price_developement);
+		}
+		
+		/**
+		 * Adds the stock price.
+		 *
+		 * @param stock_price the stock_price
+		 */
+		public void addStockPrice(double[] stock_price) {
+			this.stock_prices.add(stock_price);
+		}
+
+		/**
+		 * Gets the charts.
+		 *
+		 * @return the charts
+		 */
+		public ArrayList<MarketValueChart> getCharts() {
+			return charts;
+		}
+
+		/**
+		 * Gets the infos.
+		 *
+		 * @return the infos
+		 */
+		public List<String> getInfos() {
+			return infos;
+		}
+
+		/**
+		 * Gets the descriptions.
+		 *
+		 * @return the descriptions
+		 */
+		public List<String> getDescriptions() {
+			return descriptions;
+		}
+
+		/**
+		 * Gets the dates.
+		 *
+		 * @return the dates
+		 */
+		public List<ArrayList<Date>> getDates() {
+			return dates;
+		}
+
+		/**
+		 * Gets the stock price developements.
+		 *
+		 * @return the stock price developements
+		 */
+		public List<double[]> getStockPriceDevelopements() {
+			return stock_price_developements;
+		}
+
+		/**
+		 * Gets the stock prices.
+		 *
+		 * @return the stock prices
+		 */
+		public List<double[]> getStockPrices() {
+			return stock_prices;
+		}
+	}
 	
 	/** The high_correlations. */
 	private ArrayList<Triplet<ArrayList<MarketValue>, ArrayList<MarketValue>, Double>> high_correlations;
@@ -75,7 +232,11 @@ public class MarketValueAnalyser {
 	/** The min_days_to_correlate. */
 	private int min_days_to_correlate;
 	
+	/** The p_corr. */
 	private PearsonsCorrelation p_corr;
+	
+	/** The already_viewed. */
+	private ArrayList<Triplet<String, Date, Date>> already_viewed;
 	
 	/**
 	 * Instantiates a new market value analyser.
@@ -86,6 +247,7 @@ public class MarketValueAnalyser {
 		this.mid_correlations = new ArrayList<Triplet<ArrayList<MarketValue>, ArrayList<MarketValue>, Double>>();
 		
 		this.already_correlated = new ArrayList<Triplet<String, String, Date>>();
+		this.already_viewed = new ArrayList<Triplet<String, Date, Date>>();
 		
 		this.p_corr = new PearsonsCorrelation();
 		
@@ -105,7 +267,8 @@ public class MarketValueAnalyser {
 		this.mid_correlations = new ArrayList<Triplet<ArrayList<MarketValue>, ArrayList<MarketValue>, Double>>();
 		
 		this.already_correlated = new ArrayList<Triplet<String, String, Date>>();
-		
+		this.already_viewed = new ArrayList<Triplet<String, Date, Date>>();
+
 		this.p_corr = new PearsonsCorrelation();
 
 		this.days_to_correlate = days;
@@ -129,77 +292,9 @@ public class MarketValueAnalyser {
 			first[i] = first_values.get(i).getHigh();
 			second[i] = second_values.get(i).getHigh();
 		}
-		
+				
 		return this.p_corr.correlation(first, second);
-		
-		/*float correlation_coefficient = 0;
-		float first_values_average = 0, second_values_average = 0;
-		float first_values_squared_average = 0, second_values_squared_average = 0;
-		float first_values_times_second_values_average = 0;
-		float first_values_variance = 0, second_values_variance = 0;
-		float covariance = 0;
-		
-		MarketValue first_value;
-		MarketValue second_value;
-		float first_current_high;
-		float second_current_high;
-		
-		int size = first_values.size();
-		if(size == 0) {
-			return Float.NaN;
-		}
-		
-		for(int i = 0; i < size; i++) {
-			first_value = first_values.get(i);
-			second_value = second_values.get(i);
-			first_current_high = first_value.getHigh();
-			second_current_high = second_value.getHigh();
-			
-			first_values_average += first_current_high;
-			second_values_average += second_current_high;
-			
-			first_values_squared_average += first_current_high * first_current_high;
-			second_values_squared_average += second_current_high * second_current_high;
-			
-			first_values_times_second_values_average += first_current_high * second_current_high;
-		}
-		
-		first_values_average = first_values_average/size;
-		second_values_average = second_values_average/size;
-		first_values_squared_average = first_values_squared_average/size;
-		second_values_squared_average = second_values_squared_average/size;
-		first_values_times_second_values_average = first_values_times_second_values_average/size;
-		
-		first_values_variance = first_values_squared_average - 
-					first_values_average * first_values_average;
-		
-		second_values_variance = second_values_squared_average - 
-					second_values_average * second_values_average;
-		covariance = first_values_times_second_values_average - 
-					first_values_average * second_values_average;
-		
-		correlation_coefficient = (float) (covariance / 
-						(Math.sqrt(first_values_variance * second_values_variance)));
-		
-		
-		System.out.println("first_values_average  = " + first_values_average);
-		System.out.println("second_values_average  = " + second_values_average);
-		System.out.println("first_values_squared_average  = " + first_values_squared_average);
-		System.out.println("second_values_squared_average  = " + second_values_squared_average);
-		System.out.println("first_values_times_second_values_average  = " + first_values_times_second_values_average);
-		
-		System.out.println("first_values_variance  = " + first_values_variance);
-		System.out.println("second_values_variance  = " + second_values_variance);
 
-		System.out.println("covariance  = " + covariance);
-
-		if(correlation_coefficient == Float.NaN || 
-				correlation_coefficient == Float.NEGATIVE_INFINITY ||
-				correlation_coefficient == Float.POSITIVE_INFINITY ) {
-			return Float.NaN;
-		}
-		
-		return correlation_coefficient;*/
 	}
 	
 	/**
@@ -322,72 +417,6 @@ public class MarketValueAnalyser {
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Correlation test.
-	 *
-	 * @throws ParseException the parse exception
-	 */
-	public void correlationTest() throws ParseException {
-		ArrayList<MarketValue> values1 = new ArrayList<MarketValue>();
-		SimpleDateFormat formater = new SimpleDateFormat("dd.MM.yy");
-		values1.add(new MarketValue(21.4f, formater.parse("22.07.11")));
-		values1.add(new MarketValue(21.71f, formater.parse("23.07.11")));
-		values1.add(new MarketValue(21.2f, formater.parse("24.07.11")));
-		
-		values1.add(new MarketValue(21.34f, formater.parse("27.07.11")));
-		values1.add(new MarketValue(21.49f, formater.parse("28.07.11")));
-		values1.add(new MarketValue(21.39f, formater.parse("29.07.11")));
-		values1.add(new MarketValue(22.16f, formater.parse("30.07.11")));
-		values1.add(new MarketValue(22.53f, formater.parse("01.08.11")));
-		
-		values1.add(new MarketValue(22.44f, formater.parse("05.08.11")));
-		values1.add(new MarketValue(22.75f, formater.parse("06.08.11")));
-		values1.add(new MarketValue(23.23f, formater.parse("07.08.11")));
-		values1.add(new MarketValue(23.09f, formater.parse("08.08.11")));
-		
-		values1.add(new MarketValue(22.85f, formater.parse("11.08.11")));
-		values1.add(new MarketValue(22.45f, formater.parse("12.08.11")));
-		values1.add(new MarketValue(22.48f, formater.parse("13.08.11")));
-		values1.add(new MarketValue(22.27f, formater.parse("14.08.11")));
-		values1.add(new MarketValue(22.37f, formater.parse("15.08.11")));
-
-		values1.add(new MarketValue(22.28f, formater.parse("18.08.11")));
-		values1.add(new MarketValue(23.06f, formater.parse("19.08.11")));
-		values1.add(new MarketValue(22.99f, formater.parse("20.08.11")));
-		
-		System.out.println(values1.get(0).getDate());
-		
-		
-		
-		ArrayList<MarketValue> values2 = new ArrayList<MarketValue>();
-		values2.add(new MarketValue(54.83f, formater.parse("22.07.11")));
-		values2.add(new MarketValue(55.34f, formater.parse("23.07.11")));
-		values2.add(new MarketValue(54.38f, formater.parse("24.07.11")));
-		
-		values2.add(new MarketValue(55.25f, formater.parse("27.07.11")));
-		values2.add(new MarketValue(56.07f, formater.parse("28.07.11")));		
-		values2.add(new MarketValue(56.30f, formater.parse("29.07.11")));
-		values2.add(new MarketValue(57.05f, formater.parse("30.07.11")));
-		values2.add(new MarketValue(57.91f, formater.parse("01.08.11")));
-		
-		values2.add(new MarketValue(58.20f, formater.parse("05.08.11")));
-		values2.add(new MarketValue(58.39f, formater.parse("06.08.11")));
-		values2.add(new MarketValue(59.19f, formater.parse("07.08.11")));
-		values2.add(new MarketValue(59.03f, formater.parse("08.08.11")));
-		
-		values2.add(new MarketValue(57.96f, formater.parse("11.08.11")));
-		values2.add(new MarketValue(57.52f, formater.parse("12.08.11")));
-		values2.add(new MarketValue(57.76f, formater.parse("13.08.11")));
-		values2.add(new MarketValue(57.09f, formater.parse("14.08.11")));
-		values2.add(new MarketValue(57.85f, formater.parse("15.08.11")));
-
-		values2.add(new MarketValue(57.54f, formater.parse("18.08.11")));
-		values2.add(new MarketValue(58.85f, formater.parse("19.08.11")));
-		values2.add(new MarketValue(58.60f, formater.parse("20.08.11")));
-		
-		System.out.println(this.calculateCorrelationCoefficient(values1, values2));
 	}
 	
 	/**
@@ -637,6 +666,11 @@ public class MarketValueAnalyser {
 		
 	}
 	
+	/**
+	 * Correlate all companies.
+	 *
+	 * @return the double[]
+	 */
 	public double[] correlateAllCompanies() {
 		
 		List<Company> companies = HibernateSupport.readMoreObjects(Company.class, new ArrayList<Criterion>());
@@ -710,6 +744,13 @@ public class MarketValueAnalyser {
 		
 	}
 	
+	/**
+	 * Correlate company with multiple companies.
+	 *
+	 * @param values the values
+	 * @param values_list the values_list
+	 * @return the list
+	 */
 	public List<Double> correlateCompanyWithMultipleCompanies(double[] values,
 													  List<double[]> values_list) {
 		
@@ -726,6 +767,14 @@ public class MarketValueAnalyser {
 		return result;
 	}
 	
+	/**
+	 * Gets the multiple market values from companies.
+	 *
+	 * @param companies the companies
+	 * @param from the from
+	 * @param to the to
+	 * @return the multiple market values from companies
+	 */
 	public List<double[]> getMultipleMarketValuesFromCompanies(List<Company> companies,
 													 Calendar from,
 													 Calendar to) {
@@ -745,6 +794,15 @@ public class MarketValueAnalyser {
 		return result;
 	}
 	
+	/**
+	 * Correlate two sectors.
+	 *
+	 * @param sector1 the sector1
+	 * @param sector2 the sector2
+	 * @param from the from
+	 * @param to the to
+	 * @return the list
+	 */
 	public List<Double> correlateTwoSectors(List<double[]> sector1, 
 											List<double[]> sector2,
 											Calendar from,
@@ -767,6 +825,12 @@ public class MarketValueAnalyser {
 		
 	}
 	
+	/**
+	 * Correlate industry sectors.
+	 *
+	 * @param from the from
+	 * @param to the to
+	 */
 	public void correlateIndustrySectors(Calendar from, Calendar to) {
 		List<IndustrySector> sectors = HibernateSupport.readMoreObjects(IndustrySector.class, new ArrayList<Criterion>());
 		int sectors_size = sectors.size();
@@ -844,6 +908,14 @@ public class MarketValueAnalyser {
 		
 	}
 	
+	/**
+	 * Gets the values from psf.
+	 *
+	 * @param psf the psf
+	 * @param from the from
+	 * @param to the to
+	 * @return the values from psf
+	 */
 	public double[] getValuesFromPsf(PolynomialSplineFunction psf, Calendar from, Calendar to) {
 		
 		int diff = (int) TimeUnit.DAYS.convert(to.getTimeInMillis() 
@@ -868,6 +940,14 @@ public class MarketValueAnalyser {
 		return result;
 	}
 	
+	/**
+	 * Gets the share price developement.
+	 *
+	 * @param psf the psf
+	 * @param from the from
+	 * @param to the to
+	 * @return the share price developement
+	 */
 	public double[] getSharePriceDevelopement(PolynomialSplineFunction psf, Calendar from, Calendar to) {
 		
 		int diff = (int) TimeUnit.DAYS.convert(to.getTimeInMillis() 
@@ -894,6 +974,14 @@ public class MarketValueAnalyser {
 		return result;
 	}
 	
+	/**
+	 * Gets the market value spline from to.
+	 *
+	 * @param company the company
+	 * @param from the from
+	 * @param to the to
+	 * @return the market value spline from to
+	 */
 	public PolynomialSplineFunction getMarketValueSplineFromTo(Company company, Calendar from, Calendar to) {
 		
 		List<MarketValue> values = company.getMarketValuesBetweenDatesFromDB(from.getTime(), to.getTime());
@@ -915,6 +1003,15 @@ public class MarketValueAnalyser {
 		
 	}
 	
+	/**
+	 * Normalize market values.
+	 *
+	 * @param company the company
+	 * @param values the values
+	 * @param from the from
+	 * @param to the to
+	 * @return true, if successful
+	 */
 	public boolean normalizeMarketValues(Company company, List<MarketValue> values, Calendar from, Calendar to) {
 				
 		MarketValue value;
@@ -942,6 +1039,14 @@ public class MarketValueAnalyser {
 		
 	}
 	
+	/**
+	 * Gets the date before or after.
+	 *
+	 * @param company the company
+	 * @param date the date
+	 * @param dec_inc the dec_inc
+	 * @return the date before or after
+	 */
 	public MarketValue getDateBeforeOrAfter(Company company, Calendar date, int dec_inc) {
 		MarketValue value;
 		List<Criterion> cr;
@@ -964,5 +1069,165 @@ public class MarketValueAnalyser {
 		return null;
 	}
 	
+	/**
+	 * Analyse stock price developement of companies with good rep.
+	 *
+	 * @param days_to_examine the days_to_examine please provide a positive
+	 * 			integer, no matter if you would like to examine the stock
+	 * 			prices before or after!
+	 * @param period the period
+	 * @param modus the modus
+	 * @param value1 the value1 please provide a positiv or negative value
+	 * @param value2 the value2 please provide a positiv or negative value
+	 * 					only used when modus is set to BETWEEN
+	 */
+	public void analyseStockPriceDevelopementOfCompaniesWithGoodRep(int days_to_examine,
+												MarketValueAnalyser.Analyse period,
+												MarketValueAnalyser.Analyse modus,
+												double value1,
+												double value2) {
+		this.already_viewed.clear();
+		List<News> news_list;
+		
+		if(modus == MarketValueAnalyser.Analyse.GREATER) {
+			news_list = News.getNewsCompaniesGoodRepGePolarity(value1); //EXTREM GUTES ERGEBNIS! 0.5
+		} else if(modus == MarketValueAnalyser.Analyse.LESS) {
+			news_list = News.getNewsCompaniesGoodRepLePolarity(value1); //EXTREM GUTES ERGEBNIS! -0.20
+		} else {
+			System.out.println("Modus has to be greater or less.");
+			return;
+		}
+		
+
+		//List<News> news_list = News.getNewsCompaniesGoodRepLePolarity(-0.6);
+		if(news_list == null || news_list.size() == 0) {
+			System.out.println("Quit, because Query provided no result.");
+			return;
+		}
+		
+		MVAReturnValues mva_return_values = calculateStockPriceDevelopements(news_list,
+													days_to_examine, period);
+		
+		this.printStats(mva_return_values);
+		
+	}
+	
+	/**
+	 * Calculate stock price developements.
+	 *
+	 * @param news_list the news_list
+	 * @param days_to_examine the days_to_examine
+	 * @param period the period
+	 * @return the MVA return values
+	 */
+	private MVAReturnValues calculateStockPriceDevelopements(List<News> news_list,
+								int days_to_examine,MarketValueAnalyser.Analyse period) {
+		
+		PolynomialSplineFunction psf;
+		News news;
+		List<Company> companies;
+		Company company;
+		
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		Pair<Calendar, Calendar> from_to;
+		
+		MVAReturnValues mva_return_values = new MVAReturnValues();
+		
+		String title = "Stock Price Developement";
+		String description;
+		
+		int news_size = news_list.size();
+		System.out.println(news_size);
+
+		for(int i = 0; i < news_size; i++) {
+			news = news_list.get(i);
+			companies = news.getCompanies();
+			for(int j = 0; j < companies.size(); j++) {
+				
+				from_to = MyDateUtils.getFromToCalendars(period, news.getDate(), days_to_examine);
+				from = from_to.getValue0();
+				to = from_to.getValue1();
+				company = companies.get(j);
+				
+				if(alreadyViewed(company.getName(), from.getTime(), to.getTime())) {
+						//|| company.getName().contains("ADIDAS")) {
+					System.out.println("continue..");
+					continue;
+				}
+
+				if((psf = this.getMarketValueSplineFromTo(company, from, to)) != null) {
+					description = company.getName() + " (" + company.getIsin() + ")"
+							+ " - polarity: " + news.getNewsDetails().get(0).getTotalPolarity();
+							
+					mva_return_values.addChart(new MarketValueChart(title, "Date", "Price Per Unit", period));
+					mva_return_values.addDates(MyDateUtils.getListOfDatesFromToCalendar(from, to));
+					mva_return_values.addStockPriceDev(this.getSharePriceDevelopement(psf, from, to));
+					mva_return_values.addDescription(description);
+					
+					mva_return_values.addStockPrice(this.getValuesFromPsf(psf, from, to));					
+					mva_return_values.addInfo(description + " - objectivity " + 
+											  news.getNewsDetails().get(0).getTotalObjectivity() + 
+											  " hash = " + news.getHash());
+				}
+			}
+		}
+		
+		return mva_return_values;
+	}
+	
+	/**
+	 * Prints the stats.
+	 *
+	 * @param mvavalues the mvavalues
+	 */
+	private void printStats(MVAReturnValues mvavalues) {
+		Mean mean = new Mean();
+		List<double[]> stock_price_developements = mvavalues.getStockPriceDevelopements();
+		double[] stock_price_tmp = new double[stock_price_developements.size()];
+		int array_size = stock_price_developements.get(0).length;
+		for(int i = 0; i < array_size - 1; i++) {
+			for(int j = 0; j < stock_price_developements.size(); j++) {
+				stock_price_tmp[j] = stock_price_developements.get(j)[i];
+			}
+			System.out.println((i +1 ) + ". day mean = " + mean.evaluate(stock_price_tmp));
+		}
+		
+		List<String> infos = mvavalues.getInfos();
+		List<MarketValueChart> mvcs = mvavalues.getCharts();
+		List<String> descriptions = mvavalues.getDescriptions();
+		List<ArrayList<Date>> dates = mvavalues.getDates();
+		List<double[]> stock_prices = mvavalues.getStockPrices();
+		
+		for(int i = 0; i < mvcs.size(); i++) {
+			mvcs.get(i).execute(stock_prices.get(i), descriptions.get(i), dates.get(i));
+			System.out.println(infos.get(i));
+		}
+
+	}
+	
+	
+	/**
+	 * Already viewed.
+	 *
+	 * @param name the name
+	 * @param from the from
+	 * @param to the to
+	 * @return true, if successful
+	 */
+	private boolean alreadyViewed(String name, Date from, Date to) {
+		
+		Triplet<String, Date, Date> to_check = new Triplet<String, Date, Date>(name, from, to);
+		
+		for(int i = 0; i < this.already_viewed.size(); i++) {
+			if(this.already_viewed.get(i).equals(to_check)) {
+				return true;
+			}
+		}
+		
+		this.already_viewed.add(to_check);
+		
+		return false;
+	}
 	
 }

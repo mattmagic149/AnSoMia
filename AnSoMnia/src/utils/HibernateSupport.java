@@ -27,6 +27,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
@@ -81,10 +82,12 @@ public class HibernateSupport {
 		configuration.addAnnotatedClass(NewsDetail.class);
 		configuration.addAnnotatedClass(SentenceInformation.class);
 		configuration.addAnnotatedClass(IndustrySector.class);
+		configuration.addAnnotatedClass(CompanyInformation.class);
+
 
 		configuration.configure(configFile);
 		
-		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();
+		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).getBootstrapServiceRegistry();
 		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 	}
 	
@@ -148,6 +151,15 @@ public class HibernateSupport {
 		return result;
 	}
 	
+	/**
+	 * Read more objects desc.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param criterions the criterions
+	 * @param field the field
+	 * @return the array list
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> ArrayList <T> readMoreObjectsDesc(Class<?> classToRetrieve, List<Criterion> criterions, String field) {
 		beginTransaction();
@@ -220,6 +232,21 @@ public class HibernateSupport {
 	 * @param id the id
 	 * @return the t
 	 */
+	public static <T> T readOneObjectByLongID(Class<?> classToRetrieve, long id) {
+		List<Criterion> criterions = new ArrayList<Criterion>();
+		criterions.add(Restrictions.idEq(id));
+		T result = readOneObject(classToRetrieve, criterions);
+		return result;
+	}
+	
+	/**
+	 * Read one object by id.
+	 *
+	 * @param <T> the generic type
+	 * @param classToRetrieve the class to retrieve
+	 * @param id the id
+	 * @return the t
+	 */
 	public static <T> T readOneObjectByID(Class<?> classToRetrieve, long id) {
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		criterions.add(Restrictions.idEq(id));
@@ -270,6 +297,13 @@ public class HibernateSupport {
 		getCurrentSession().delete(objectToDelete);
 	}
 	
+	/**
+	 * Gets the string like disjunction.
+	 *
+	 * @param to_read the to_read
+	 * @param property the property
+	 * @return the string like disjunction
+	 */
 	public static Criterion getStringLikeDisjunction(List<String> to_read, String property) {
 		
 		Disjunction disj = Restrictions.disjunction();

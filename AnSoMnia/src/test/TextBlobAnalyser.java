@@ -1,3 +1,22 @@
+/*
+ * @Author: Matthias Ivantsits
+ * Supported by TU-Graz (KTI)
+ * 
+ * Tool, to gather market information, in quantitative and qualitative manner.
+ * Copyright (C) 2015  Matthias Ivantsits
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package test;
 
 import org.python.core.PyObject;
@@ -5,13 +24,25 @@ import org.python.util.PythonInterpreter;
 
 import database.News;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class TextBlobAnalyser.
+ */
 public class TextBlobAnalyser
 {
 	
+	/**
+	 * Instantiates a new text blob analyser.
+	 */
 	public TextBlobAnalyser() {
 		System.out.println("TextBlobAnalyser ctor called");
 	}
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		String text = "Hallo wie gehts es dir? Du bist echt böse.";
 
@@ -28,6 +59,12 @@ public class TextBlobAnalyser
         System.out.println("translated_text: " + translated_text.toString());
 	}
 	
+	/**
+	 * Analyse text.
+	 *
+	 * @param news the news
+	 * @return true, if successful
+	 */
 	public boolean analyseText(News news) {
 		try{
 		 
