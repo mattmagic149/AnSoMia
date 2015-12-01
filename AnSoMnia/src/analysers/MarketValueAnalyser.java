@@ -19,9 +19,14 @@
  */
 package analysers;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +37,9 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.correlation.*;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
@@ -994,6 +1001,7 @@ public class MarketValueAnalyser {
 		double[] y = new double[values.size()];
 		Calendar cal = Calendar.getInstance();
 		for(int i = 0; i < values.size(); i++) {
+			//System.out.println(values.get(i).getDate() + " " + values.get(i).getHigh());
 			cal.setTime(values.get(i).getDate());
 			x[i] = cal.getTimeInMillis();
 			y[i] = values.get(i).getHigh();
@@ -1191,6 +1199,9 @@ public class MarketValueAnalyser {
 				stock_price_tmp[j] = stock_price_developements.get(j)[i];
 			}
 			System.out.println((i +1 ) + ". day mean = " + mean.evaluate(stock_price_tmp));
+			
+			if(i > 8)
+				break;
 		}
 		
 		List<String> infos = mvavalues.getInfos();
@@ -1228,6 +1239,188 @@ public class MarketValueAnalyser {
 		this.already_viewed.add(to_check);
 		
 		return false;
+	}
+	
+	public void createDistributionTable(int nr_steps, int days, MarketValueAnalyser.Analyse period, boolean good_rep) {
+		double step = 2.0 / nr_steps;
+		double lower;
+		double upper;
+		List<List<Double>> result = new ArrayList<List<Double>>();
+		
+		String directory = "data/distributions/";
+		try {
+			PrintWriter writer = new PrintWriter(directory + period + "_days_" + days + "overall.csv", "UTF-8");
+			for(int i = 0; i < nr_steps; i++) {
+				lower = (-1.0 + i * step);
+				upper = (-1.0 + (i + 1) * step);
+				System.out.print("*******************");
+				System.out.print(lower + " to " + upper);
+				System.out.println("*******************");
+				result.add(this.createMarginalDistribution(lower, upper, days, period, good_rep, writer));
+ 
+			}
+			
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		/*try {
+			PrintWriter writer = new PrintWriter(directory + period + "_days_" + days + ".csv", "UTF-8");
+			String line = "";
+			for(int row = (result.get(0).size() - 1); row >= 0; row--) {
+				for(int col = 0; col < result.size(); col++) {
+					line = line + result.get(col).get(row) + ",";
+				}
+				System.out.println(line);
+				writer.println(line);
+				line = "";
+			}
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
+
+		
+	}
+	
+	public List<Double> createMarginalDistribution(double lower, double upper, int days, 
+													MarketValueAnalyser.Analyse period, boolean good_rep,
+													PrintWriter writer) {
+		
+		HibernateSupport.beginTransaction();
+			Criteria c2 = HibernateSupport.getCurrentSession().createCriteria(News.class);
+			c2.createAlias("news_details", "detail");
+			c2.add(Restrictions.ge("detail.total_polarity", lower));
+			c2.add(Restrictions.lt("detail.total_polarity", upper));
+			
+			if(good_rep) {
+				c2.createAlias("companies", "company");
+				c2.add(News.getNewsOfCompaniesWithGoodReputation());			
+			}
+
+			List<News> news_list = c2.list();
+		HibernateSupport.commitTransaction();
+		
+		System.out.println("list.size() = " + news_list.size());
+		
+		PolynomialSplineFunction psf;
+		Date publish_date;
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		double[] share_price_dev;
+		int counter = 0;
+		News single_news;
+		List<Company> companies;
+		List<Double> price_devs_period = new ArrayList<Double>();
+		Pair<Calendar, Calendar> from_to;
+		
+		while(news_list.size() > 0) {
+			single_news = news_list.get(0);
+			news_list.remove(0);
+			
+			companies = single_news.getCompaniesNew();
+			
+			publish_date = single_news.getDate();
+			//from.setTime(publish_date);
+			//to.setTime(publish_date);
+			
+			from_to = MyDateUtils.getFromToCalendars(period, publish_date, days);
+			from = from_to.getValue0();
+			to = from_to.getValue1();
+
+			to.set(Calendar.DAY_OF_YEAR, to.get(Calendar.DAY_OF_YEAR) + days);
+			for(Company company : single_news.getCompaniesNew()) {
+				//System.out.println("publish_date = " + publish_date);
+				//System.out.println("ISIN = " + company.getIsin());
+				if((psf = this.getMarketValueSplineFromTo(company, from, to)) != null) {
+					share_price_dev = this.getSharePriceDevelopement(psf, from, to);
+					//System.out.println(++counter);
+					//System.out.println(share_price_dev[days - 1]);
+					price_devs_period.add(share_price_dev[days - 1]); //day - 1
+					writer.println(single_news.getNewsDetails().get(0).getTotalPolarity() + ", " + share_price_dev[days - 1]);
+				}
+			}
+		}
+		
+		/*Collections.sort(price_devs_period);
+		List<Double> data_set = this.createDataSet(price_devs_period, -10.0f, 10.0f, 42);
+		System.out.println(data_set);
+		return data_set;*/
+		return null;
+		
+	}
+	
+	public static void main(String[] args) throws ParseException {
+		
+		HibernateSupport.beginTransaction();
+			Criteria cr = HibernateSupport.getCurrentSession().createCriteria(News.class);
+			cr.createAlias("news_details", "details");
+			cr.add(Restrictions.ge("details.total_objectivity", 0.5));
+			cr.add(Restrictions.le("details.total_objectivity", 1.0));
+			cr.setProjection(Projections.rowCount());
+			long size = (long)cr.uniqueResult();
+		HibernateSupport.commitTransaction();
+		
+		System.out.println("size = " + size);
+
+		MarketValueAnalyser mva = new MarketValueAnalyser();		
+		//mva.createDistributionTable(40, 1, MarketValueAnalyser.Analyse.AFTER, false);
+		mva.createDistributionTable(40, 3, MarketValueAnalyser.Analyse.AFTER, false);
+		mva.createDistributionTable(40, 5, MarketValueAnalyser.Analyse.AFTER, false);
+		mva.createDistributionTable(40, 7, MarketValueAnalyser.Analyse.AFTER, false);
+		
+		mva.createDistributionTable(40, 1, MarketValueAnalyser.Analyse.BEFORE, false);
+		mva.createDistributionTable(40, 3, MarketValueAnalyser.Analyse.BEFORE, false);
+		mva.createDistributionTable(40, 5, MarketValueAnalyser.Analyse.BEFORE, false);
+		mva.createDistributionTable(40, 7, MarketValueAnalyser.Analyse.BEFORE, false);
+			
+	}
+	
+	private List<Double> createDataSet(List<Double> data, float lower_bound, float upper_bound, int nr_bins) {
+		if(nr_bins <= 2) {
+			return null;
+		}
+		
+		List<Double> result = new ArrayList<Double>();
+		double value = 0;
+		float diff = upper_bound - lower_bound;
+		float step = diff/(nr_bins - 2);
+		
+		for(double elem : data) {
+			if(elem < lower_bound) {
+				value++;
+			}
+		}
+		result.add(value);
+		value = 0;
+		
+		for(int i = 0; i < (nr_bins - 2); i++) {
+			for(double elem : data) {
+				if(elem >= (lower_bound + i * step) && elem < (lower_bound + (i + 1) * step)) {
+					value++;
+				}
+			}
+			result.add(value);
+			value = 0;
+		}
+		
+		for(double elem : data) {
+			if(elem >= upper_bound) {
+				value++;
+			}
+		}
+		
+		result.add(value);
+		value = 0;
+		
+		return result;
 	}
 	
 }

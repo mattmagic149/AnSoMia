@@ -83,11 +83,11 @@ public class HibernateSupport {
 		configuration.addAnnotatedClass(SentenceInformation.class);
 		configuration.addAnnotatedClass(IndustrySector.class);
 		configuration.addAnnotatedClass(CompanyInformation.class);
-
+		configuration.addAnnotatedClass(EntityInformation.class);
 
 		configuration.configure(configFile);
 		
-		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).getBootstrapServiceRegistry();
+		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();
 		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 	}
 	

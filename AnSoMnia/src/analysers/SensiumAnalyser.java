@@ -24,6 +24,10 @@ import java.util.Date;
 import java.util.List;
 
 import utils.HibernateSupport;
+import utils.HttpRequestManager;
+import database.Company;
+import database.CompanyInformation;
+import database.EntityInformation;
 import database.News;
 import database.NewsDetail;
 import database.SentenceInformation;
@@ -31,6 +35,7 @@ import io.sensium.ExtractionRequest;
 import io.sensium.ExtractionRequest.Extractor;
 import io.sensium.ExtractionResponse;
 import io.sensium.NamedEntity;
+import io.sensium.Occurrence;
 import io.sensium.Sensium;
 import io.sensium.SensiumException;
 import io.sensium.Sentence;
@@ -56,6 +61,8 @@ public class SensiumAnalyser<Occurence>
 	/** The date_added. */
 	private Date date_added;
 	
+	private HttpRequestManager http_manager;
+	
 	/**
 	 * Instantiates a new sensium analyser.
 	 */
@@ -64,6 +71,7 @@ public class SensiumAnalyser<Occurence>
 		this.sensium = new Sensium("e16c27a8-e309-47aa-838d-cc2e6ffc5007");
 		this.req = new ExtractionRequest();
 		this.date_added = new Date();
+		this.http_manager = HttpRequestManager.getInstance();
 	}
 	
 	/**
@@ -205,7 +213,18 @@ public class SensiumAnalyser<Occurence>
 		return true;
 	}
 	
-	public boolean getEntities(News news) {
+	public boolean getEntitiesAndMapNewsNew(News news) {
+		
+		if(news.getNewsDetails().size() == 0) {
+			System.out.println("I am returning. NewsDetails are not available");
+			return false;
+		}
+		
+		if(news.getNewsDetails().get(0).getEntityInformation().size() > 0) {
+			System.out.println("I am returning. Already analysed.");
+			return false;
+		}
+		
 		if(news.getLanguage().equals("en")) {
 			this.req.text = news.getContent();
 		} else if(news.getLanguage().equals("de")) {
@@ -225,24 +244,56 @@ public class SensiumAnalyser<Occurence>
 		
 
 		NamedEntity entity;
-		for(int i = 0; i < resp.entities.size(); i++) {
-			entity = resp.entities.get(i);
-			
-			if(entity.type.equals("Organisation")) { //Organisation, Location, Person
-				System.out.println(resp.entities.get(i).link);
-				System.out.println(resp.entities.get(i).normalized);
-				
-				for(int j = 0; j < resp.entities.get(i).occurrences.size(); j++) {
-					System.out.println(resp.entities.get(i).occurrences.get(j).start);
-					System.out.println(resp.entities.get(i).occurrences.get(j).end);
-				}
-				
-				System.out.println();
-			}
-			
-
+		EntityInformation e_info;
+		CompanyInformation c_info;
+		List<Company> companies;
+		List<Occurrence> occurrences;
+		Occurrence occurence;
+		
+		NewsDetail detail = news.getCorrespondingNewsDetail("sensium");
+		if(detail == null) {
+			return false;
 		}
 		
+		for(int i = 0; i < resp.entities.size(); i++) {
+			entity = resp.entities.get(i);
+			occurrences = entity.occurrences;
+			
+			if(entity.type.equals("Organisation")) { //Organisation, Location, Person
+				c_info = CompanyInformation.getCorrespondingCompanyInformation(entity, this.http_manager);
+				
+				if(c_info == null) {
+					System.out.println("c_info does not fullfill its requirements");
+					return false;
+				}
+				
+				//map news.
+				HibernateSupport.beginTransaction();
+				companies = c_info.getCompanies();
+				System.out.println("companies.size() = " + companies.size());
+
+				for(int j = 0; j < companies.size(); j++) {
+					companies.get(j).addNewsMapping2(news);
+					companies.get(j).saveToDB();
+				}				
+				
+				if(detail.getEntityInformation().size() == 0) {
+					for(int j = 0; j < occurrences.size(); j++) {
+						occurence = occurrences.get(j);
+						e_info = new EntityInformation(detail, 
+													   c_info, 
+													   occurence.start, 
+													   occurence.end);
+						
+						e_info.saveToDB();	
+					}
+				}
+				HibernateSupport.commitTransaction();
+					
+			}
+		}
+		
+		System.out.println("Everything worked as expected.");
 		return true;
 	}
 

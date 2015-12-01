@@ -20,10 +20,15 @@
 package analysers;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -156,13 +161,9 @@ public class TextAnalyserManager implements Job
 	 */
 	public static void main(String[] argv) throws SecurityException, IOException {
 		TextAnalyserManager tam = new TextAnalyserManager();
-		long id = -9196334014482206897L;
+	
 		
-		News news = HibernateSupport.readOneObjectByLongID(News.class, id);
-		
-		tam.sensium_analyser.getEntities(news);
-		
-		/*Logger logger = Logger.getLogger("MyLogger");
+		Logger logger = Logger.getLogger("MyLogger");
 		logger.setUseParentHandlers(false);
 		String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
 	  	FileHandler fh = new FileHandler("data/tmp/addsentencesentiment-"+ date + ".log", true);  
@@ -171,15 +172,15 @@ public class TextAnalyserManager implements Job
 		List<News> company_news = new ArrayList<News>();
 		News single_company_news;
 		HibernateSupport.beginTransaction();
-		int news_size = (int) HibernateSupport.getCurrentSession().createCriteria(News.class)
+		long news_size = (long) HibernateSupport.getCurrentSession().createCriteria(News.class)
 				.setProjection(Projections.rowCount())
 				.uniqueResult();
 		HibernateSupport.commitTransaction();
 		System.out.println(news_size);
 		
-		int counter = 0;
+		int counter = 94500;
 		int increment_by = 500;
-		for(int offset = 0; offset < news_size; offset += increment_by) {
+		for(int offset = counter; offset < news_size; offset += increment_by) {
 			company_news.clear();
 			System.gc();
 			company_news = HibernateSupport.readMoreObjects(News.class, new ArrayList<Criterion>(), offset, increment_by);
@@ -190,7 +191,7 @@ public class TextAnalyserManager implements Job
 			while(company_news.size() > 0) {
 				single_company_news = company_news.get(0);
 				company_news.remove(0);
-				if(!tam.sensium_analyser.addSentenceSentiment(single_company_news)) {
+				if(!tam.sensium_analyser.getEntitiesAndMapNewsNew(single_company_news)) {
 					logger.info("language: " + single_company_news.getLanguage() + " news-hash: " + single_company_news.getHash());
 				}
 				System.out.println(++counter + "/" + news_size);
@@ -199,7 +200,7 @@ public class TextAnalyserManager implements Job
 
 		}
 		
-		return;*/
+		return;
 		/*try {
 			tam.execute(null);
 		} catch (JobExecutionException e) {

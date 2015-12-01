@@ -73,6 +73,10 @@ public class NewsDetail implements ISaveAndDelete  {
 	@OneToMany
 	@JoinColumn(name="details_id")
 	private List<SentenceInformation> sentence_information;
+
+	@OneToMany
+	@JoinColumn(name="entity_id")
+	private List<EntityInformation> entity_information;
 	
 	/**
 	 * Instantiates a new news detail.
@@ -92,6 +96,7 @@ public class NewsDetail implements ISaveAndDelete  {
 	public NewsDetail(News news, String analyser, String language, double total_rating,
 			double total_objectivity, Date date_added) {
 		this.sentence_information = new ArrayList<SentenceInformation>();
+		this.entity_information = new ArrayList<EntityInformation>();
 		this.news = news;
 		this.analyser = analyser;
 		this.language = language;
@@ -181,6 +186,10 @@ public class NewsDetail implements ISaveAndDelete  {
 		return sentence_information;
 	}
 	
+	public List<EntityInformation> getEntityInformation() {
+		return this.entity_information;
+	}
+	
 	
 	/**
 	 * Sets the sentence information.
@@ -210,11 +219,12 @@ public class NewsDetail implements ISaveAndDelete  {
 	public boolean addSentenceInformation(SentenceInformation info) {
 		boolean success = false;
 		
-		if (this.sentence_information.add(info)){
-			success = info.saveToDB();
-		} else {
-			assert(false);
+		if(info != null && !this.sentence_information.contains(info)) {
+			if (this.sentence_information.add(info)){
+				success = info.saveToDB();
+			}
 		}
+		
 		return success;
 	}
 	
@@ -228,6 +238,18 @@ public class NewsDetail implements ISaveAndDelete  {
 			this.sentence_information.remove(0);
 			info.deleteFromDB(info);
 		}
+	}
+	
+	public boolean addEntityInformation(EntityInformation info) {
+		boolean success = false;
+		
+		if(info != null && !this.entity_information.contains(info)) {
+			if (this.entity_information.add(info)){
+				success = info.saveToDB();
+			}
+		}
+		
+		return success;
 	}
 	
 	/* (non-Javadoc)

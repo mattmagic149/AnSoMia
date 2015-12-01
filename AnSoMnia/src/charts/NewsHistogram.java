@@ -103,6 +103,7 @@ public class NewsHistogram extends ApplicationFrame {
     					  this.number_of_bins);/*, 
     					  this.start,
     					  this.end);*/
+    	
         return dataset;
     }
 

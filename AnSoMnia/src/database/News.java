@@ -83,6 +83,10 @@ public class News implements ISaveAndDelete {
 	@ManyToMany(mappedBy="company_news")
 	private List<Company> companies;
 	
+	/** The companies. */
+	@ManyToMany(mappedBy="company_news_mapping_2")
+	private List<Company> companies_mapping_2;
+	
 	/** The news_details. */
 	@OneToMany
 	@JoinColumn(name="md5_hash")
@@ -185,6 +189,18 @@ public class News implements ISaveAndDelete {
 	public String getUrl() {
 		return news_url;
 	}
+	
+	public NewsDetail getCorrespondingNewsDetail(String analyser) {
+		NewsDetail detail;
+		for(int i = 0; i < this.news_details.size(); i++) {
+			detail = this.news_details.get(i);
+			if(detail.getAnalyser().equals(analyser)) {
+				return detail;
+			}
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Gets the date.
@@ -220,6 +236,15 @@ public class News implements ISaveAndDelete {
 	 */
 	public List<Company> getCompanies() {
 		return companies;
+	}
+	
+	/**
+	 * Gets the companies.
+	 *
+	 * @return the companies
+	 */
+	public List<Company> getCompaniesNew() {
+		return this.companies_mapping_2;
 	}
 	
 	/**
@@ -341,7 +366,7 @@ public class News implements ISaveAndDelete {
 	 *
 	 * @return the news of companies with good reputation
 	 */
-	private static Criterion getNewsOfCompaniesWithGoodReputation() {
+	public static Criterion getNewsOfCompaniesWithGoodReputation() {
 		String property = "company.name";
 		List<String> companies = FileUtils.readGoodReputationCompanies();
 		Criterion disj = HibernateSupport.getStringLikeDisjunction(companies, property);

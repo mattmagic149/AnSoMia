@@ -19,6 +19,8 @@
  */
 package test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -145,6 +147,17 @@ public class TestClass {
 		
 		
 		
+		String homepage = "http://www.commerzbank.com/ghkfd/fghl/.html";
+		URL url = null;
+		try {
+			url = new URL(homepage);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println(url.getHost());
+		
+		
 		
 		//double[] correlations = mva.correlateAllCompanies();
 		//mva.createCorrelationHist("News Analysis", "description", correlations);
@@ -162,11 +175,7 @@ public class TestClass {
 		
 		
 		
-		Company company = HibernateSupport.readOneObjectByStringId(Company.class, "AT000000STR1");
-		
-		//CompanyInformation info = new CompanyInformation("name", "link", "content", "homepage", new Date());
-		
-		
+
 		
 		
 		/*ArrayList<Criterion> criterions	= new ArrayList<Criterion>();

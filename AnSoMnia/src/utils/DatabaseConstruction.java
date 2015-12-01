@@ -52,6 +52,7 @@ public class DatabaseConstruction {
 		configuration.addAnnotatedClass(SentenceInformation.class);
 		configuration.addAnnotatedClass(IndustrySector.class);
 		configuration.addAnnotatedClass(CompanyInformation.class);
+		configuration.addAnnotatedClass(EntityInformation.class);
 		
 		configuration.configure("hibernate.cfg.xml");
 

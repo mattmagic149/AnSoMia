@@ -74,19 +74,24 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 				inverseJoinColumns={@JoinColumn(name="md5_hash")})
 	private List<News> company_news;
 	
+	@ManyToMany
+	@JoinTable(name="CompanyToNewsMapping2",
+				joinColumns={@JoinColumn(name="isin")}, 
+				inverseJoinColumns={@JoinColumn(name="md5_hash")})
+	private List<News> company_news_mapping_2;
+	
 	/** List of all indexes. */
 	@ManyToMany(mappedBy="companies")
 	private List<Index> indexes;
 	
 	/** List of all industry sectors. */
 	@ManyToMany(mappedBy="companies")
-	private List<Index> industry_sectors;
+	private List<IndustrySector> industry_sectors;
 	
 	@ManyToOne
-	@JoinColumn(name="info",updatable=true)
+	@JoinColumn(name="ci_id",updatable=true)
 	private CompanyInformation info;
 
-	
 	/**
 	 * Instantiates a new company.
 	 */
@@ -217,6 +222,15 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 	 */
 	public void setWebSite(String web_site) {
 		this.web_site = web_site;
+	}
+	
+	
+	public CompanyInformation getInfo() {
+		return info;
+	}
+
+	public void setInfo(CompanyInformation info) {
+		this.info = info;
 	}
 	
 	/**
@@ -399,17 +413,44 @@ public class Company extends ShareInfo implements ISaveAndDelete {
 	public boolean addNews(News new_news) {
 		boolean success = false;
 		
-		if(new_news != null){	
+		if(new_news != null && !this.checkNewsAlreadyAdded(new_news.getHash(), this.company_news)){	
 			// add object to list and save to DB
-			if (this.company_news.add(new_news))
+			if (this.company_news.add(new_news)) {
 				success = this.saveToDB();
+			}
 		}
 		
-		if (success){
-			return true;
+		return success;
+	}
+	
+	public boolean addNewsMapping2(News new_news) {
+		boolean success = false;
+		
+		if(new_news != null && !this.checkNewsAlreadyAdded(new_news.getHash(), company_news_mapping_2)){	
+			// add object to list and save to DB
+			if (this.company_news_mapping_2.add(new_news)) {
+				success = this.saveToDB();
+			}
 		}
-		else
-			return false;
+		
+		return success;
+	}
+	
+	
+	/**
+	 * Check news already added.
+	 *
+	 * @param hash the hash of the news
+	 * @return true, if successful
+	 */
+	public boolean checkNewsAlreadyAdded(long hash, List<News> news_list) {
+		for(int i = 0; i < news_list.size(); i++) {
+			if(news_list.get(i).getHash() == hash) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
