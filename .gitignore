@@ -1,0 +1,22 @@
+*target*
+*.jar
+*.war
+*.ear
+*.class
+
+# eclipse specific git ignore
+*.pydevproject
+.project
+.metadata
+
+/bin
+/AnSoMnia/src/.DS_Store
+/AnSoMnia/src/Support/HibernateSupport.java
+/.DS_Store
+/AnSoMnia/.DS_Store
+/AnSoMnia/model/AnSoMia.asta.lock
+/AnsoMnia/.classpath
+/AnsoMnia/.project
+/AnsoMnia/.classpath
+/AnsoMnia/data/backups/*
+/AnsoMnia/data/backups_copy/*

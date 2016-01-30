@@ -1,0 +1,49 @@
+KPIs
+
+Benötigte Kennzahlen
+EPS - Earnings per share
+ESG - Earnings per share growth
+PER - Price earnings ratio				
+PEG - Price earnings to growth ratio
+DPR - Dividend price ratio
+CFS - Cashflow per share
+PCF - Price cash flow ratio
+PBV - Price to book value
+PSR - Price sales ratio
+EQR	- Equity ratio
+DTR	- Debt ratio
+ROE	- Return on equity
+POR - Payout ratio
+GRM - Gross margin
+OPM - Operating margin
+BVS	- Book value per share
+
+Alpha 	-
+Beta 	-
+Sharpe	-
+
+Daten:
+Täglich:
+Price						Kurs
+Buy Price					Briefkurs
+Sell Price					Geldkurs
+
+Monatlich:
+Revenue						Umsatz
+Operating income				EBIT
+Net Income					Ergebnis nach Steuern
+Cashflow					Cash Flow
+Equity						Bilanzielles Eigenkapital
+Debt						Summe Fremdkapital
+Balance Sheet Total				Aktiva oder Passiva
+Dividend					Dividende je Aktie
+Working Capital					Working Capital
+Equity Ratio					Eigenkapitalquote
+Employee					# Mitarbeiter
+Liquidity					Liquidität 1./2./3. Grades
+Gross Profit					Bruttoergebnis vom  Umsatz
+Outstanding Shares				Aktien im Umlauf in Mio.
+
+
+Book Value Per Share				Indirekt über Bilanzielles Eigenkapital / # Aktien im Umlauf (bzw. Eigenkapitalprognose)
+Market capitalisation				Indirekt Kurs * # Aktien im Umlauf
